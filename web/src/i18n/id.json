@@ -52,5 +52,83 @@
       "rate_limit_exceeded": "Terlalu banyak percobaan. Tunggu sebentar lalu coba lagi.",
       "network_unreachable": "Tidak dapat terhubung ke server."
     }
+  },
+  "common": {
+    "loading": "Memuat…",
+    "save": "Simpan",
+    "saved": "Tersimpan."
+  },
+  "nav": {
+    "label": "Menu",
+    "dashboard": "Dashboard",
+    "organization": "Organisasi",
+    "users": "Pengguna"
+  },
+  "roles": {
+    "Root": "Root",
+    "Owner": "Owner",
+    "Admin": "Admin",
+    "Staff": "Staff"
+  },
+  "legal": {
+    "terms": "Syarat & Ketentuan",
+    "privacy": "Kebijakan Privasi"
+  },
+  "onboarding": {
+    "title": "Buat organisasi Anda",
+    "subtitle": "Halo {{name}}! Satu langkah lagi sebelum membuat acara pertama.",
+    "acceptPrefix": "Saya telah membaca dan menyetujui",
+    "and": "serta",
+    "submit": "Buat organisasi"
+  },
+  "organization": {
+    "title": "Profil organisasi",
+    "name": "Nama organisasi",
+    "nameHint": "Misalnya nama wedding organizer atau keluarga penyelenggara.",
+    "contactEmail": "Email kontak (opsional)",
+    "contactPhone": "Nomor telepon (opsional)",
+    "since": "Dibuat {{date}}"
+  },
+  "users": {
+    "title": "Pengguna",
+    "inviteTitle": "Undang Admin atau Staff",
+    "inviteHint": "Masukkan email Google mereka. Mereka cukup masuk dengan Google, tanpa password.",
+    "name": "Nama",
+    "googleEmail": "Email Google",
+    "role": "Peran",
+    "roleOf": "Peran {{name}}",
+    "inviteSubmit": "Undang",
+    "cancelInvite": "Batalkan undangan",
+    "disable": "Nonaktifkan",
+    "enable": "Aktifkan",
+    "status": {
+      "Active": "Aktif",
+      "Invited": "Diundang",
+      "Disabled": "Nonaktif"
+    }
+  },
+  "platform": {
+    "ownersTitle": "Owner",
+    "search": "Cari nama atau email",
+    "noOrganization": "Belum ada organisasi",
+    "active": "Aktif",
+    "suspended": "Dinonaktifkan",
+    "suspend": "Nonaktifkan",
+    "reactivate": "Aktifkan kembali",
+    "confirmSuspend": "Nonaktifkan {{name}}? Owner dan seluruh anggota organisasinya tidak akan bisa masuk.",
+    "empty": "Tidak ada Owner."
+  },
+  "errors": {
+    "generic": "Terjadi kesalahan. Silakan coba lagi.",
+    "organization_already_exists": "Anda sudah memiliki organisasi.",
+    "legal_terms_outdated": "Syarat & Ketentuan telah diperbarui. Muat ulang halaman lalu setujui versi terbaru.",
+    "organization_required": "Buat organisasi terlebih dahulu.",
+    "user_email_taken": "Email ini sudah terdaftar di EventLy.",
+    "user_not_invited": "Hanya undangan yang belum dipakai yang bisa dibatalkan.",
+    "user_owner_immutable": "Akun Owner tidak bisa diubah di sini.",
+    "user_not_found": "Pengguna tidak ditemukan.",
+    "auth_forbidden": "Anda tidak memiliki akses untuk tindakan ini.",
+    "network_unreachable": "Tidak dapat terhubung ke server.",
+    "validation_failed": "Periksa kembali isian Anda."
   }
 }

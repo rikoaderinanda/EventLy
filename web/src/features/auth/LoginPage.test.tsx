@@ -74,6 +74,6 @@ describe('LoginPage', () => {
 
     renderRoute('/login')
 
-    await waitFor(() => expect(screen.getByRole('heading', { name: 'Paket & Owner' })).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByRole('heading', { name: 'Owner' })).toBeInTheDocument())
   })
 })

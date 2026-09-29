@@ -21,9 +21,11 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.AvatarUrl).HasMaxLength(2048);
         builder.Property(u => u.Role).HasConversion<string>().HasMaxLength(20);
         builder.Property(u => u.Status).HasConversion<string>().HasMaxLength(20);
+        builder.Property(u => u.TermsVersion).HasMaxLength(20);
 
         builder.HasIndex(u => u.Email).IsUnique();
         builder.HasIndex(u => u.GoogleSubject).IsUnique().HasFilter("google_subject IS NOT NULL");
         builder.HasIndex(u => new { u.OrganizationId, u.Role });
+        builder.HasOne<Organization>().WithMany().HasForeignKey(u => u.OrganizationId).OnDelete(DeleteBehavior.Restrict);
     }
 }

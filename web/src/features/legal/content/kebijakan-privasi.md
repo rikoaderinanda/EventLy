@@ -6,15 +6,16 @@ Kebijakan Privasi ini menjelaskan cara **[Nama Badan Usaha]** ("kami"), pengelol
 
 ## 1. Peran para pihak
 
-| Pihak | Peran menurut UU PDP |
-|---|---|
-| **Penyelenggara acara** (Owner dan organisasinya) | **Pengendali Data Pribadi** atas data tamu. Penyelenggara menentukan siapa yang diundang dan data apa yang dimasukkan. |
-| **Kami (EventLy)** | **Prosesor Data Pribadi** atas data tamu, karena kami memproses data tersebut atas perintah penyelenggara. Kami adalah **Pengendali** atas data akun pengguna (Owner, Admin, Staff). |
-| **Tamu** | Subjek Data Pribadi |
+| Pihak                                             | Peran menurut UU PDP                                                                                                                                                                 |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Penyelenggara acara** (Owner dan organisasinya) | **Pengendali Data Pribadi** atas data tamu. Penyelenggara menentukan siapa yang diundang dan data apa yang dimasukkan.                                                               |
+| **Kami (EventLy)**                                | **Prosesor Data Pribadi** atas data tamu, karena kami memproses data tersebut atas perintah penyelenggara. Kami adalah **Pengendali** atas data akun pengguna (Owner, Admin, Staff). |
+| **Tamu**                                          | Subjek Data Pribadi                                                                                                                                                                  |
 
 ## 2. Data yang kami kumpulkan
 
 **a. Pengguna (Owner, Admin, Staff)** — melalui masuk dengan akun Google:
+
 - Nama, alamat email, foto profil, dan ID akun Google
 - Nama organisasi, data acara, dan riwayat pembayaran
 - Catatan aktivitas (log masuk, check-in, unggah dan hapus foto) untuk keamanan dan audit
@@ -22,6 +23,7 @@ Kebijakan Privasi ini menjelaskan cara **[Nama Badan Usaha]** ("kami"), pengelol
 Kami **tidak menyimpan kata sandi**. Proses masuk sepenuhnya ditangani oleh Google.
 
 **b. Tamu** — dimasukkan oleh penyelenggara acara:
+
 - Nama, nomor telepon, email (opsional), dan jumlah orang dalam undangan
 - Jawaban RSVP, waktu check-in, serta waktu undangan dibuka
 - **Foto** yang diambil oleh staff acara atau oleh tamu sendiri melalui kamera di aplikasi
@@ -51,28 +53,29 @@ Kami **tidak menjual** data pribadi dan **tidak menggunakannya untuk iklan**.
 
 ## 5. Penyimpanan dan penghapusan
 
-| Data | Lama penyimpanan |
-|---|---|
-| Foto acara | Sesuai masa simpan paket yang dipilih penyelenggara, lalu **dihapus otomatis** |
-| Data tamu dan undangan | Hingga 12 bulan setelah acara selesai, lalu dihapus |
-| Log audit | Minimal 1 tahun |
-| Data akun pengguna | Selama akun aktif |
+| Data                   | Lama penyimpanan                                                               |
+| ---------------------- | ------------------------------------------------------------------------------ |
+| Foto acara             | Sesuai masa simpan paket yang dipilih penyelenggara, lalu **dihapus otomatis** |
+| Data tamu dan undangan | Hingga 12 bulan setelah acara selesai, lalu dihapus                            |
+| Log audit              | Minimal 1 tahun                                                                |
+| Data akun pengguna     | Selama akun aktif                                                              |
 
 ## 6. Pihak ketiga yang memproses data
 
-| Penyedia | Fungsi | Lokasi |
-|---|---|---|
-| Google Cloud (Cloud Run) | Menjalankan aplikasi | Jakarta, Indonesia |
-| Neon | Basis data | Singapura |
-| Cloudflare R2 | Penyimpanan foto | [lokasi bucket] |
-| Google | Layanan masuk (Google Sign-In) | Global |
-| Xendit | Pembayaran | Indonesia |
+| Penyedia                 | Fungsi                         | Lokasi             |
+| ------------------------ | ------------------------------ | ------------------ |
+| Google Cloud (Cloud Run) | Menjalankan aplikasi           | Jakarta, Indonesia |
+| Neon                     | Basis data                     | Singapura          |
+| Cloudflare R2            | Penyimpanan foto               | [lokasi bucket]    |
+| Google                   | Layanan masuk (Google Sign-In) | Global             |
+| Xendit                   | Pembayaran                     | Indonesia          |
 
 Sebagian data disimpan di luar Indonesia, yaitu di Singapura. Kami hanya menggunakan penyedia yang menerapkan standar pelindungan data yang memadai, sesuai ketentuan transfer data dalam UU PDP.
 
 ## 7. Keamanan
 
 Kami menerapkan langkah-langkah berikut:
+
 - Koneksi terenkripsi (HTTPS)
 - Pemisahan data antar penyelenggara
 - Pembatasan akses berdasarkan peran pengguna
@@ -84,6 +87,7 @@ Jika terjadi kegagalan pelindungan data, kami akan memberi tahu pihak yang terda
 ## 8. Hak Anda
 
 Sesuai UU PDP, Anda berhak untuk:
+
 - Mengakses data pribadi Anda
 - Memperbaiki data pribadi Anda
 - Meminta penghapusan data pribadi Anda

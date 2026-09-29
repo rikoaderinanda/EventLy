@@ -15,7 +15,8 @@ The architecture, decisions and roadmap are in [docs/architecture](docs/architec
 | 0 | Architecture and decisions | ✅ Approved |
 | 1 | Foundation: solution, EF Core + first migration, Docker, React app, CI | ✅ Done |
 | 2 | Identity: Google sign-in, JWT + refresh rotation, roles/permissions, audit | ✅ Done (real Google login needs a client id, see setup guide §7) |
-| 3 | Organization + tenant isolation | Next |
+| 3 | Organization: onboarding with Terms acceptance, profile, Admin/Staff invitations, tenant isolation, Root suspend/reactivate | ✅ Done |
+| 4 | Events (CRUD, sessions akad/resepsi, staff assignment) | Next |
 
 ## Quick start (Docker)
 

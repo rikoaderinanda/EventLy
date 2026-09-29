@@ -21,6 +21,8 @@ export type AuthResponse = {
 export type AuthConfig = {
   googleClientId: string | null
   devSignInEnabled: boolean
+  /** Current Terms & Privacy Policy version; the Owner accepts it at onboarding. */
+  termsVersion: string
 }
 
 /** Where each role lands after signing in. */

@@ -9,7 +9,16 @@ import { homeForRole, type UserRole } from './types'
  * (remembering where they were); users of another role go to their own home.
  * The API enforces permissions on every call; this only keeps the UI consistent.
  */
-export function ProtectedRoute({ roles, children }: { roles: UserRole[]; children?: ReactNode }) {
+export function ProtectedRoute({
+  roles,
+  requireOrganization = false,
+  children,
+}: {
+  roles: UserRole[]
+  /** Owner/Admin/Staff areas need an organization; an Owner without one is sent to onboarding. */
+  requireOrganization?: boolean
+  children?: ReactNode
+}) {
   const { t } = useTranslation()
   const { status, user } = useSession()
   const location = useLocation()
@@ -29,6 +38,10 @@ export function ProtectedRoute({ roles, children }: { roles: UserRole[]; childre
 
   if (!roles.includes(user.role)) {
     return <Navigate to={homeForRole(user.role)} replace />
+  }
+
+  if (requireOrganization && !user.organizationId) {
+    return <Navigate to="/onboarding" replace />
   }
 
   return children ?? <Outlet />

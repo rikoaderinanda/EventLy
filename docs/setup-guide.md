@@ -74,6 +74,7 @@ All settings can be overridden with environment variables. Use `__` as the secti
 | Root account | `Auth__RootEmail` | – | The one Google email that signs in as Root. Development: `root@evently.test` |
 | Test sign-in | `Auth__DevSignInEnabled` | `false` | Sign in without Google. Only works in Development/Testing, even if switched on elsewhere |
 | Sign-in rate limit | `RateLimiting__AuthPermitPerMinute` | `10` | Per client IP, for sign-in/refresh/logout |
+| Terms version | `Legal__TermsVersion` | `2026-09-29` | Bump it when the Terms/Privacy text changes; Owners then accept the new version |
 
 Frontend build variables (`web/.env.example`): `VITE_API_BASE_URL` (default `/api/v1`), `VITE_APP_NAME`, `VITE_DEFAULT_LOCALE` (`id` or `en`). They end up in public JavaScript, so never put secrets there.
 
@@ -98,6 +99,11 @@ Without Docker, the database integration tests are reported as **skipped**, not 
 | `POST /api/v1/auth/google` · `/dev-sign-in` | Sign in → access token + HttpOnly refresh cookie |
 | `POST /api/v1/auth/refresh` · `/logout` | Rotate / end the session (need header `X-Requested-With`) |
 | `GET /api/v1/auth/me` | The signed-in user and permissions |
+| `POST /api/v1/organization` | Onboarding: create the organization, accept the Terms (returns a token with `org_id`) |
+| `GET` · `PUT /api/v1/organization` | Organization profile (all members read, Owner edits) |
+| `GET` · `POST /api/v1/users`, `PUT` · `DELETE /api/v1/users/{id}` | Owner manages Admin/Staff (invite by Google email, change role/status, cancel invitation) |
+| `GET /api/v1/platform/owners`, `POST …/{id}/suspend` · `/reactivate` | Root: Owner accounts |
+| `/legal/terms`, `/legal/privacy` | Terms & Privacy Policy pages |
 | any other path | The PWA (`index.html`); unknown `/api/...` paths return a JSON 404 |
 
 ## 7. Google sign-in (OAuth client id)

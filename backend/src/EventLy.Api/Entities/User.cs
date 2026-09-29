@@ -44,6 +44,11 @@ public sealed class User : IHasTimestamps
 
     public DateTimeOffset? LastSignInAt { get; set; }
 
+    /// <summary>Version of the Terms &amp; Privacy Policy the Owner accepted (UU PDP), and when.</summary>
+    public string? TermsVersion { get; set; }
+
+    public DateTimeOffset? TermsAcceptedAt { get; set; }
+
     public DateTimeOffset CreatedAt { get; set; }
 
     public DateTimeOffset UpdatedAt { get; set; }

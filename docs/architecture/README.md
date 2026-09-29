@@ -1,6 +1,6 @@
 # EventLy — Phase 0: Project Analysis
 
-Status: **Complete — all decisions recorded, awaiting final approval** · updated 2026-09-29
+Status: **Approved** · updated 2026-09-29
 
 | # | Document | Contents |
 |---|---|---|
@@ -10,6 +10,6 @@ Status: **Complete — all decisions recorded, awaiting final approval** · upda
 | 4 | [Frontend Structure](04-frontend-structure.md) | Layering, libraries, folder layout, route map, auth flow, scanner UX, PWA/TWA |
 | 5 | [Development Roadmap](05-development-roadmap.md) | Definition of Done, phases 1–12, risks |
 | 6 | [Decisions](06-open-questions.md) | Full decision log |
-| – | [Legal drafts](../legal/) | Kebijakan Privasi, Syarat & Ketentuan (draft, needs legal review) |
+| – | [Legal drafts](../legal/README.md) | Kebijakan Privasi, Syarat & Ketentuan (draft, needs legal review; the text lives in `web/src/features/legal/content/`) |
 
-No production code will be written until these documents are approved.
+Approved on 2026-09-29. Later decisions are appended to the decision log (06).

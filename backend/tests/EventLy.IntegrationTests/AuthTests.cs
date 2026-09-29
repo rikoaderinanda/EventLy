@@ -88,7 +88,9 @@ public sealed class AuthTests(PostgresFixture postgres) : IClassFixture<Postgres
     public async Task Invited_staff_is_matched_by_email_and_becomes_active()
     {
         var email = UniqueEmail("staff");
-        var orgId = Guid.CreateVersion7();
+        var owner = await DevSignInAsync(_client, UniqueEmail("owner"));
+        var orgId = (await TenantBuilder.CreateOrganizationAsync(_client, owner.Body.AccessToken, "Santoso WO"))
+            .Organization.Id;
         await using (var db = postgres.CreateDbContext())
         {
             db.Users.Add(new User

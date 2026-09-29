@@ -243,7 +243,8 @@ stateDiagram-v2
 
 **Model:** shared database, shared schema, tenant discriminator column.
 
-1. Every tenant-owned entity implements `ITenantOwned { Guid OrganizationId }`. This covers `User`, `Event`, `Guest`, `Invitation`, `Rsvp`, `CheckIn`, `Photo`, `Payment`, `AuditLog` and `EventStaffAssignment`.
+1. Every tenant-owned **business** entity implements `ITenantOwned { Guid OrganizationId }`: `Event`, `Guest`, `Invitation`, `Rsvp`, `CheckIn`, `Photo`, `Payment`, `EventStaffAssignment` (from Phase 4 on).
+   **`User` is the deliberate exception (decided in Phase 3):** sign-in, refresh and Root must look users up across organizations, and a global filter there would make sign-in silently fail. Every user query in the organization area (`UserService`) therefore filters on the caller's organization explicitly, and the two-tenant tests cover it. `AuditLog.OrganizationId` is nullable (sign-in before onboarding) and is filtered explicitly in the audit viewer.
    **[Assumption — Q-10]** The spec's entities put `OrganizationId` only on User and Event. We **denormalize** it onto the child tables so that one global filter and one composite index protect every table. Without it, each query would have to join through `Event`, and a single missed join would leak data between tenants.
 2. `ICurrentUser.OrganizationId` is read **only from the validated JWT claim `org_id`**, never from the route, query string or body.
 3. `AppDbContext` applies `HasQueryFilter(e => e.OrganizationId == _currentUser.OrganizationId)` to every `ITenantOwned` entity.

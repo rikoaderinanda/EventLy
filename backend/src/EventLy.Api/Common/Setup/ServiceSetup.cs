@@ -37,10 +37,14 @@ public static class ServiceSetup
     }
 
     /// <summary>Feature services: concrete classes, no interfaces (see docs/architecture §4.1).</summary>
-    public static IServiceCollection AddAppServices(this IServiceCollection services)
+    public static IServiceCollection AddAppServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.Configure<LegalOptions>(configuration.GetSection(LegalOptions.SectionName));
         services.AddScoped<AuditService>();
         services.AddScoped<AuthService>();
+        services.AddScoped<OrganizationService>();
+        services.AddScoped<UserService>();
+        services.AddScoped<PlatformOwnerService>();
         return services;
     }
 

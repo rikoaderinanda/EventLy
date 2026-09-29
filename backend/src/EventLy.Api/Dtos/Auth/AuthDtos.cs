@@ -7,7 +7,8 @@ public sealed record GoogleSignInRequest(string IdToken);
 /// <summary>Development/Testing only: signs in as this email without Google.</summary>
 public sealed record DevSignInRequest(string Email, string? Name);
 
-public sealed record AuthConfigResponse(string? GoogleClientId, bool DevSignInEnabled);
+/// <summary>What the login and onboarding pages need. All values are public.</summary>
+public sealed record AuthConfigResponse(string? GoogleClientId, bool DevSignInEnabled, string TermsVersion);
 
 public sealed record CurrentUserDto(
     Guid Id,

@@ -1,5 +1,6 @@
 using EventLy.Api.Auth;
 using EventLy.Api.Common.Errors;
+using EventLy.Api.Common.Options;
 using EventLy.Api.Dtos.Auth;
 using EventLy.Api.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -16,6 +17,7 @@ public sealed class AuthController(
     IGoogleTokenValidator googleValidator,
     ICurrentUser currentUser,
     IOptions<AuthOptions> options,
+    IOptions<LegalOptions> legal,
     IHostEnvironment environment,
     TimeProvider timeProvider) : ControllerBase
 {
@@ -31,7 +33,8 @@ public sealed class AuthController(
     [AllowAnonymous]
     public AuthConfigResponse GetConfig() => new(
         string.IsNullOrWhiteSpace(_options.GoogleClientId) ? null : _options.GoogleClientId,
-        AuthSetup.DevSignInAllowed(_options, environment));
+        AuthSetup.DevSignInAllowed(_options, environment),
+        legal.Value.TermsVersion);
 
     /// <summary>Sign in (or sign up as a new Owner) with a Google ID token.</summary>
     [HttpPost("google")]

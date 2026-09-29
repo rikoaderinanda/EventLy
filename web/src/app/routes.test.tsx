@@ -36,13 +36,14 @@ describe('routes', () => {
     ['/app', 'Admin', 'Dashboard'],
     ['/staff', 'Staff', 'Scan QR'],
     ['/staff', 'Owner', 'Scan QR'],
-    ['/platform', 'Root', 'Paket & Owner'],
-  ] as const)('lets %s through for a signed-in %s', (path, role, title) => {
+    ['/platform', 'Root', 'Owner'],
+  ] as const)('lets %s through for a signed-in %s', async (path, role, title) => {
     signInAs(role)
 
     renderRoute(path)
 
-    expect(screen.getByRole('heading', { name: title })).toBeInTheDocument()
+    // Lazy-loaded pages appear asynchronously.
+    expect(await screen.findByRole('heading', { name: title })).toBeInTheDocument()
   })
 
   it('sends an anonymous visitor of a protected page to the login page', () => {
@@ -59,13 +60,13 @@ describe('routes', () => {
   it.each([
     ['/platform', 'Owner', 'Dashboard'],
     ['/app', 'Staff', 'Scan QR'],
-    ['/app', 'Root', 'Paket & Owner'],
-  ] as const)('redirects %s to the home of a %s', (path, role, expectedTitle) => {
+    ['/app', 'Root', 'Owner'],
+  ] as const)('redirects %s to the home of a %s', async (path, role, expectedTitle) => {
     signInAs(role)
 
     renderRoute(path)
 
-    expect(screen.getByRole('heading', { name: expectedTitle })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: expectedTitle })).toBeInTheDocument()
   })
 
   it('keeps guest invitation pages public', () => {

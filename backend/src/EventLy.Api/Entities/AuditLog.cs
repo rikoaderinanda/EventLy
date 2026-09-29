@@ -37,4 +37,13 @@ public static class AuditActions
     public const string SignInRefused = "auth.sign_in_refused";
     public const string SignOut = "auth.sign_out";
     public const string RefreshTokenReuse = "auth.refresh_token_reuse";
+
+    public const string OrganizationCreated = "organization.created";
+    public const string OrganizationUpdated = "organization.updated";
+    public const string OrganizationSuspended = "organization.suspended";
+    public const string OrganizationReactivated = "organization.reactivated";
+
+    public const string UserInvited = "user.invited";
+    public const string UserUpdated = "user.updated";
+    public const string UserInvitationCancelled = "user.invitation_cancelled";
 }

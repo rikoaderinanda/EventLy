@@ -32,7 +32,7 @@
 | Q-11 | Creating Admin/Staff | The Owner enters name, Google email and role. The account is **Invited** until that person first signs in with Google, then **Active**. One email belongs to one organization | 2026-09-29 |
 | Q-32 | Upgrade / refund | **Not in the MVP.** Root handles special cases manually (manual activation) | 2026-09-29 |
 | Q-33 | Free storage | **10 GB Cloudflare R2 is enough for stage 1** | 2026-09-29 |
-| Q-34 | Personal data (UU PDP) | Short privacy notice on the invitation page and gallery. **Terms & Conditions** and **Privacy Policy** pages, accepted by the Owner at first sign-in (acceptance date + version stored). Drafts in `docs/legal/` (must be reviewed by a legal advisor before launch) | 2026-09-29 |
+| Q-34 | Personal data (UU PDP) | Short privacy notice on the invitation page and gallery. **Terms & Conditions** and **Privacy Policy** pages, accepted by the Owner at first sign-in (acceptance date + version stored). Drafts in `web/src/features/legal/content/` (see `docs/legal/README.md`) (must be reviewed by a legal advisor before launch) | 2026-09-29 |
 | Q-35 | Check-in window | Check-in is allowed **only on the date of the check-in session (resepsi)**, in the event time zone | 2026-09-29 |
 | Q-36 | Payment proof | A **payment receipt** page (package, amount, date, reference, event) that the Owner can print or save as PDF from the browser (print stylesheet, so no PDF library and no license question). No tax invoice (faktur pajak) in the MVP | 2026-09-29 |
 | Q-37 | Initial package prices | Seed values: **Basic Rp 150.000 · Premium Rp 350.000 · Enterprise Rp 1.000.000** (IDR). Root changes them later in the UI | 2026-09-29 |

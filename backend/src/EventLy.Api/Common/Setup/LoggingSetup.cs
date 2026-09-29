@@ -29,7 +29,10 @@ public static class LoggingSetup
             {
                 config.WriteTo.Console(new RenderedCompactJsonFormatter());
             }
-        });
+        },
+        // The app gets its own logger instead of freezing the static bootstrap logger, which can only be
+        // frozen once per process (several hosts start in parallel in the integration tests).
+        preserveStaticLogger: true);
 
         return builder;
     }

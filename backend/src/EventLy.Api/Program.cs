@@ -19,7 +19,7 @@ try
         .AddCaching(builder.Configuration)
         .AddHealth(builder.Configuration)
         .AddAuth(builder.Configuration, builder.Environment)
-        .AddAppServices();
+        .AddAppServices(builder.Configuration);
 
     var app = builder.Build();
 

@@ -15,10 +15,13 @@ public static class PersistenceSetup
     {
         var connectionString = GetConnectionString(configuration);
         services.AddSingleton<TimestampsInterceptor>();
+        services.AddSingleton<TenantInterceptor>();
         services.AddDbContext<AppDbContext>((sp, options) =>
         {
             Configure(options, connectionString);
-            options.AddInterceptors(sp.GetRequiredService<TimestampsInterceptor>());
+            options.AddInterceptors(
+                sp.GetRequiredService<TimestampsInterceptor>(),
+                sp.GetRequiredService<TenantInterceptor>());
         });
         return services;
     }

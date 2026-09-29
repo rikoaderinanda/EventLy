@@ -77,6 +77,7 @@ public sealed class FoundationTests : IAsyncLifetime
 
         config.GetProperty("googleClientId").GetString().ShouldBe(FakeGoogleTokenValidator.ClientId);
         config.GetProperty("devSignInEnabled").GetBoolean().ShouldBeTrue();
+        config.GetProperty("termsVersion").GetString().ShouldBe(TenantBuilder.TermsVersion);
     }
 
     [Fact]

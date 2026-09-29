@@ -107,7 +107,8 @@ public sealed class AuthService(
         if (token.ExpiresAt <= now
             || token.User.Status != UserStatus.Active
             || token.SecurityStamp != token.User.SecurityStamp
-            || (token.User.Role == UserRole.Root && !IsRootEmail(token.User.Email)))
+            || (token.User.Role == UserRole.Root && !IsRootEmail(token.User.Email))
+            || await IsOrganizationSuspendedAsync(token.User.OrganizationId, ct))
         {
             token.RevokedAt = now;
             await db.SaveChangesAsync(ct);
@@ -168,6 +169,10 @@ public sealed class AuthService(
             // Root is whoever Auth:RootEmail names; a former Root email loses access when the setting changes.
             refusal = "not_root_anymore";
         }
+        else if (await IsOrganizationSuspendedAsync(user.OrganizationId, ct))
+        {
+            refusal = "organization_suspended";
+        }
 
         if (refusal is null)
         {
@@ -212,6 +217,10 @@ public sealed class AuthService(
             t.RevokedAt = now;
         }
     }
+
+    private async Task<bool> IsOrganizationSuspendedAsync(Guid? organizationId, CancellationToken ct) =>
+        organizationId is { } id
+        && await db.Organizations.AnyAsync(o => o.Id == id && o.Status == OrganizationStatus.Suspended, ct);
 
     private bool IsRootEmail(string email) =>
         !string.IsNullOrWhiteSpace(_options.RootEmail)

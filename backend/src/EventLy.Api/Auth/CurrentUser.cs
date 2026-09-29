@@ -1,3 +1,4 @@
+using EventLy.Api.Common.Errors;
 using EventLy.Api.Entities;
 
 namespace EventLy.Api.Auth;
@@ -35,4 +36,15 @@ public sealed class HttpCurrentUser(IHttpContextAccessor accessor) : ICurrentUse
 
     private Guid? ParseGuid(string claim) =>
         IsAuthenticated && Guid.TryParse(Principal!.FindFirst(claim)?.Value, out var value) ? value : null;
+}
+
+public static class CurrentUserExtensions
+{
+    public static Guid RequireUserId(this ICurrentUser user) =>
+        user.UserId ?? throw new UnauthorizedException("auth.unauthenticated", "Sign-in required.");
+
+    /// <summary>The caller's organization, or 403 <c>organization.required</c> (Root, or an Owner before onboarding).</summary>
+    public static Guid RequireOrganizationId(this ICurrentUser user) =>
+        user.OrganizationId ?? throw new ForbiddenException(
+            "organization.required", "Create or join an organization first.");
 }

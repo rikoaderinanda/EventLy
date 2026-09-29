@@ -52,5 +52,83 @@
       "rate_limit_exceeded": "Too many attempts. Please wait a moment and try again.",
       "network_unreachable": "Can't reach the server."
     }
+  },
+  "common": {
+    "loading": "Loading…",
+    "save": "Save",
+    "saved": "Saved."
+  },
+  "nav": {
+    "label": "Menu",
+    "dashboard": "Dashboard",
+    "organization": "Organization",
+    "users": "Users"
+  },
+  "roles": {
+    "Root": "Root",
+    "Owner": "Owner",
+    "Admin": "Admin",
+    "Staff": "Staff"
+  },
+  "legal": {
+    "terms": "Terms & Conditions",
+    "privacy": "Privacy Policy"
+  },
+  "onboarding": {
+    "title": "Create your organization",
+    "subtitle": "Hi {{name}}! One more step before your first event.",
+    "acceptPrefix": "I have read and agree to the",
+    "and": "and the",
+    "submit": "Create organization"
+  },
+  "organization": {
+    "title": "Organization profile",
+    "name": "Organization name",
+    "nameHint": "For example your wedding organizer or the hosting family.",
+    "contactEmail": "Contact email (optional)",
+    "contactPhone": "Phone number (optional)",
+    "since": "Created {{date}}"
+  },
+  "users": {
+    "title": "Users",
+    "inviteTitle": "Invite an Admin or Staff member",
+    "inviteHint": "Enter their Google email. They just sign in with Google, no password.",
+    "name": "Name",
+    "googleEmail": "Google email",
+    "role": "Role",
+    "roleOf": "Role of {{name}}",
+    "inviteSubmit": "Invite",
+    "cancelInvite": "Cancel invitation",
+    "disable": "Disable",
+    "enable": "Enable",
+    "status": {
+      "Active": "Active",
+      "Invited": "Invited",
+      "Disabled": "Disabled"
+    }
+  },
+  "platform": {
+    "ownersTitle": "Owners",
+    "search": "Search name or email",
+    "noOrganization": "No organization yet",
+    "active": "Active",
+    "suspended": "Suspended",
+    "suspend": "Suspend",
+    "reactivate": "Reactivate",
+    "confirmSuspend": "Suspend {{name}}? The Owner and every member of their organization will be unable to sign in.",
+    "empty": "No Owners."
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "organization_already_exists": "You already have an organization.",
+    "legal_terms_outdated": "The Terms have been updated. Reload the page and accept the current version.",
+    "organization_required": "Create your organization first.",
+    "user_email_taken": "This email is already registered in EventLy.",
+    "user_not_invited": "Only an unused invitation can be cancelled.",
+    "user_owner_immutable": "The Owner account can't be changed here.",
+    "user_not_found": "User not found.",
+    "auth_forbidden": "You don't have permission for this action.",
+    "network_unreachable": "Can't reach the server.",
+    "validation_failed": "Please check the form."
   }
 }

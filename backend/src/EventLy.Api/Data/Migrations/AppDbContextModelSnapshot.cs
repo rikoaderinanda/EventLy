@@ -91,6 +91,59 @@ namespace EventLy.Api.Data.Migrations
                     b.ToTable("audit_logs", (string)null);
                 });
 
+            modelBuilder.Entity("EventLy.Api.Entities.Organization", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ContactEmail")
+                        .HasMaxLength(254)
+                        .HasColumnType("citext")
+                        .HasColumnName("contact_email");
+
+                    b.Property<string>("ContactPhone")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("contact_phone");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("name");
+
+                    b.Property<Guid>("OwnerUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("owner_user_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_organizations");
+
+                    b.HasIndex("OwnerUserId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_organizations_owner_user_id");
+
+                    b.ToTable("organizations", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_organizations_status", "status IN ('Active','Suspended')");
+                        });
+                });
+
             modelBuilder.Entity("EventLy.Api.Entities.RefreshToken", b =>
                 {
                     b.Property<Guid>("Id")
@@ -203,6 +256,15 @@ namespace EventLy.Api.Data.Migrations
                         .HasColumnType("character varying(20)")
                         .HasColumnName("status");
 
+                    b.Property<DateTimeOffset?>("TermsAcceptedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("terms_accepted_at");
+
+                    b.Property<string>("TermsVersion")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("terms_version");
+
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
@@ -230,6 +292,16 @@ namespace EventLy.Api.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("EventLy.Api.Entities.Organization", b =>
+                {
+                    b.HasOne("EventLy.Api.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_organizations_users_owner_user_id");
+                });
+
             modelBuilder.Entity("EventLy.Api.Entities.RefreshToken", b =>
                 {
                     b.HasOne("EventLy.Api.Entities.User", "User")
@@ -240,6 +312,15 @@ namespace EventLy.Api.Data.Migrations
                         .HasConstraintName("fk_refresh_tokens_users_user_id");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("EventLy.Api.Entities.User", b =>
+                {
+                    b.HasOne("EventLy.Api.Entities.Organization", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_users_organizations_organization_id");
                 });
 #pragma warning restore 612, 618
         }
