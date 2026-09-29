@@ -1,7 +1,10 @@
 using System.Text.Json.Serialization;
 using EventLy.Api.Common.Errors;
+using EventLy.Api.Common.Validation;
 using EventLy.Api.Common.Options;
 using EventLy.Api.Data;
+using EventLy.Api.Services;
+using FluentValidation;
 using Microsoft.AspNetCore.HttpOverrides;
 
 namespace EventLy.Api.Common.Setup;
@@ -13,13 +16,14 @@ public static class ServiceSetup
     public static IServiceCollection AddApiCore(this IServiceCollection services)
     {
         services
-            .AddControllers()
+            .AddControllers(o => o.Filters.Add<ValidationFilter>())
             .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
         services.AddProblemDetails();
         services.AddExceptionHandler<AppExceptionHandler>();
         services.AddOpenApi("v1");
         services.AddSingleton(TimeProvider.System);
+        services.AddValidatorsFromAssemblyContaining<Program>(ServiceLifetime.Singleton);
 
         // Cloud Run (and the local reverse proxy) terminate TLS and forward the original scheme/client IP.
         services.Configure<ForwardedHeadersOptions>(o =>
@@ -29,6 +33,14 @@ public static class ServiceSetup
             o.KnownProxies.Clear();
         });
 
+        return services;
+    }
+
+    /// <summary>Feature services: concrete classes, no interfaces (see docs/architecture §4.1).</summary>
+    public static IServiceCollection AddAppServices(this IServiceCollection services)
+    {
+        services.AddScoped<AuditService>();
+        services.AddScoped<AuthService>();
         return services;
     }
 

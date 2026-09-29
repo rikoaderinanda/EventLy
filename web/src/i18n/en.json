@@ -28,5 +28,29 @@
     "genericTitle": "Something went wrong",
     "back": "Back to home"
   },
-  "language": "Language"
+  "language": "Language",
+  "auth": {
+    "title": "Sign in to EventLy",
+    "subtitle": "Use your Google account. No password needed.",
+    "loading": "Loading…",
+    "googleUnavailable": "The Google button couldn't load. Check your internet connection.",
+    "googleNotConfigured": "Google sign-in isn't configured on this server.",
+    "help": "Admins and Staff: sign in with the Google email your Owner registered.",
+    "devTitle": "Test sign-in (Development only)",
+    "devHint": "Sign in without Google for development. root@evently.test becomes Root.",
+    "email": "Email",
+    "name": "Name (optional)",
+    "devSubmit": "Sign in (test)",
+    "signOut": "Sign out",
+    "errors": {
+      "generic": "Sign-in failed. Please try again.",
+      "auth_account_disabled": "This account is disabled. Contact your administrator.",
+      "auth_google_account_mismatch": "This email is already linked to a different Google account.",
+      "auth_not_root_anymore": "This account no longer has Root access.",
+      "auth_invalid_google_token": "The Google sign-in couldn't be verified. Please try again.",
+      "auth_email_not_verified": "This Google account's email isn't verified.",
+      "rate_limit_exceeded": "Too many attempts. Please wait a moment and try again.",
+      "network_unreachable": "Can't reach the server."
+    }
+  }
 }

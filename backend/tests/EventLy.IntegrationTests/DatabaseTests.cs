@@ -1,8 +1,6 @@
 using System.Net;
-using EventLy.Api.Data;
 using EventLy.IntegrationTests.Infrastructure;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 
 namespace EventLy.IntegrationTests;
@@ -11,17 +9,13 @@ namespace EventLy.IntegrationTests;
 public sealed class DatabaseTests(PostgresFixture postgres) : IClassFixture<PostgresFixture>
 {
     [Fact]
-    public async Task Migrations_apply_and_readiness_reports_healthy()
+    public async Task Migrations_are_applied_and_readiness_reports_healthy()
     {
         postgres.SkipIfUnavailable();
-        await using var factory = new ApiFactory(postgres.ConnectionString);
         var ct = TestContext.Current.CancellationToken;
 
-        await using (var scope = factory.Services.CreateAsyncScope())
+        await using (var db = postgres.CreateDbContext())
         {
-            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            await db.Database.MigrateAsync(ct);
-
             (await db.Database.GetPendingMigrationsAsync(ct)).ShouldBeEmpty();
             var citextInstalled = await db.Database
                 .SqlQuery<bool>($"SELECT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'citext') AS \"Value\"")
@@ -29,6 +23,7 @@ public sealed class DatabaseTests(PostgresFixture postgres) : IClassFixture<Post
             citextInstalled.ShouldBeTrue();
         }
 
+        await using var factory = new ApiFactory(postgres.ConnectionString);
         using var client = factory.CreateClient();
         var response = await client.GetAsync("/health/ready", ct);
 

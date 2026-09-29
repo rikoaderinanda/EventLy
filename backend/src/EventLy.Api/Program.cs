@@ -1,4 +1,5 @@
 using System.Globalization;
+using EventLy.Api.Auth;
 using EventLy.Api.Common.Setup;
 using EventLy.Api.Data;
 using Serilog;
@@ -16,7 +17,9 @@ try
         .AddApiCore()
         .AddPersistence(builder.Configuration)
         .AddCaching(builder.Configuration)
-        .AddHealth(builder.Configuration);
+        .AddHealth(builder.Configuration)
+        .AddAuth(builder.Configuration, builder.Environment)
+        .AddAppServices();
 
     var app = builder.Build();
 

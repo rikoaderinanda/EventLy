@@ -52,4 +52,47 @@ public sealed class FoundationTests : IAsyncLifetime
         var problem = await response.Content.ReadFromJsonAsync<JsonElement>(TestContext.Current.CancellationToken);
         problem.GetProperty("code").GetString().ShouldBe("route.not_found");
     }
+
+    [Fact]
+    public async Task Protected_endpoint_without_token_returns_401_problem()
+    {
+        var response = await _client.GetAsync("/api/v1/auth/me", TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+        (await AuthClient.ProblemCodeAsync(response)).ShouldBe("auth.unauthenticated");
+    }
+
+    [Fact]
+    public async Task Tampered_access_token_is_rejected()
+    {
+        var response = await AuthClient.GetMeAsync(_client, "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.forged");
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task Auth_config_exposes_the_public_google_client_id()
+    {
+        var config = await _client.GetFromJsonAsync<JsonElement>("/api/v1/auth/config", TestContext.Current.CancellationToken);
+
+        config.GetProperty("googleClientId").GetString().ShouldBe(FakeGoogleTokenValidator.ClientId);
+        config.GetProperty("devSignInEnabled").GetBoolean().ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task Auth_endpoints_are_rate_limited_per_client()
+    {
+        await using var factory = new ApiFactory(ApiFactory.UnusedDatabase,
+            new Dictionary<string, string?> { ["RateLimiting:AuthPermitPerMinute"] = "3" });
+        using var client = factory.CreateClient();
+
+        var statuses = new List<HttpStatusCode>();
+        for (var i = 0; i < 4; i++)
+        {
+            statuses.Add((await AuthClient.RefreshAsync(client, refreshToken: null)).StatusCode);
+        }
+
+        statuses.ShouldBe([HttpStatusCode.Unauthorized, HttpStatusCode.Unauthorized, HttpStatusCode.Unauthorized,
+            HttpStatusCode.TooManyRequests]);
+    }
 }

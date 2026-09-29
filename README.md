@@ -14,7 +14,8 @@ The architecture, decisions and roadmap are in [docs/architecture](docs/architec
 |---|---|---|
 | 0 | Architecture and decisions | ✅ Approved |
 | 1 | Foundation: solution, EF Core + first migration, Docker, React app, CI | ✅ Done |
-| 2 | Identity: Google sign-in, JWT, roles | Next |
+| 2 | Identity: Google sign-in, JWT + refresh rotation, roles/permissions, audit | ✅ Done (real Google login needs a client id, see setup guide §7) |
+| 3 | Organization + tenant isolation | Next |
 
 ## Quick start (Docker)
 
@@ -30,6 +31,7 @@ docker compose up --build
 | http://localhost:8080 | The PWA |
 | http://localhost:8080/docs | API reference (Scalar) |
 | http://localhost:8080/health/ready | Readiness (database + Redis) |
+| http://localhost:8080/login | Sign in. Locally the test sign-in works without Google; `root@evently.test` is Root |
 
 Compose starts PostgreSQL 17 and Redis 7, runs the database migrations once (`migrate` service), then starts the app.
 

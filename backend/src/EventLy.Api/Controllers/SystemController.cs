@@ -1,9 +1,11 @@
 using System.Reflection;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventLy.Api.Controllers;
 
 [ApiController]
+[AllowAnonymous]
 [Route("api/v1/system")]
 public sealed class SystemController(IWebHostEnvironment environment, TimeProvider timeProvider) : ControllerBase
 {

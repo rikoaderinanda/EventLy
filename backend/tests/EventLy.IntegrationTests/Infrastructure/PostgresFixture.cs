@@ -1,11 +1,14 @@
+using EventLy.Api.Data;
+using Microsoft.EntityFrameworkCore;
 using Testcontainers.PostgreSql;
 
 namespace EventLy.IntegrationTests.Infrastructure;
 
 /// <summary>
-/// Starts a throwaway PostgreSQL container. When Docker isn't available (for example a
-/// laptop without Docker Desktop), <see cref="SkipReason"/> is set and database tests skip
-/// instead of failing. In CI (<c>CI</c> env var set, as on GitHub Actions) a missing Docker is a failure.
+/// Starts one throwaway PostgreSQL container per test class and applies all migrations.
+/// When Docker isn't available (a laptop without Docker Desktop), <see cref="SkipReason"/> is set and
+/// database tests skip instead of failing. In CI (<c>CI</c> env var set, as on GitHub Actions) a missing
+/// Docker is a failure.
 /// </summary>
 public sealed class PostgresFixture : IAsyncLifetime
 {
@@ -29,7 +32,18 @@ public sealed class PostgresFixture : IAsyncLifetime
         catch (Exception ex) when (!RunningInCi)
         {
             SkipReason = $"Docker is not available, so database tests are skipped ({ex.GetType().Name}).";
+            return;
         }
+
+        await using var db = CreateDbContext();
+        await db.Database.MigrateAsync();
+    }
+
+    public AppDbContext CreateDbContext()
+    {
+        var options = new DbContextOptionsBuilder<AppDbContext>();
+        PersistenceSetup.Configure(options, ConnectionString);
+        return new AppDbContext(options.Options);
     }
 
     public async ValueTask DisposeAsync()

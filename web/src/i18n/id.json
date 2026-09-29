@@ -28,5 +28,29 @@
     "genericTitle": "Terjadi kesalahan",
     "back": "Kembali ke beranda"
   },
-  "language": "Bahasa"
+  "language": "Bahasa",
+  "auth": {
+    "title": "Masuk ke EventLy",
+    "subtitle": "Gunakan akun Google Anda. Tidak perlu membuat password.",
+    "loading": "Memuat…",
+    "googleUnavailable": "Tombol Google tidak dapat dimuat. Periksa koneksi internet Anda.",
+    "googleNotConfigured": "Login Google belum dikonfigurasi di server ini.",
+    "help": "Admin dan Staff: masuk dengan email Google yang didaftarkan oleh Owner Anda.",
+    "devTitle": "Login test (hanya Development)",
+    "devHint": "Masuk tanpa Google untuk pengembangan. Email root@evently.test menjadi Root.",
+    "email": "Email",
+    "name": "Nama (opsional)",
+    "devSubmit": "Masuk (test)",
+    "signOut": "Keluar",
+    "errors": {
+      "generic": "Gagal masuk. Silakan coba lagi.",
+      "auth_account_disabled": "Akun ini dinonaktifkan. Hubungi administrator Anda.",
+      "auth_google_account_mismatch": "Email ini sudah terhubung ke akun Google lain.",
+      "auth_not_root_anymore": "Akun ini tidak lagi memiliki akses Root.",
+      "auth_invalid_google_token": "Login Google tidak dapat diverifikasi. Silakan coba lagi.",
+      "auth_email_not_verified": "Email akun Google ini belum terverifikasi.",
+      "rate_limit_exceeded": "Terlalu banyak percobaan. Tunggu sebentar lalu coba lagi.",
+      "network_unreachable": "Tidak dapat terhubung ke server."
+    }
+  }
 }

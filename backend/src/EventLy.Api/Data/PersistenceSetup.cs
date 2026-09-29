@@ -1,4 +1,5 @@
 using System.Data.Common;
+using EventLy.Api.Data.Interceptors;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
@@ -13,7 +14,12 @@ public static class PersistenceSetup
     public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = GetConnectionString(configuration);
-        services.AddDbContext<AppDbContext>(options => Configure(options, connectionString));
+        services.AddSingleton<TimestampsInterceptor>();
+        services.AddDbContext<AppDbContext>((sp, options) =>
+        {
+            Configure(options, connectionString);
+            options.AddInterceptors(sp.GetRequiredService<TimestampsInterceptor>());
+        });
         return services;
     }
 

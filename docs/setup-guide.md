@@ -69,6 +69,11 @@ All settings can be overridden with environment variables. Use `__` as the secti
 | Redis connection | `Cache__RedisConnection` | – | Required when the provider is `Redis` |
 | API docs | `ApiDocs__Enabled` | `false` | Always on in Development |
 | Environment | `ASPNETCORE_ENVIRONMENT` | `Production` | `Development` locally |
+| JWT signing key | `Auth__Jwt__SigningKey` | *(required, ≥ 32 bytes)* | **Secret.** Development has a `dev-only` key; outside Development/Testing that key is refused at startup |
+| Google client id | `Auth__GoogleClientId` | *(required outside Development)* | Public value from Google Cloud Console (see §7) |
+| Root account | `Auth__RootEmail` | – | The one Google email that signs in as Root. Development: `root@evently.test` |
+| Test sign-in | `Auth__DevSignInEnabled` | `false` | Sign in without Google. Only works in Development/Testing, even if switched on elsewhere |
+| Sign-in rate limit | `RateLimiting__AuthPermitPerMinute` | `10` | Per client IP, for sign-in/refresh/logout |
 
 Frontend build variables (`web/.env.example`): `VITE_API_BASE_URL` (default `/api/v1`), `VITE_APP_NAME`, `VITE_DEFAULT_LOCALE` (`id` or `en`). They end up in public JavaScript, so never put secrets there.
 
@@ -81,7 +86,7 @@ cd web && npm test               # Vitest + Testing Library
 
 Without Docker, the database integration tests are reported as **skipped**, not failed. On GitHub Actions the `CI` variable is set, so a missing Docker there is a real failure.
 
-## 6. Endpoints available after Phase 1
+## 6. Endpoints available so far
 
 | Endpoint | Purpose |
 |---|---|
@@ -89,9 +94,31 @@ Without Docker, the database integration tests are reported as **skipped**, not 
 | `GET /health/ready` | Database (and Redis when enabled) reachable. Returns 503 within about 5 seconds if not |
 | `GET /api/v1/system/info` | Name, version, environment, server time |
 | `/docs`, `/openapi/v1.json` | API reference (Development, or `ApiDocs__Enabled=true`) |
+| `GET /api/v1/auth/config` | Google client id (public) and whether test sign-in is on |
+| `POST /api/v1/auth/google` · `/dev-sign-in` | Sign in → access token + HttpOnly refresh cookie |
+| `POST /api/v1/auth/refresh` · `/logout` | Rotate / end the session (need header `X-Requested-With`) |
+| `GET /api/v1/auth/me` | The signed-in user and permissions |
 | any other path | The PWA (`index.html`); unknown `/api/...` paths return a JSON 404 |
 
-## 7. Troubleshooting
+## 7. Google sign-in (OAuth client id)
+
+Everyone signs in with Google. Locally you can use the **test sign-in** on the login page instead (Development only); `root@evently.test` becomes Root.
+
+To use real Google sign-in:
+
+1. Open https://console.cloud.google.com/ and create (or pick) a project, for example `evently`.
+2. **APIs & Services → OAuth consent screen**: choose *External*, fill in the app name (EventLy), support email and developer email. While testing, add your own Google address under *Test users*.
+3. **APIs & Services → Credentials → Create credentials → OAuth client ID**:
+   - Application type: **Web application**
+   - Authorized JavaScript origins: `http://localhost:8080` and `http://localhost:5173` (later also the Cloud Run URL / your domain)
+   - No redirect URI is needed (the button uses a popup).
+4. Copy the **Client ID** (`…apps.googleusercontent.com`). It is public, not a secret; there is no client secret to store.
+5. Give it to the API:
+   - docker compose: add `AUTH_GOOGLE_CLIENT_ID=…` to `.env`
+   - `dotnet run`: set `Auth__GoogleClientId=…` or put it in `appsettings.Development.json`
+6. Restart. The login page now shows **"Continue with Google"**. Set `Auth__RootEmail` to your own Google address if you want to sign in as Root.
+
+## 8. Troubleshooting
 
 | Problem | Fix |
 |---|---|
@@ -99,3 +126,5 @@ Without Docker, the database integration tests are reported as **skipped**, not 
 | `/health/ready` returns 503 | PostgreSQL isn't reachable. Check `docker compose ps` and the connection string |
 | Port 5432 / 6379 / 8080 already in use | Change `POSTGRES_PORT`, `REDIS_PORT` or `APP_PORT` in `.env` |
 | Integration tests "skipped" | Docker isn't running. Start Docker Desktop and run the tests again |
+| `Auth:Jwt:SigningKey must be at least 32 bytes` | Set `Auth__Jwt__SigningKey` (Production), or run with `ASPNETCORE_ENVIRONMENT=Development` |
+| Google button: "origin is not allowed" | Add the exact origin (scheme + host + port) to *Authorized JavaScript origins* in Google Cloud Console |

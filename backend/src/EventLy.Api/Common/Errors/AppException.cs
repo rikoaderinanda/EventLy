@@ -23,5 +23,8 @@ public sealed class NotFoundException(string code, string title, string? detail 
 public sealed class ConflictException(string code, string title, string? detail = null)
     : AppException(StatusCodes.Status409Conflict, code, title, detail);
 
+public sealed class UnauthorizedException(string code, string title, string? detail = null)
+    : AppException(StatusCodes.Status401Unauthorized, code, title, detail);
+
 public sealed class ForbiddenException(string code, string title, string? detail = null)
     : AppException(StatusCodes.Status403Forbidden, code, title, detail);

@@ -18,19 +18,25 @@ public static class PipelineSetup
         app.UseDefaultFiles();
         app.UseStaticFiles();
 
+        app.UseRateLimiter();
+        app.UseAuthentication();
+        app.UseAuthorization();
+
         if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("ApiDocs:Enabled"))
         {
-            app.MapOpenApi("/openapi/{documentName}.json");
-            app.MapScalarApiReference("/docs", o => o.WithOpenApiRoutePattern("/openapi/{documentName}.json"));
+            app.MapOpenApi("/openapi/{documentName}.json").AllowAnonymous();
+            app.MapScalarApiReference("/docs", o => o.WithOpenApiRoutePattern("/openapi/{documentName}.json"))
+                .AllowAnonymous();
         }
 
         app.MapControllers();
 
-        app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false });
+        // Endpoints below are public on purpose; everything else requires sign-in (fallback policy).
+        app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false }).AllowAnonymous();
         app.MapHealthChecks("/health/ready", new HealthCheckOptions
         {
             Predicate = check => check.Tags.Contains(ServiceSetup.ReadyTag),
-        });
+        }).AllowAnonymous();
 
         // Unknown API routes get a JSON 404 instead of the PWA's index.html.
         app.Map("/api/{**path}", (HttpContext http) => Results.Problem(new ProblemDetails
@@ -40,10 +46,10 @@ public static class PipelineSetup
             Title = "Endpoint not found.",
             Detail = $"No API endpoint matches '{http.Request.Path}'.",
             Extensions = { ["code"] = "route.not_found" },
-        }));
+        })).AllowAnonymous();
 
         // Client-side routes (/app/..., /i/{code}, ...) resolve to the PWA.
-        app.MapFallbackToFile("index.html");
+        app.MapFallbackToFile("index.html").AllowAnonymous();
 
         return app;
     }

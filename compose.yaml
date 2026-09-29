@@ -55,6 +55,9 @@ services:
       Cache__Provider: Redis
       Cache__RedisConnection: redis:6379
       ApiDocs__Enabled: "true"
+      # Optional: real Google sign-in (docs/setup-guide.md §7). Without it, use the test sign-in.
+      Auth__GoogleClientId: ${AUTH_GOOGLE_CLIENT_ID:-}
+      Auth__RootEmail: ${AUTH_ROOT_EMAIL:-root@evently.test}
     depends_on:
       migrate:
         condition: service_completed_successfully
