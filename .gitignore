@@ -1,0 +1,32 @@
+# Secrets and local config (public repository: never commit these)
+.env
+.env.*
+!.env.example
+**/appsettings.*.local.json
+*.pfx
+*.pem
+
+# .NET
+bin/
+obj/
+TestResults/
+*.user
+.vs/
+
+# Node / frontend
+node_modules/
+dist/
+dev-dist/
+coverage/
+*.tsbuildinfo
+
+# Built PWA copied into the API (produced by the Dockerfile)
+backend/src/EventLy.Api/wwwroot/*
+!backend/src/EventLy.Api/wwwroot/.gitkeep
+
+# Editors / OS
+.idea/
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db

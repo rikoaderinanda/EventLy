@@ -1,0 +1,66 @@
+# Local development stack: `docker compose up --build`, then open http://localhost:8080
+# Values come from .env (copy .env.example). Defaults below are for local use only.
+name: evently
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-evently}
+      POSTGRES_USER: ${POSTGRES_USER:-evently}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-evently_dev}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # Kept locally so the Redis code path stays tested (spec). Production stage 1 uses the in-memory cache.
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # Applies EF Core migrations once, then exits. The app starts only after it succeeds.
+  migrate:
+    build: .
+    image: evently:local
+    command: ["migrate"]
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__Database: Host=postgres;Port=5432;Database=${POSTGRES_DB:-evently};Username=${POSTGRES_USER:-evently};Password=${POSTGRES_PASSWORD:-evently_dev}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  app:
+    image: evently:local
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__Database: Host=postgres;Port=5432;Database=${POSTGRES_DB:-evently};Username=${POSTGRES_USER:-evently};Password=${POSTGRES_PASSWORD:-evently_dev}
+      Cache__Provider: Redis
+      Cache__RedisConnection: redis:6379
+      ApiDocs__Enabled: "true"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  redisdata:

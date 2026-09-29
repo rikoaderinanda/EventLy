@@ -1,0 +1,32 @@
+{
+  "app": {
+    "tagline": "Invitations, RSVP, QR check-in and photo gallery in one app."
+  },
+  "home": {
+    "title": "Welcome to EventLy",
+    "subtitle": "Event management, starting with weddings.",
+    "apiStatus": "Server status",
+    "apiOnline": "Connected",
+    "apiOffline": "Not connected",
+    "apiChecking": "Checking…",
+    "areas": "App areas"
+  },
+  "areas": {
+    "login": "Sign in",
+    "organizer": "Organizer dashboard",
+    "staff": "Staff (QR scan)",
+    "guest": "Sample invitation page",
+    "platform": "Root (packages & owners)"
+  },
+  "comingSoon": {
+    "title": "Coming soon",
+    "body": "This page is built in {{phase}}.",
+    "back": "Back to home"
+  },
+  "error": {
+    "notFoundTitle": "Page not found",
+    "genericTitle": "Something went wrong",
+    "back": "Back to home"
+  },
+  "language": "Language"
+}

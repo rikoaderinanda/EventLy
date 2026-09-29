@@ -1,0 +1,32 @@
+{
+  "app": {
+    "tagline": "Undangan, RSVP, check-in QR, dan galeri foto dalam satu aplikasi."
+  },
+  "home": {
+    "title": "Selamat datang di EventLy",
+    "subtitle": "Platform pengelolaan acara, dimulai dari pernikahan.",
+    "apiStatus": "Status server",
+    "apiOnline": "Terhubung",
+    "apiOffline": "Tidak terhubung",
+    "apiChecking": "Memeriksa…",
+    "areas": "Area aplikasi"
+  },
+  "areas": {
+    "login": "Masuk",
+    "organizer": "Dashboard penyelenggara",
+    "staff": "Staff (scan QR)",
+    "guest": "Contoh halaman undangan",
+    "platform": "Root (paket & owner)"
+  },
+  "comingSoon": {
+    "title": "Segera hadir",
+    "body": "Halaman ini dibangun pada {{phase}}.",
+    "back": "Kembali ke beranda"
+  },
+  "error": {
+    "notFoundTitle": "Halaman tidak ditemukan",
+    "genericTitle": "Terjadi kesalahan",
+    "back": "Kembali ke beranda"
+  },
+  "language": "Bahasa"
+}
