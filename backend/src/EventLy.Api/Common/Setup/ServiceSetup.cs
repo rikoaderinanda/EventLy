@@ -56,7 +56,7 @@ public static class ServiceSetup
     public static IServiceCollection AddHealth(this IServiceCollection services, IConfiguration configuration)
     {
         var checks = services.AddHealthChecks()
-            .AddDbContextCheck<AppDbContext>("database", tags: [ReadyTag]);
+            .AddCheck<DatabaseHealthCheck>("database", tags: [ReadyTag]);
 
         var cache = configuration.GetSection(CacheOptions.SectionName).Get<CacheOptions>() ?? new CacheOptions();
         if (cache.Provider == CacheProvider.Redis)

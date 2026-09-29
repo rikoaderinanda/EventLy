@@ -20,7 +20,7 @@ Each phase ends with a **demo and an approval gate**. The next phase starts only
 | Phase | Scope | Key deliverables | Tests of note | Depends on |
 |---|---|---|---|---|
 | **0** | Analysis | These 5 documents + open questions | — | — |
-| **1** | Foundation | .NET 10 solution (one `EventLy.Api` project + unit and integration test projects), EF Core + Npgsql, first migration (empty + `__EFMigrationsHistory`), Serilog, ProblemDetails, health checks, OpenAPI/Scalar. Vite React TS app, router, layouts, env config, Tailwind. `docker-compose.yml` (api, web, postgres, redis, minio, migrator). GitHub repository + **GitHub Actions** CI (build, test, lint on every push/PR) | `/health/ready` integration test with Testcontainers | 0 |
+| **1** ✅ | Foundation | .NET 10 solution (one `EventLy.Api` project + unit and integration test projects), EF Core + Npgsql, first migration (empty + `__EFMigrationsHistory`), Serilog, ProblemDetails, health checks, OpenAPI/Scalar. Vite React TS app, router, layouts, env config, Tailwind. `docker-compose.yml` (api, web, postgres, redis, minio, migrator). GitHub repository + **GitHub Actions** CI (build, test, lint on every push/PR) | `/health/ready` integration test with Testcontainers | 0 |
 | **2** | Identity | User, RefreshToken, **Google Sign-In for every role** (ID token validation, new Owner auto-created, Invited Admin/Staff matched by email, Root by config email), a **Development-only test sign-in** so local runs and integration tests don't need a real Google account, refresh rotation, logout, `/auth/me`, permission model + authorization policies, `auth` rate limit, sign-in audit. FE: Login with Google button, ProtectedRoute, token refresh middleware | Google ID token validation (wrong audience, expired, unverified email rejected), unregistered email can't become Admin/Staff, suspended user refused, token rotation and reuse detection, role→permission matrix unit test | 1 |
 | **3** | Organization | Create org (1 per owner), profile, token re-issue with `org_id`, **tenant filter + interceptor**, Owner creates Admin/Staff users. FE: onboarding, profile, users page | Two-tenant isolation suite (the reusable fixture used by every later phase) | 2 |
 | **4** | Event | Event CRUD, category/status, lifecycle guards, **sessions (akad/resepsi, one check-in session)**, description, cover photo, staff assignment. FE: list, form with sessions editor, detail shell with tabs | Status transition unit tests; Staff sees only assigned events | 3 |
@@ -49,8 +49,9 @@ Each phase ends with a **demo and an approval gate**. The next phase starts only
 ```
 EventLy/
 ├── backend/            EventLy.sln, src/EventLy.Api/, tests/
+├── Dockerfile, compose.yaml   one image (API + PWA), local stack
 ├── web/                React PWA
-├── deploy/             docker-compose.yml, docker-compose.prod.yml, nginx/, scripts/ (backup, restore)
+├── deploy/             (Phase 12) Cloud Run deploy + backup/restore scripts
 ├── docs/
 │   ├── architecture/   ← Phase 0 documents
 │   ├── modules/

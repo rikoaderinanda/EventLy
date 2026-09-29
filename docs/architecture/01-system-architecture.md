@@ -36,7 +36,7 @@ flowchart LR
     end
 
     subgraph Edge
-        RP[Reverse proxy<br/>Nginx / Caddy<br/>TLS, static PWA, /api proxy]
+        RP[Cloud Run HTTPS endpoint<br/>TLS termination]
     end
 
     subgraph Backend
@@ -454,19 +454,19 @@ State management (TanStack Query = server state · Zustand = session/UI state)
 
 ## 10. Deployment topology
 
-### Local (Phase 1 onward)
+### Local (Phase 1 onward, as built)
 
 ```
-docker compose up
- ├── api        (.NET 10, port 8080)
- ├── web        (Nginx serving the built PWA, proxying /api → api) port 5173/80
- ├── postgres   (17, volume pgdata)
- ├── redis      (7, append-only file on)
- ├── minio      (+ minio-init creates a private bucket)
- └── seq        (optional log UI)
+docker compose up --build            (compose.yaml)
+ ├── postgres   PostgreSQL 17, volume pgdata
+ ├── redis      Redis 7 (append-only), volume redisdata — keeps the Redis code path tested
+ ├── migrate    the app image run as `dotnet EventLy.Api.dll migrate`: applies migrations, then exits
+ └── app        the same image: API + built PWA on http://localhost:8080 (starts after migrate succeeds)
 ```
 
-Migrations run through a one-shot `migrator` container (the EF Core migration bundle). In production the API does **not** run migrations itself when it starts.
+- **One image** (root `Dockerfile`) holds the API and the built PWA, so local and Cloud Run run the same thing.
+- **Migrations** use the `migrate` argument of the same image, not a separate EF migration bundle. This is one less build artefact, and the same command becomes the Cloud Run migration job. The API never migrates when it starts.
+- **Object storage for local development** is added in Phase 9. MinIO's community Docker images changed status in 2025, so the local S3-compatible emulator is chosen then. Production uses Cloudflare R2.
 
 ### Production — free-tier setup (stage 1, decided 2026-09-29)
 
@@ -494,7 +494,7 @@ Scheduled cleanup: Cloud Scheduler (free: 3 jobs) → internal endpoint
 | Photo storage | **Cloudflare R2** | The Google Cloud Storage free tier only exists in US regions. R2 gives 10 GB free, **with no charge for downloads**, and is S3-compatible, so the existing `S3FileStorage` works unchanged. **No extra GCS adapter is needed** |
 | Cache / rate limit | **No Redis at this stage.** Uses the ASP.NET Core in-memory cache and in-memory rate limiter | Memorystore has no free tier. With a maximum of 1 Cloud Run instance, in-memory is correct and simpler. Switching to Redis later is a configuration change (`IDistributedCache`). Double check-ins are already prevented by the database unique index |
 | Deploy | `gcloud run deploy evently --source . --region asia-southeast2` | One command. Google builds the Dockerfile in the cloud (Cloud Build) and deploys it. Code lives on GitHub. GitHub Actions runs build and tests. Automatic deploy on push can be added later |
-| Migrations | Run by the deploy script as a one-off Cloud Run Job before the new version goes live | The API still never migrates itself when it starts |
+| Migrations | The same image run with the argument `migrate`, as a one-off Cloud Run Job before the new version goes live | The API never migrates itself when it starts |
 | Background work | **No always-on background workers.** The gallery ZIP is streamed directly in the download request. Retention cleanup is a daily Cloud Scheduler call to a protected endpoint | On the free setup, Cloud Run only gives CPU while a request is running |
 | Logs / monitoring | Serilog JSON → Cloud Logging (free allowance). Uptime check + budget alert | |
 
