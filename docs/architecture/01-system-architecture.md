@@ -216,6 +216,8 @@ stateDiagram-v2
     PendingPayment --> Active : payment settled (webhook)
     Active --> Completed : owner closes / auto after event date + N days
     Draft --> Cancelled
+    PendingPayment --> Cancelled
+    Active --> Cancelled : owner cancels (no refund, Q-32)
     Completed --> [*]
     Cancelled --> [*]
 ```

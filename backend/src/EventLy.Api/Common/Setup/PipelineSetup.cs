@@ -11,8 +11,10 @@ public static class PipelineSetup
     public static WebApplication UseApiPipeline(this WebApplication app)
     {
         app.UseForwardedHeaders();
-        app.UseExceptionHandler();
+        // Request logging wraps the exception handler so it records the final status (409, 404, ...)
+        // instead of a 500 for every business exception. Real 500s are logged by AppExceptionHandler.
         app.UseSerilogRequestLogging();
+        app.UseExceptionHandler();
 
         // The built PWA is served from wwwroot by this same service (one Cloud Run service, one domain).
         app.UseDefaultFiles();

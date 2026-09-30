@@ -117,6 +117,32 @@ public sealed class EventStaffAssignment : ITenantOwned
     public DateTimeOffset CreatedAt { get; init; }
 }
 
+/// <summary>
+/// Which status changes and edits are allowed (decision Q-4). Kept as pure functions so the rules
+/// are unit tested; <c>EventService</c> enforces them and answers 409 when one is broken.
+/// </summary>
+public static class EventLifecycle
+{
+    /// <summary>Completed and cancelled events are read-only.</summary>
+    public static bool IsEditable(EventStatus status) =>
+        status is EventStatus.Draft or EventStatus.PendingPayment or EventStatus.Active;
+
+    /// <summary>Paid events keep their history, so only drafts and cancelled events can be deleted.</summary>
+    public static bool IsDeletable(EventStatus status) =>
+        status is EventStatus.Draft or EventStatus.Cancelled;
+
+    public static bool CanChange(EventStatus from, EventStatus to) => (from, to) switch
+    {
+        (EventStatus.Draft, EventStatus.PendingPayment) => true,
+        (EventStatus.PendingPayment, EventStatus.Draft) => true, // payment failed or expired
+        (EventStatus.PendingPayment, EventStatus.Active) => true, // payment settled (Phase 5)
+        (EventStatus.Active, EventStatus.Completed) => true,
+        // Cancel is possible until the event is completed; there is no refund in the MVP (Q-32).
+        (EventStatus.Draft or EventStatus.PendingPayment or EventStatus.Active, EventStatus.Cancelled) => true,
+        _ => false,
+    };
+}
+
 /// <summary>Indonesian time zones offered for events (WIB, WITA, WIT).</summary>
 public static class EventTimeZones
 {

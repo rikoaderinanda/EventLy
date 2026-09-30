@@ -13,8 +13,6 @@ namespace EventLy.Api.Services;
 /// </summary>
 public sealed class EventService(AppDbContext db, ICurrentUser currentUser, AuditService audit, TimeProvider timeProvider)
 {
-    private static readonly EventStatus[] Editable = [EventStatus.Draft, EventStatus.PendingPayment, EventStatus.Active];
-
     public async Task<IReadOnlyList<EventListItemDto>> ListAsync(EventListQuery filter, CancellationToken ct)
     {
         var query = VisibleEvents().AsNoTracking();
@@ -67,7 +65,7 @@ public sealed class EventService(AppDbContext db, ICurrentUser currentUser, Audi
     public async Task<EventDto> UpdateAsync(Guid id, UpdateEventRequest request, CancellationToken ct)
     {
         var ev = await LoadAsync(id, db.Events, ct);
-        if (!Editable.Contains(ev.Status))
+        if (!EventLifecycle.IsEditable(ev.Status))
         {
             throw new ConflictException("event.not_editable", "A completed or cancelled event can't be changed.");
         }
@@ -92,7 +90,7 @@ public sealed class EventService(AppDbContext db, ICurrentUser currentUser, Audi
     public async Task DeleteAsync(Guid id, CancellationToken ct)
     {
         var ev = await LoadAsync(id, db.Events, ct);
-        if (ev.Status is not (EventStatus.Draft or EventStatus.Cancelled))
+        if (!EventLifecycle.IsDeletable(ev.Status))
         {
             throw new ConflictException("event.not_deletable", "Only a draft or a cancelled event can be deleted.");
         }
@@ -104,10 +102,10 @@ public sealed class EventService(AppDbContext db, ICurrentUser currentUser, Audi
 
     /// <summary>Owner only. No refund in the MVP (decision Q-32).</summary>
     public Task<EventDto> CancelAsync(Guid id, CancellationToken ct) =>
-        ChangeStatusAsync(id, EventStatus.Cancelled, allowedFrom: Editable, ct);
+        ChangeStatusAsync(id, EventStatus.Cancelled, ct);
 
     public Task<EventDto> CompleteAsync(Guid id, CancellationToken ct) =>
-        ChangeStatusAsync(id, EventStatus.Completed, allowedFrom: [EventStatus.Active], ct);
+        ChangeStatusAsync(id, EventStatus.Completed, ct);
 
     public async Task<IReadOnlyList<EventStaffDto>> GetStaffAsync(Guid eventId, CancellationToken ct)
     {
@@ -152,11 +150,10 @@ public sealed class EventService(AppDbContext db, ICurrentUser currentUser, Audi
         return await GetStaffAsync(eventId, ct);
     }
 
-    private async Task<EventDto> ChangeStatusAsync(
-        Guid id, EventStatus target, IReadOnlyCollection<EventStatus> allowedFrom, CancellationToken ct)
+    private async Task<EventDto> ChangeStatusAsync(Guid id, EventStatus target, CancellationToken ct)
     {
         var ev = await LoadAsync(id, db.Events, ct);
-        if (!allowedFrom.Contains(ev.Status))
+        if (!EventLifecycle.CanChange(ev.Status, target))
         {
             throw new ConflictException("event.invalid_status_change",
                 $"An event that is {ev.Status} can't become {target}.");
