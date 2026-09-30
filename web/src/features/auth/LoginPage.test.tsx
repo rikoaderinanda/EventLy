@@ -33,7 +33,7 @@ describe('LoginPage', () => {
     await userEvent.type(await screen.findByLabelText('Email'), 'budi@example.test')
     await userEvent.click(screen.getByRole('button', { name: 'Masuk (test)' }))
 
-    expect(await screen.findByRole('heading', { name: 'Scan QR' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Acara saya' })).toBeInTheDocument()
     expect(useSession.getState().accessToken).toBe('access-token-1')
   })
 
@@ -44,7 +44,7 @@ describe('LoginPage', () => {
     await userEvent.type(await screen.findByLabelText('Email'), 'rina@example.test')
     await userEvent.click(screen.getByRole('button', { name: 'Masuk (test)' }))
 
-    expect(await screen.findByRole('heading', { name: 'Scan QR' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Acara saya' })).toBeInTheDocument()
   })
 
   it('ignores an external next= target (no open redirect)', async () => {
@@ -54,7 +54,7 @@ describe('LoginPage', () => {
     await userEvent.type(await screen.findByLabelText('Email'), 'rina@example.test')
     await userEvent.click(screen.getByRole('button', { name: 'Masuk (test)' }))
 
-    expect(await screen.findByRole('heading', { name: 'Dashboard' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Acara' })).toBeInTheDocument()
   })
 
   it('shows a readable message when the account is disabled', async () => {

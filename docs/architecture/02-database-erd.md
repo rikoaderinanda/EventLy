@@ -269,7 +269,7 @@ CREATE UNIQUE INDEX ux_refresh_tokens_hash      ON refresh_tokens (token_hash);
 
 -- events
 CREATE INDEX        ix_events_org_date          ON events (organization_id, date DESC) WHERE deleted_at IS NULL;
-CREATE UNIQUE INDEX ux_one_checkin_session  ON event_sessions (event_id) WHERE is_check_in_session;
+-- one check-in session per event: enforced by the validator (a partial unique index can't be deferred)
 CREATE UNIQUE INDEX ux_users_google          ON users (google_subject) WHERE google_subject IS NOT NULL;
 CREATE UNIQUE INDEX ux_staff_assignment         ON event_staff_assignments (event_id, user_id);
 CREATE INDEX        ix_staff_assignment_user    ON event_staff_assignments (user_id);

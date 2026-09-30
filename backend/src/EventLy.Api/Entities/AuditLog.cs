@@ -46,4 +46,10 @@ public static class AuditActions
     public const string UserInvited = "user.invited";
     public const string UserUpdated = "user.updated";
     public const string UserInvitationCancelled = "user.invitation_cancelled";
+
+    public const string EventCreated = "event.created";
+    public const string EventUpdated = "event.updated";
+    public const string EventDeleted = "event.deleted";
+    public const string EventStatusChanged = "event.status_changed";
+    public const string EventStaffAssigned = "event.staff_assigned";
 }

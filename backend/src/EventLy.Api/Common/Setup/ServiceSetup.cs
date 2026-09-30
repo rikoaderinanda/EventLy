@@ -45,6 +45,7 @@ public static class ServiceSetup
         services.AddScoped<OrganizationService>();
         services.AddScoped<UserService>();
         services.AddScoped<PlatformOwnerService>();
+        services.AddScoped<EventService>();
         return services;
     }
 

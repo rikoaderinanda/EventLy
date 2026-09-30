@@ -7,7 +7,7 @@ function OrganizerNav() {
   const { t } = useTranslation()
   const role = useSession((s) => s.user?.role)
   const links = [
-    { to: '/app', label: t('nav.dashboard'), end: true },
+    { to: '/app', label: t('nav.events'), end: true },
     { to: '/app/organization', label: t('nav.organization'), end: false },
     ...(role === 'Owner' ? [{ to: '/app/users', label: t('nav.users'), end: false }] : []),
   ]

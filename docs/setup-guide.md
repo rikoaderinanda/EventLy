@@ -103,6 +103,9 @@ Without Docker, the database integration tests are reported as **skipped**, not 
 | `GET` · `PUT /api/v1/organization` | Organization profile (all members read, Owner edits) |
 | `GET` · `POST /api/v1/users`, `PUT` · `DELETE /api/v1/users/{id}` | Owner manages Admin/Staff (invite by Google email, change role/status, cancel invitation) |
 | `GET /api/v1/platform/owners`, `POST …/{id}/suspend` · `/reactivate` | Root: Owner accounts |
+| `GET` · `POST /api/v1/events`, `GET` · `PUT` · `DELETE /api/v1/events/{id}` | Events (Staff: only assigned ones) |
+| `POST /api/v1/events/{id}/cancel` · `/complete` | Status changes (cancel: Owner; complete: from Active) |
+| `GET` · `PUT /api/v1/events/{id}/staff` | Owner assigns Staff to the event |
 | `/legal/terms`, `/legal/privacy` | Terms & Privacy Policy pages |
 | any other path | The PWA (`index.html`); unknown `/api/...` paths return a JSON 404 |
 

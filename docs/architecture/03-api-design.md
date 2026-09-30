@@ -76,16 +76,12 @@ The route is singular because a user belongs to exactly one organization.
 | Method | Path | Roles | Description |
 |---|---|---|---|
 | GET | `/events?status=&category=&from=&to=` | O A · S (assigned only) | List events |
-| POST | `/events` | O A | Create a Draft `{name, category, date, venue}` |
+| POST | `/events` | O A | Create a Draft `{name, category, timeZone, description, sessions: [{name, startsAtLocal, endsAtLocal, venue, mapsUrl, isCheckInSession}]}`. Times are venue-local (no offset) and converted with the event time zone (WIB/WITA/WIT). Exactly one check-in session. Date/venue of the event = the check-in session's |
 | GET | `/events/{id}` | O A · S (assigned) | Event details (Staff get a reduced DTO with no package or payment fields) |
-| PUT | `/events/{id}` | O A | Update (the date and venue can change while Active. The package can't change after payment) |
+| PUT | `/events/{id}` | O A | Update, same body plus `version` (optimistic concurrency: a stale version gives 409 `event.modified_elsewhere`). Sessions with an `id` are updated in place, new ones added, missing ones removed. Completed/Cancelled events are read-only |
 | DELETE | `/events/{id}` | O A | Soft delete. Allowed only in `Draft` or `Cancelled` **[Q-4]** |
 | POST | `/events/{id}/cancel` | O | Cancel |
 | POST | `/events/{id}/complete` | O A | Mark the event completed |
-| GET | `/events/{id}/sessions` | O A · S (assigned) | Sessions (akad, resepsi...) |
-| POST | `/events/{id}/sessions` | O A | Add `{name, startsAt, endsAt, venue, mapsUrl, isCheckInSession}` |
-| PUT / DELETE | `/events/{id}/sessions/{sessionId}` | O A | Edit / remove (the check-in session can't be removed once guests have checked in) |
-| PUT | `/events/{id}/cover` | O A | Upload the cover photo (`multipart/form-data`) |
 | GET | `/events/{id}/wishes` | O A | All wishes, including hidden ones |
 | POST | `/events/{id}/wishes/{wishId}/hide` · `/unhide` · DELETE `/events/{id}/wishes/{wishId}` | O A | Moderation |
 | GET / PUT | `/events/{id}/gift-accounts` | O A | List / replace the bank and e-wallet accounts |

@@ -1,11 +1,14 @@
 using System.Net;
 using System.Net.Http.Json;
+using EventLy.Api.Dtos.Events;
 using EventLy.Api.Dtos.Organizations;
 using EventLy.Api.Dtos.Users;
 using EventLy.Api.Entities;
 using EventLy.IntegrationTests.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 using Shouldly;
 using static EventLy.IntegrationTests.Infrastructure.AuthClient;
+using static EventLy.IntegrationTests.Infrastructure.EventRequests;
 using static EventLy.IntegrationTests.Infrastructure.TenantBuilder;
 
 namespace EventLy.IntegrationTests;
@@ -84,5 +87,52 @@ public sealed class TenantIsolationTests(PostgresFixture postgres) : IClassFixtu
             _b.Owner.AccessToken);
 
         (await response.Content.ReadFromJsonAsync<OrganizationDto>(Json, Ct)).ShouldNotBeNull().Id.ShouldBe(_b.OrganizationId);
+    }
+
+    [Fact]
+    public async Task Another_tenants_event_is_not_found_for_every_operation()
+    {
+        var ev = await CreateAsync(_client, _a.Owner);
+        var id = ev.Id;
+
+        var attempts = new (HttpMethod Method, string Path, object? Body)[]
+        {
+            (HttpMethod.Get, $"/api/v1/events/{id}", null),
+            (HttpMethod.Put, $"/api/v1/events/{id}", ToUpdate(ev) with { Name = "Hijacked" }),
+            (HttpMethod.Delete, $"/api/v1/events/{id}", null),
+            (HttpMethod.Post, $"/api/v1/events/{id}/cancel", null),
+            (HttpMethod.Get, $"/api/v1/events/{id}/staff", null),
+            (HttpMethod.Put, $"/api/v1/events/{id}/staff", new AssignStaffRequest([_b.Staff.UserId])),
+        };
+        foreach (var (method, path, body) in attempts)
+        {
+            var response = await SendAsync(_client, method, path, _b.Owner.AccessToken, body);
+            response.StatusCode.ShouldBe(HttpStatusCode.NotFound, $"{method} {path}");
+        }
+
+        var listB = await (await SendAsync(_client, HttpMethod.Get, "/api/v1/events", _b.Owner.AccessToken))
+            .Content.ReadFromJsonAsync<List<EventListItemDto>>(Json, Ct);
+        listB.ShouldNotBeNull().ShouldNotContain(e => e.Id == id);
+        (await GetAsync(_client, _a.Owner, id)).Name.ShouldBe(ev.Name);
+    }
+
+    [Fact]
+    public async Task Tenant_filter_hides_and_interceptor_refuses_other_tenants_rows_at_the_database_level()
+    {
+        var ev = await CreateAsync(_client, _a.Owner);
+
+        await using (var asB = postgres.CreateDbContext(_b.OrganizationId))
+        {
+            (await asB.Events.AnyAsync(e => e.Id == ev.Id, Ct)).ShouldBeFalse();
+            (await asB.EventSessions.AnyAsync(s => s.EventId == ev.Id, Ct)).ShouldBeFalse();
+
+            // Even when code bypasses the filter, writing another tenant's row is refused before it reaches SQL.
+            var loaded = await asB.Events.IgnoreQueryFilters().SingleAsync(e => e.Id == ev.Id, Ct);
+            loaded.Name = "Hijacked";
+            await Should.ThrowAsync<InvalidOperationException>(() => asB.SaveChangesAsync(Ct));
+        }
+
+        await using var asNobody = postgres.CreateDbContext();
+        (await asNobody.Events.AnyAsync(e => e.Id == ev.Id, Ct)).ShouldBeFalse();
     }
 }

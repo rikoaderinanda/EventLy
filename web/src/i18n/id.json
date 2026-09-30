@@ -62,7 +62,8 @@
     "label": "Menu",
     "dashboard": "Dashboard",
     "organization": "Organisasi",
-    "users": "Pengguna"
+    "users": "Pengguna",
+    "events": "Acara"
   },
   "roles": {
     "Root": "Root",
@@ -129,6 +130,69 @@
     "user_not_found": "Pengguna tidak ditemukan.",
     "auth_forbidden": "Anda tidak memiliki akses untuk tindakan ini.",
     "network_unreachable": "Tidak dapat terhubung ke server.",
-    "validation_failed": "Periksa kembali isian Anda."
+    "validation_failed": "Periksa kembali isian Anda.",
+    "event_not_found": "Acara tidak ditemukan.",
+    "event_not_editable": "Acara yang sudah selesai atau dibatalkan tidak bisa diubah.",
+    "event_not_deletable": "Hanya acara draf atau yang dibatalkan yang bisa dihapus.",
+    "event_modified_elsewhere": "Acara ini baru saja diubah orang lain. Muat ulang lalu ulangi perubahan Anda.",
+    "event_invalid_status_change": "Status acara tidak bisa diubah dengan cara ini.",
+    "event_invalid_staff": "Hanya Staff aktif di organisasi Anda yang bisa ditugaskan."
+  },
+  "events": {
+    "title": "Acara",
+    "create": "Buat acara",
+    "newTitle": "Acara baru",
+    "editTitle": "Ubah acara",
+    "emptyTitle": "Belum ada acara",
+    "emptyBody": "Buat acara pertama Anda, misalnya akad dan resepsi pernikahan.",
+    "name": "Nama acara",
+    "nameHint": "Misalnya \"Pernikahan Rina & Budi\".",
+    "categoryLabel": "Kategori",
+    "timeZone": "Zona waktu lokasi",
+    "description": "Kata pengantar (opsional)",
+    "descriptionPlaceholder": "Nama mempelai dan salam untuk tamu.",
+    "sessions": "Sesi acara",
+    "sessionsHint": "Isi jam sesuai waktu setempat di lokasi ({{tz}}). Tamu check-in di satu sesi saja.",
+    "sessionN": "Sesi {{n}}",
+    "sessionName": "Nama sesi",
+    "defaultSession": "Resepsi",
+    "date": "Tanggal",
+    "start": "Mulai",
+    "end": "Selesai",
+    "venue": "Lokasi",
+    "mapsUrl": "Link Google Maps (opsional)",
+    "checkInHere": "Tamu check-in di sesi ini",
+    "checkInSession": "Sesi check-in",
+    "addSession": "+ Tambah sesi (misalnya Akad Nikah)",
+    "removeSession": "Hapus sesi",
+    "openMaps": "Buka di Google Maps",
+    "edit": "Ubah",
+    "complete": "Tandai selesai",
+    "cancel": "Batalkan acara",
+    "delete": "Hapus",
+    "confirmCancel": "Batalkan acara ini? Pembayaran yang sudah dilakukan tidak dikembalikan.",
+    "confirmDelete": "Hapus acara ini?",
+    "staffTitle": "Staff yang bertugas",
+    "noStaff": "Belum ada Staff. Undang Staff lebih dulu di menu",
+    "saveStaff": "Simpan penugasan",
+    "status": {
+      "Draft": "Draf",
+      "PendingPayment": "Menunggu pembayaran",
+      "Active": "Aktif",
+      "Completed": "Selesai",
+      "Cancelled": "Dibatalkan"
+    },
+    "category": {
+      "Wedding": "Pernikahan",
+      "Corporate": "Acara kantor",
+      "Birthday": "Ulang tahun",
+      "Community": "Komunitas",
+      "Other": "Lainnya"
+    }
+  },
+  "staffArea": {
+    "title": "Acara saya",
+    "empty": "Anda belum ditugaskan ke acara mana pun.",
+    "scannerSoon": "Scan QR tamu tersedia di tahap berikutnya."
   }
 }

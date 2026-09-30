@@ -62,7 +62,8 @@
     "label": "Menu",
     "dashboard": "Dashboard",
     "organization": "Organization",
-    "users": "Users"
+    "users": "Users",
+    "events": "Events"
   },
   "roles": {
     "Root": "Root",
@@ -129,6 +130,69 @@
     "user_not_found": "User not found.",
     "auth_forbidden": "You don't have permission for this action.",
     "network_unreachable": "Can't reach the server.",
-    "validation_failed": "Please check the form."
+    "validation_failed": "Please check the form.",
+    "event_not_found": "Event not found.",
+    "event_not_editable": "A completed or cancelled event can't be changed.",
+    "event_not_deletable": "Only a draft or a cancelled event can be deleted.",
+    "event_modified_elsewhere": "Someone else just changed this event. Reload it and apply your changes again.",
+    "event_invalid_status_change": "The event status can't be changed this way.",
+    "event_invalid_staff": "Only active Staff of your organization can be assigned."
+  },
+  "events": {
+    "title": "Events",
+    "create": "Create event",
+    "newTitle": "New event",
+    "editTitle": "Edit event",
+    "emptyTitle": "No events yet",
+    "emptyBody": "Create your first event, for example a wedding with akad and resepsi.",
+    "name": "Event name",
+    "nameHint": "For example \"Wedding of Rina & Budi\".",
+    "categoryLabel": "Category",
+    "timeZone": "Venue time zone",
+    "description": "Greeting (optional)",
+    "descriptionPlaceholder": "Names of the couple and a greeting for guests.",
+    "sessions": "Sessions",
+    "sessionsHint": "Enter local times at the venue ({{tz}}). Guests check in at one session only.",
+    "sessionN": "Session {{n}}",
+    "sessionName": "Session name",
+    "defaultSession": "Reception",
+    "date": "Date",
+    "start": "Start",
+    "end": "End",
+    "venue": "Venue",
+    "mapsUrl": "Google Maps link (optional)",
+    "checkInHere": "Guests check in at this session",
+    "checkInSession": "Check-in session",
+    "addSession": "+ Add a session (for example the akad)",
+    "removeSession": "Remove session",
+    "openMaps": "Open in Google Maps",
+    "edit": "Edit",
+    "complete": "Mark completed",
+    "cancel": "Cancel event",
+    "delete": "Delete",
+    "confirmCancel": "Cancel this event? Payments already made are not refunded.",
+    "confirmDelete": "Delete this event?",
+    "staffTitle": "Staff on duty",
+    "noStaff": "No Staff yet. Invite Staff first under",
+    "saveStaff": "Save assignment",
+    "status": {
+      "Draft": "Draft",
+      "PendingPayment": "Awaiting payment",
+      "Active": "Active",
+      "Completed": "Completed",
+      "Cancelled": "Cancelled"
+    },
+    "category": {
+      "Wedding": "Wedding",
+      "Corporate": "Corporate",
+      "Birthday": "Birthday",
+      "Community": "Community",
+      "Other": "Other"
+    }
+  },
+  "staffArea": {
+    "title": "My events",
+    "empty": "You aren't assigned to any event yet.",
+    "scannerSoon": "Guest QR scanning comes in the next step."
   }
 }

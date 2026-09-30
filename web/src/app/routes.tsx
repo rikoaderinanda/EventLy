@@ -50,7 +50,30 @@ export const routes: RouteObject[] = [
           {
             element: <OrganizerLayout />,
             children: [
-              { index: true, element: <ComingSoon title="Dashboard" phase="Phase 4" /> },
+              {
+                index: true,
+                lazy: async () => ({
+                  Component: (await import('@/features/events/EventListPage')).EventListPage,
+                }),
+              },
+              {
+                path: 'events/new',
+                lazy: async () => ({
+                  Component: (await import('@/features/events/EventFormPage')).NewEventPage,
+                }),
+              },
+              {
+                path: 'events/:id',
+                lazy: async () => ({
+                  Component: (await import('@/features/events/EventDetailPage')).EventDetailPage,
+                }),
+              },
+              {
+                path: 'events/:id/edit',
+                lazy: async () => ({
+                  Component: (await import('@/features/events/EventFormPage')).EditEventPage,
+                }),
+              },
               {
                 path: 'organization',
                 lazy: async () => ({
@@ -77,7 +100,14 @@ export const routes: RouteObject[] = [
         children: [
           {
             element: <StaffLayout />,
-            children: [{ index: true, element: <ComingSoon title="Scan QR" phase="Phase 8" /> }],
+            children: [
+              {
+                index: true,
+                lazy: async () => ({
+                  Component: (await import('@/features/events/StaffEventsPage')).StaffEventsPage,
+                }),
+              },
+            ],
           },
         ],
       },

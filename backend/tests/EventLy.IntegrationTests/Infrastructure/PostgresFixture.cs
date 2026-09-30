@@ -1,4 +1,7 @@
+using EventLy.Api.Auth;
 using EventLy.Api.Data;
+using EventLy.Api.Data.Interceptors;
+using EventLy.Api.Entities;
 using Microsoft.EntityFrameworkCore;
 using Testcontainers.PostgreSql;
 
@@ -39,11 +42,27 @@ public sealed class PostgresFixture : IAsyncLifetime
         await db.Database.MigrateAsync();
     }
 
-    public AppDbContext CreateDbContext()
+    /// <summary>
+    /// A context acting as a member of <paramref name="organizationId"/> (tenant filter and interceptor apply),
+    /// or with no organization at all. Use <c>IgnoreQueryFilters()</c> to look across tenants in assertions.
+    /// </summary>
+    public AppDbContext CreateDbContext(Guid? organizationId = null)
     {
         var options = new DbContextOptionsBuilder<AppDbContext>();
         PersistenceSetup.Configure(options, ConnectionString);
-        return new AppDbContext(options.Options);
+        options.AddInterceptors(new TimestampsInterceptor(TimeProvider.System), new TenantInterceptor());
+        return new AppDbContext(options.Options, new FakeCurrentUser(organizationId));
+    }
+
+    private sealed class FakeCurrentUser(Guid? organizationId) : ICurrentUser
+    {
+        public bool IsAuthenticated => organizationId is not null;
+
+        public Guid? UserId => null;
+
+        public Guid? OrganizationId => organizationId;
+
+        public UserRole? Role => organizationId is null ? null : UserRole.Owner;
     }
 
     public async ValueTask DisposeAsync()

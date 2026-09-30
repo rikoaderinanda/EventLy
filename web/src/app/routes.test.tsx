@@ -32,10 +32,10 @@ describe('routes', () => {
   })
 
   it.each([
-    ['/app', 'Owner', 'Dashboard'],
-    ['/app', 'Admin', 'Dashboard'],
-    ['/staff', 'Staff', 'Scan QR'],
-    ['/staff', 'Owner', 'Scan QR'],
+    ['/app', 'Owner', 'Acara'],
+    ['/app', 'Admin', 'Acara'],
+    ['/staff', 'Staff', 'Acara saya'],
+    ['/staff', 'Owner', 'Acara saya'],
     ['/platform', 'Root', 'Owner'],
   ] as const)('lets %s through for a signed-in %s', async (path, role, title) => {
     signInAs(role)
@@ -46,7 +46,7 @@ describe('routes', () => {
     expect(await screen.findByRole('heading', { name: title })).toBeInTheDocument()
   })
 
-  it('sends an anonymous visitor of a protected page to the login page', () => {
+  it('sends an anonymous visitor of a protected page to the login page', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue(jsonResponse({ googleClientId: null, devSignInEnabled: false })),
@@ -54,12 +54,12 @@ describe('routes', () => {
 
     renderRoute('/app')
 
-    expect(screen.getByRole('heading', { name: 'Masuk ke EventLy' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Masuk ke EventLy' })).toBeInTheDocument()
   })
 
   it.each([
-    ['/platform', 'Owner', 'Dashboard'],
-    ['/app', 'Staff', 'Scan QR'],
+    ['/platform', 'Owner', 'Acara'],
+    ['/app', 'Staff', 'Acara saya'],
     ['/app', 'Root', 'Owner'],
   ] as const)('redirects %s to the home of a %s', async (path, role, expectedTitle) => {
     signInAs(role)

@@ -22,6 +22,7 @@ public static class Permissions
     public const string EventManage = "event.manage";
     public const string EventView = "event.view";
     public const string EventAssignStaff = "event.assign_staff";
+    public const string EventCancel = "event.cancel";
 
     public const string PackageView = "package.view";
     public const string PaymentManage = "payment.manage";
@@ -56,6 +57,7 @@ public static class Permissions
         [EventManage] = OwnerAdmin,
         [EventView] = [UserRole.Owner, UserRole.Admin, UserRole.Staff],
         [EventAssignStaff] = OwnerOnly,
+        [EventCancel] = OwnerOnly,
 
         [PackageView] = OwnerAdmin,
         [PaymentManage] = OwnerOnly,

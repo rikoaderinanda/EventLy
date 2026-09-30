@@ -58,7 +58,7 @@ describe('onboarding', () => {
     await userEvent.click(screen.getByRole('checkbox'))
     await userEvent.click(submit)
 
-    expect(await screen.findByRole('heading', { name: 'Dashboard' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Acara' })).toBeInTheDocument()
     expect(useSession.getState().accessToken).toBe('access-token-with-org')
     const body = JSON.parse(String(fetchMock.mock.calls.find((c) => c[1]?.method === 'POST')![1]!.body))
     expect(body).toMatchObject({ name: 'Santoso WO', acceptTerms: true, termsVersion: '2026-09-29' })
@@ -76,14 +76,15 @@ describe('organizer navigation', () => {
     changeLocale('id')
   })
 
-  it('shows the Users tab to the owner only', () => {
+  it('shows the Users tab to the owner only', async () => {
     signInAs('Owner')
     const { unmount } = renderRoute('/app')
-    expect(screen.getByRole('link', { name: 'Pengguna' })).toBeInTheDocument()
+    expect(await screen.findByRole('link', { name: 'Pengguna' })).toBeInTheDocument()
     unmount()
 
     signInAs('Admin')
     renderRoute('/app')
+    expect(await screen.findByRole('link', { name: 'Organisasi' })).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Pengguna' })).not.toBeInTheDocument()
   })
 
