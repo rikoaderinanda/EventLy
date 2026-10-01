@@ -319,7 +319,9 @@
   },
   "staffArea": {
     "title": "Acara saya",
-    "empty": "Anda belum ditugaskan ke acara mana pun."
+    "empty": "Anda belum ditugaskan ke acara mana pun.",
+    "subtitle": "Pilih acara, lalu pindai QR undangan tamu di pintu masuk.",
+    "emptyHint": "Minta Owner menugaskan Anda di halaman acara."
   },
   "packages": {
     "sectionTitle": "Paket & pembayaran",
@@ -573,7 +575,7 @@
     "confirm": "Check-in",
     "cancel": "Batal",
     "next": "Tamu berikutnya",
-    "success": "✓ Check-in berhasil",
+    "success": "Check-in berhasil",
     "already": "Sudah check-in pukul {{time}} oleh {{by}}",
     "invalidTitle": "Undangan tidak valid",
     "errorTitle": "Check-in tidak bisa dilakukan",
@@ -589,7 +591,12 @@
       "Scan": "scan QR",
       "Manual": "cari nama"
     },
-    "openScanner": "Buka scanner"
+    "openScanner": "Buka scanner",
+    "foundTitle": "Tamu ditemukan",
+    "alreadyTitle": "Sudah check-in",
+    "checking": "Memeriksa undangan…",
+    "aim": "Arahkan kamera ke QR undangan tamu",
+    "modes": "Cara check-in"
   },
   "photos": {
     "galleryTitle": "Galeri foto",

@@ -119,6 +119,17 @@
   }
 }
 
+/* The scanner's moving line (the class sets motion-reduce:hidden). */
+@keyframes scanline {
+  0%,
+  100% {
+    top: 0;
+  }
+  50% {
+    top: calc(100% - 2px);
+  }
+}
+
 /* Legal texts rendered from Markdown */
 .prose-legal h1 {
   @apply mb-4 text-2xl font-semibold text-brand-900;

@@ -325,7 +325,9 @@
   },
   "staffArea": {
     "title": "My events",
-    "empty": "You aren't assigned to any event yet."
+    "empty": "You aren't assigned to any event yet.",
+    "subtitle": "Choose an event, then scan the guests' invitation QR at the entrance.",
+    "emptyHint": "Ask the Owner to assign you on the event page."
   },
   "packages": {
     "sectionTitle": "Package & payment",
@@ -580,7 +582,7 @@
     "confirm": "Check in",
     "cancel": "Cancel",
     "next": "Next guest",
-    "success": "✓ Checked in",
+    "success": "Checked in",
     "already": "Already checked in at {{time}} by {{by}}",
     "invalidTitle": "Invalid invitation",
     "errorTitle": "Can't check in",
@@ -596,7 +598,12 @@
       "Scan": "QR scan",
       "Manual": "name search"
     },
-    "openScanner": "Open scanner"
+    "openScanner": "Open scanner",
+    "foundTitle": "Guest found",
+    "alreadyTitle": "Already checked in",
+    "checking": "Checking the invitation…",
+    "aim": "Point the camera at the guest's invitation QR",
+    "modes": "Check-in mode"
   },
   "photos": {
     "galleryTitle": "Photo gallery",

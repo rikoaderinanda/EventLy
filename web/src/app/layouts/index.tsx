@@ -138,6 +138,16 @@ export function StaffLayout() {
   )
 }
 
+/** The check-in scanner: full screen on near-black, so the camera and the results stand out at a dark venue. */
+export function ScannerLayout() {
+  return (
+    <div className="min-h-dvh bg-stone-950 text-white">
+      <OfflineBanner />
+      <Outlet />
+    </div>
+  )
+}
+
 /** Public pages (home, login, legal, onboarding). */
 export function AuthLayout() {
   return (

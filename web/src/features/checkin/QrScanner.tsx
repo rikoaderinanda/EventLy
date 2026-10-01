@@ -1,3 +1,4 @@
+import { CameraOff } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -8,6 +9,22 @@ type DetectorConstructor = new (options: { formats: string[] }) => Detector
 function nativeDetector(): Detector | null {
   const Ctor = (globalThis as { BarcodeDetector?: DetectorConstructor }).BarcodeDetector
   return Ctor ? new Ctor({ formats: ['qr_code'] }) : null
+}
+
+/** Four white corner brackets around the scan area, and a soft moving line while scanning. */
+function Frame({ active }: { active: boolean }) {
+  const corner = 'absolute size-12 border-white'
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-[12%]">
+      <span className={`${corner} top-0 left-0 rounded-tl-2xl border-t-4 border-l-4`} />
+      <span className={`${corner} top-0 right-0 rounded-tr-2xl border-t-4 border-r-4`} />
+      <span className={`${corner} bottom-0 left-0 rounded-bl-2xl border-b-4 border-l-4`} />
+      <span className={`${corner} right-0 bottom-0 rounded-br-2xl border-r-4 border-b-4`} />
+      {active && (
+        <span className="absolute inset-x-4 top-0 h-0.5 animate-[scanline_2.4s_ease-in-out_infinite] rounded-full bg-gold-300 shadow-[0_0_12px_2px_rgb(226_199_102/0.7)] motion-reduce:hidden" />
+      )}
+    </div>
+  )
 }
 
 /**
@@ -85,14 +102,20 @@ export function QrScanner({ paused, onDetect }: { paused: boolean; onDetect: (te
 
   if (error) {
     return (
-      <p role="alert" className="rounded-lg bg-amber-50 p-4 text-sm text-amber-900">
-        {t(error === 'denied' ? 'checkin.cameraDenied' : 'checkin.cameraUnavailable')}
-      </p>
+      <div
+        role="alert"
+        className="flex aspect-square w-full flex-col items-center justify-center gap-4 rounded-3xl border border-white/10 bg-white/5 p-8 text-center"
+      >
+        <CameraOff aria-hidden className="size-10 text-white/60" />
+        <p className="text-sm text-white/85">
+          {t(error === 'denied' ? 'checkin.cameraDenied' : 'checkin.cameraUnavailable')}
+        </p>
+      </div>
     )
   }
 
   return (
-    <div className="relative overflow-hidden rounded-xl bg-black">
+    <div className="relative overflow-hidden rounded-3xl bg-black shadow-[0_0_0_1px_rgb(255_255_255/0.08)]">
       <video
         ref={video}
         muted
@@ -100,10 +123,10 @@ export function QrScanner({ paused, onDetect }: { paused: boolean; onDetect: (te
         aria-label={t('checkin.camera')}
         className="aspect-square w-full object-cover"
       />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-10 rounded-xl border-4 border-white/70"
-      />
+      <Frame active={!paused} />
+      <p className="absolute inset-x-0 bottom-4 text-center text-sm font-medium text-white/90 drop-shadow">
+        {t('checkin.aim')}
+      </p>
     </div>
   )
 }

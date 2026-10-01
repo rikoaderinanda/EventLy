@@ -1,5 +1,9 @@
+import { Camera, ImagePlus } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Button } from '@/components/ui/Button'
+import { Notice } from '@/components/ui/Feedback'
+import { Spinner } from '@/components/ui/Spinner'
 import { errorMessage } from '@/shared/lib/errors'
 import { compressPhoto } from '@/shared/lib/image'
 import { uploadPhotos } from './api'
@@ -35,16 +39,19 @@ export function StaffPhotoButton({ invitationId }: { invitationId: string }) {
   }
 
   return (
-    <div className="space-y-2">
-      <button
-        type="button"
+    <div className="space-y-2 rounded-2xl bg-brand-50 p-3">
+      <Button
+        variant="secondary"
+        size="lg"
+        block
+        icon={Camera}
         disabled={busy}
         onClick={() => setCameraOpen(true)}
-        className="w-full rounded-xl border-2 border-brand-700 py-3 font-semibold text-brand-700 disabled:opacity-50"
       >
         {uploaded > 0 ? t('photos.takeAnother') : t('photos.take')}
-      </button>
-      <label className="block cursor-pointer text-center text-sm text-stone-600 underline">
+      </Button>
+      <label className="flex cursor-pointer items-center justify-center gap-1.5 py-1 text-sm text-stone-600 hover:text-brand-800 has-focus-visible:outline-2 has-focus-visible:outline-brand-600">
+        {busy ? <Spinner /> : <ImagePlus aria-hidden className="size-4" />}
         {busy ? t('photos.uploading') : t('photos.pickFiles')}
         <input
           type="file"
@@ -59,12 +66,8 @@ export function StaffPhotoButton({ invitationId }: { invitationId: string }) {
           }}
         />
       </label>
-      {uploaded > 0 && (
-        <p role="status" className="text-sm text-emerald-700">
-          {t('photos.uploaded', { n: uploaded })}
-        </p>
-      )}
-      {error !== null && <p className="text-sm text-red-700">{errorMessage(t, error)}</p>}
+      {uploaded > 0 && <Notice tone="success">{t('photos.uploaded', { n: uploaded })}</Notice>}
+      {error !== null && <Notice tone="danger">{errorMessage(t, error)}</Notice>}
       {cameraOpen && <CameraCapture onUse={(photo) => send([photo])} onClose={() => setCameraOpen(false)} />}
     </div>
   )

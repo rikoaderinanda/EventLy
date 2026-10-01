@@ -2,7 +2,14 @@ import type { RouteObject } from 'react-router'
 import { LoginPage } from '@/features/auth/LoginPage'
 import { ProtectedRoute } from '@/features/auth/ProtectedRoute'
 import { HomePage } from '@/features/home/HomePage'
-import { AuthLayout, GuestLayout, OrganizerLayout, PlatformLayout, StaffLayout } from './layouts'
+import {
+  AuthLayout,
+  GuestLayout,
+  OrganizerLayout,
+  PlatformLayout,
+  ScannerLayout,
+  StaffLayout,
+} from './layouts'
 import { RouteError } from './RouteError'
 
 /**
@@ -214,6 +221,12 @@ export const routes: RouteObject[] = [
                   Component: (await import('@/features/settings/SettingsPage')).SettingsPage,
                 }),
               },
+            ],
+          },
+          {
+            // Full screen, dark and high contrast, without the staff bar.
+            element: <ScannerLayout />,
+            children: [
               {
                 path: 'events/:id',
                 lazy: async () => ({

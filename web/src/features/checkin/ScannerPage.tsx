@@ -1,9 +1,32 @@
+import {
+  ArrowLeft,
+  CircleAlert,
+  CircleCheck,
+  History,
+  type LucideIcon,
+  QrCode,
+  Search,
+  TriangleAlert,
+  UserRound,
+  UsersRound,
+} from 'lucide-react'
+import { motion } from 'motion/react'
 import { useCallback, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router'
 import { ApiError } from '@/api/problem'
+import { Avatar } from '@/components/ui/Avatar'
+import { Badge } from '@/components/ui/Badge'
+import { Button } from '@/components/ui/Button'
+import { cn } from '@/components/ui/cn'
+import { Notice } from '@/components/ui/Feedback'
+import { TextField } from '@/components/ui/Input'
+import { Modal } from '@/components/ui/Modal'
+import { Loading } from '@/components/ui/Spinner'
 import { useEvent } from '@/features/events/api'
+import { StaffPhotoButton } from '@/features/photos/StaffPhotoButton'
 import { errorMessage } from '@/shared/lib/errors'
+import { vibrate } from '@/shared/lib/haptics'
 import {
   lookup,
   useCheckIn,
@@ -13,7 +36,6 @@ import {
   type CheckInResult,
   type CheckInTarget,
 } from './api'
-import { StaffPhotoButton } from '@/features/photos/StaffPhotoButton'
 import { QrScanner } from './QrScanner'
 
 type Sheet =
@@ -22,13 +44,30 @@ type Sheet =
   | { kind: 'done'; result: CheckInResult }
   | { kind: 'error'; error: unknown }
 
+type Tab = 'scan' | 'manual' | 'mine'
+
 function time(value: string | null, locale: string) {
   return value ? new Date(value).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }) : ''
 }
 
+/** The big round status mark at the top of the result: it pops in, so the result reads at a glance. */
+function StatusMark({ icon: Icon, tone }: { icon: LucideIcon; tone: string }) {
+  return (
+    <motion.span
+      // Scale only: the mark is fully visible from the first frame even if the animation stutters.
+      initial={{ scale: 0.6 }}
+      animate={{ scale: 1 }}
+      transition={{ type: 'spring', damping: 14, stiffness: 320 }}
+      className={cn('mx-auto flex size-20 items-center justify-center rounded-full', tone)}
+    >
+      <Icon aria-hidden className="size-11" strokeWidth={2.25} />
+    </motion.span>
+  )
+}
+
 /**
- * The result of a scan, before and after committing: green for a new check-in, amber for a repeat
- * scan, red for an invalid invitation. Large buttons for one-handed use at the entrance.
+ * The result of a scan as a bottom sheet: green for a new check-in, amber for a repeat scan, red for an
+ * invalid invitation. The main button has focus, so a keyboard or a Bluetooth scanner can confirm with Enter.
  */
 function ResultSheet({
   sheet,
@@ -42,84 +81,109 @@ function ResultSheet({
   onNext: () => void
 }) {
   const { t, i18n } = useTranslation()
+
   if (sheet.kind === 'loading')
-    return <p className="py-6 text-center text-stone-500">{t('common.loading')}</p>
+    return (
+      <Modal open onClose={onNext} title={t('checkin.checking')}>
+        <Loading />
+      </Modal>
+    )
 
   if (sheet.kind === 'error') {
     const notFound = sheet.error instanceof ApiError && sheet.error.status === 404
     return (
-      <div role="alert" className="space-y-4 rounded-xl bg-red-50 p-5 text-center">
-        <p className="text-lg font-semibold text-red-800">
-          {notFound ? t('checkin.invalidTitle') : t('checkin.errorTitle')}
-        </p>
-        <p className="text-sm text-red-800">{errorMessage(t, sheet.error)}</p>
-        <NextButton onNext={onNext} />
-      </div>
+      <Modal
+        open
+        onClose={onNext}
+        title={notFound ? t('checkin.invalidTitle') : t('checkin.errorTitle')}
+        footer={
+          <Button size="lg" block data-autofocus autoFocus onClick={onNext}>
+            {t('checkin.next')}
+          </Button>
+        }
+      >
+        <div role="alert" className="space-y-4 pb-2 text-center">
+          <StatusMark icon={CircleAlert} tone="bg-danger-50 text-danger-500" />
+          <p className="text-body text-danger-700">{errorMessage(t, sheet.error)}</p>
+        </div>
+      </Modal>
     )
   }
 
   const { result } = sheet
   const repeat = result.alreadyCheckedIn
   const done = sheet.kind === 'done'
-  const tone = repeat
-    ? 'bg-amber-50 text-amber-900'
-    : done
-      ? 'bg-emerald-50 text-emerald-900'
-      : 'bg-white text-stone-900'
+  const title = repeat ? t('checkin.alreadyTitle') : done ? t('checkin.success') : t('checkin.foundTitle')
 
   return (
-    <div role="status" className={`space-y-3 rounded-xl border border-brand-100 p-5 text-center ${tone}`}>
-      {done && !repeat && <p className="text-lg font-semibold">{t('checkin.success')}</p>}
-      {repeat && (
-        <p className="text-lg font-semibold">
-          {t('checkin.already', {
-            time: time(result.checkedInAt, i18n.language),
-            by: result.checkedInBy ?? '',
-          })}
-        </p>
-      )}
-      <p className="text-2xl font-semibold">{result.guestName}</p>
-      <p className="text-sm">
-        {result.type === 'Group'
-          ? t('guests.groupOf', { n: result.numberOfPeople })
-          : t('guests.type.Individual')}
-      </p>
-      {result.warnings.map((w) => (
-        <p key={w} className="rounded-md bg-amber-100 px-3 py-2 text-sm text-amber-900">
-          ⚠ {t(`checkin.warning.${w}`)}
-        </p>
-      ))}
-      {sheet.kind === 'found' && !repeat && (
-        <button
-          type="button"
-          disabled={confirming}
-          onClick={onConfirm}
-          className="w-full rounded-xl bg-emerald-600 py-4 text-lg font-semibold text-white disabled:opacity-50"
-        >
-          {t('checkin.confirm')}
-        </button>
-      )}
-      {(done || repeat) && <StaffPhotoButton key={result.invitationId} invitationId={result.invitationId} />}
-      {(done || repeat) && <NextButton onNext={onNext} />}
-      {sheet.kind === 'found' && !repeat && (
-        <button type="button" onClick={onNext} className="text-sm text-stone-600 underline">
-          {t('checkin.cancel')}
-        </button>
-      )}
-    </div>
-  )
-}
-
-function NextButton({ onNext }: { onNext: () => void }) {
-  const { t } = useTranslation()
-  return (
-    <button
-      type="button"
-      onClick={onNext}
-      className="w-full rounded-xl bg-brand-700 py-3 font-semibold text-white"
+    <Modal
+      open
+      onClose={onNext}
+      dismissible={!confirming}
+      title={title}
+      footer={
+        sheet.kind === 'found' && !repeat ? (
+          <>
+            <Button variant="ghost" size="lg" block="mobile" onClick={onNext}>
+              {t('checkin.cancel')}
+            </Button>
+            <Button
+              variant="success"
+              size="lg"
+              block="mobile"
+              icon={CircleCheck}
+              loading={confirming}
+              data-autofocus
+              autoFocus
+              onClick={onConfirm}
+            >
+              {t('checkin.confirm')}
+            </Button>
+          </>
+        ) : (
+          <Button size="lg" block data-autofocus autoFocus onClick={onNext}>
+            {t('checkin.next')}
+          </Button>
+        )
+      }
     >
-      {t('checkin.next')}
-    </button>
+      <div role="status" className="space-y-4 pb-2 text-center">
+        {done && !repeat && <StatusMark icon={CircleCheck} tone="bg-success-50 text-success-500" />}
+        {repeat && <StatusMark icon={TriangleAlert} tone="bg-warning-50 text-warning-500" />}
+        {sheet.kind === 'found' && !repeat && (
+          <Avatar name={result.guestName} size="lg" className="mx-auto size-20 text-2xl" />
+        )}
+        {repeat && (
+          <p className="font-medium text-warning-700">
+            {t('checkin.already', {
+              time: time(result.checkedInAt, i18n.language),
+              by: result.checkedInBy ?? '',
+            })}
+          </p>
+        )}
+        <div>
+          <p className="text-[1.75rem] leading-tight font-semibold text-brand-950">{result.guestName}</p>
+          <p className="mt-2 inline-flex items-center gap-1.5 text-body text-stone-600">
+            {result.type === 'Group' ? (
+              <UsersRound aria-hidden className="size-4" />
+            ) : (
+              <UserRound aria-hidden className="size-4" />
+            )}
+            {result.type === 'Group'
+              ? t('guests.groupOf', { n: result.numberOfPeople })
+              : t('guests.type.Individual')}
+          </p>
+        </div>
+        {result.warnings.map((w) => (
+          <Notice key={w} tone="warning" className="text-left">
+            {t(`checkin.warning.${w}`)}
+          </Notice>
+        ))}
+        {(done || repeat) && (
+          <StaffPhotoButton key={result.invitationId} invitationId={result.invitationId} />
+        )}
+      </div>
+    </Modal>
   )
 }
 
@@ -136,53 +200,54 @@ function ManualEntry({ eventId, onPick }: { eventId: string; onPick: (target: Ch
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 rounded-3xl bg-white p-4 text-stone-900 sm:p-5">
       <form onSubmit={submitCode} className="flex gap-2">
-        <label htmlFor="checkin-code" className="sr-only">
-          {t('checkin.codeLabel')}
-        </label>
-        <input
+        <TextField
           id="checkin-code"
+          label={t('checkin.codeLabel')}
+          icon={QrCode}
           value={code}
           onChange={(e) => setCode(e.target.value)}
-          placeholder={t('checkin.codeLabel')}
           autoComplete="off"
-          className="min-w-0 flex-1 rounded-md border border-stone-300 px-3 py-3"
+          autoCapitalize="off"
+          spellCheck={false}
+          wrapperClassName="min-w-0 flex-1"
         />
-        <button type="submit" className="rounded-md bg-brand-700 px-4 font-medium text-white">
+        <Button type="submit" size="lg" className="h-14">
           {t('checkin.find')}
-        </button>
+        </Button>
       </form>
-      <div>
-        <label htmlFor="checkin-name" className="text-sm font-medium text-stone-700">
-          {t('checkin.searchLabel')}
-        </label>
-        <input
-          id="checkin-name"
-          type="search"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="mt-1 w-full rounded-md border border-stone-300 px-3 py-3"
-        />
-      </div>
-      <ul className="divide-y divide-brand-100 rounded-lg border border-brand-100 bg-white empty:hidden">
+      <TextField
+        id="checkin-name"
+        type="search"
+        label={t('checkin.searchLabel')}
+        icon={Search}
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+      <ul className="-mx-2 divide-y divide-brand-100 empty:hidden">
         {name.trim().length >= 2 &&
           search.data?.map((hit) => (
             <li key={hit.invitationId}>
               <button
                 type="button"
                 onClick={() => onPick({ invitationId: hit.invitationId })}
-                className="flex w-full items-center justify-between gap-2 px-4 py-3 text-left"
+                className="flex min-h-14 w-full items-center gap-3 rounded-xl px-2 py-2.5 text-left hover:bg-brand-50 active:bg-brand-100"
               >
-                <span>
-                  <span className="block font-medium text-stone-800">{hit.guestName}</span>
+                <Avatar name={hit.guestName} size="sm" />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate font-medium text-brand-950">{hit.guestName}</span>
                   <span className="text-xs text-stone-500">
                     {hit.type === 'Group'
                       ? t('guests.groupOf', { n: hit.numberOfPeople })
                       : t('guests.type.Individual')}
                   </span>
                 </span>
-                {hit.checkedIn && <span className="text-xs text-emerald-700">{t('checkin.checkedIn')}</span>}
+                {hit.checkedIn && (
+                  <Badge tone="success" icon={CircleCheck}>
+                    {t('checkin.checkedIn')}
+                  </Badge>
+                )}
               </button>
             </li>
           ))}
@@ -194,76 +259,152 @@ function ManualEntry({ eventId, onPick }: { eventId: string; onPick: (target: Ch
 function MyActivity({ eventId }: { eventId: string }) {
   const { t, i18n } = useTranslation()
   const activity = useMyActivity(eventId, true)
-  if (activity.data?.length === 0) return <p className="text-sm text-stone-500">{t('checkin.noActivity')}</p>
   return (
-    <ul className="divide-y divide-brand-100 rounded-lg border border-brand-100 bg-white">
-      {activity.data?.map((item) => (
-        <li key={item.id} className="flex justify-between gap-2 px-4 py-3 text-sm">
-          <span className="text-stone-800">
-            {item.guestName} <span className="text-stone-500">({item.numberOfPeople})</span>
-          </span>
-          <span className="text-stone-500">{time(item.checkedInAt, i18n.language)}</span>
-        </li>
-      ))}
-    </ul>
+    <div className="rounded-3xl bg-white p-4 text-stone-900 sm:p-5">
+      {activity.data?.length === 0 && (
+        <p className="py-6 text-center text-sm text-stone-500">{t('checkin.noActivity')}</p>
+      )}
+      <ol className="-mx-2 divide-y divide-brand-100 empty:hidden">
+        {activity.data?.map((item) => (
+          <li key={item.id} className="flex items-center gap-3 px-2 py-3 text-sm">
+            <time className="w-12 shrink-0 font-semibold text-brand-700 tabular-nums">
+              {time(item.checkedInAt, i18n.language)}
+            </time>
+            <span className="min-w-0 flex-1 truncate font-medium text-brand-950">{item.guestName}</span>
+            <span className="text-stone-500">{t('stats.peopleCount', { count: item.numberOfPeople })}</span>
+          </li>
+        ))}
+      </ol>
+    </div>
   )
 }
 
-/** Staff at the entrance: scan or find the guest, confirm, next. Owner can use it too. */
+const tabs: { key: Tab; icon: LucideIcon }[] = [
+  { key: 'scan', icon: QrCode },
+  { key: 'manual', icon: Search },
+  { key: 'mine', icon: History },
+]
+
+/**
+ * Staff at the entrance, full screen and high contrast: scan or find the guest, confirm, next.
+ * Owner can use it too. Each result vibrates differently (success, repeat, invalid).
+ */
 export function ScannerPage() {
   const { t } = useTranslation()
   const { id = '' } = useParams()
   const event = useEvent(id)
   const summary = useCheckInSummary(id)
   const checkIn = useCheckIn(id)
-  const [tab, setTab] = useState<'scan' | 'manual' | 'mine'>('scan')
+  const [tab, setTab] = useState<Tab>('scan')
   const [sheet, setSheet] = useState<Sheet | null>(null)
+
+  const show = useCallback((next: Sheet) => {
+    if (next.kind === 'done') vibrate(next.result.alreadyCheckedIn ? 'repeat' : 'success')
+    else if (next.kind === 'found' && next.result.alreadyCheckedIn) vibrate('repeat')
+    else if (next.kind === 'error') vibrate('error')
+    setSheet(next)
+  }, [])
 
   const open = useCallback(
     async (target: CheckInTarget) => {
       setSheet({ kind: 'loading' })
       try {
         if ('code' in target) {
-          setSheet({ kind: 'found', target, result: await lookup(id, target.code) })
+          show({ kind: 'found', target, result: await lookup(id, target.code) })
         } else {
           // Picked by name: the search already showed who it is, so commit straight away.
-          setSheet({ kind: 'done', result: await checkIn.mutateAsync(target) })
+          show({ kind: 'done', result: await checkIn.mutateAsync(target) })
         }
       } catch (error) {
-        setSheet({ kind: 'error', error })
+        show({ kind: 'error', error })
       }
     },
-    [id, checkIn],
+    [id, checkIn, show],
   )
 
   function confirm() {
     if (sheet?.kind !== 'found') return
     checkIn.mutate(sheet.target, {
-      onSuccess: (result) => setSheet({ kind: 'done', result }),
-      onError: (error) => setSheet({ kind: 'error', error }),
+      onSuccess: (result) => show({ kind: 'done', result }),
+      onError: (error) => show({ kind: 'error', error }),
     })
   }
 
   const scanned = useCallback((text: string) => void open({ code: text }), [open])
+  const people = summary.data?.people ?? 0
+  const arrived = summary.data?.checkedInPeople ?? 0
 
   return (
-    <section className="mx-auto max-w-md space-y-4 py-4">
-      <Link to="/staff" className="text-sm text-brand-700 underline">
-        ← {t('staffArea.title')}
-      </Link>
-      <div>
-        <h1 className="text-xl font-semibold text-brand-900">{event.data?.name}</h1>
+    <section className="mx-auto flex min-h-dvh max-w-lg flex-col px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[calc(6.5rem+env(safe-area-inset-bottom))]">
+      <header className="flex items-center gap-3 py-2">
+        <Link
+          to="/staff"
+          aria-label={t('staffArea.title')}
+          className="flex size-11 shrink-0 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20"
+        >
+          <ArrowLeft aria-hidden className="size-5" />
+        </Link>
+        <div className="min-w-0 flex-1">
+          <h1 className="truncate text-lg font-semibold text-white">{event.data?.name ?? '…'}</h1>
+          {summary.data && (
+            <p className="truncate text-sm text-white/70">
+              {t('checkin.counter', {
+                arrived: summary.data.checkedInPeople,
+                total: summary.data.people,
+                invitations: summary.data.checkedInInvitations,
+                allInvitations: summary.data.invitations,
+              })}
+            </p>
+          )}
+        </div>
         {summary.data && (
-          <p className="text-sm text-stone-600">
-            {t('checkin.counter', {
-              arrived: summary.data.checkedInPeople,
-              total: summary.data.people,
-              invitations: summary.data.checkedInInvitations,
-              allInvitations: summary.data.invitations,
-            })}
+          <p className="shrink-0 rounded-full bg-success-500/20 px-3 py-1 text-sm font-semibold text-success-100 tabular-nums">
+            {arrived}/{people}
           </p>
         )}
+      </header>
+      {summary.data && (
+        <div aria-hidden className="mt-1 mb-4 h-1.5 overflow-hidden rounded-full bg-white/10">
+          <div
+            className="h-full rounded-full bg-success-500 transition-[width] duration-700 ease-out-soft"
+            style={{ width: `${people > 0 ? (arrived / people) * 100 : 0}%` }}
+          />
+        </div>
+      )}
+
+      <div role="tabpanel" className="flex-1">
+        {/* The scanner stays mounted while a result shows: the camera keeps running for the next guest. */}
+        <div hidden={tab !== 'scan'}>
+          <QrScanner paused={sheet !== null || tab !== 'scan'} onDetect={scanned} />
+        </div>
+        {tab === 'manual' && <ManualEntry eventId={id} onPick={(target) => void open(target)} />}
+        {tab === 'mine' && <MyActivity eventId={id} />}
       </div>
+
+      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-stone-950/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur">
+        <div
+          role="tablist"
+          aria-label={t('checkin.modes')}
+          className="mx-auto grid max-w-lg grid-cols-3 gap-2"
+        >
+          {tabs.map(({ key, icon: Icon }) => (
+            <button
+              key={key}
+              type="button"
+              role="tab"
+              aria-selected={tab === key}
+              onClick={() => setTab(key)}
+              className={cn(
+                'flex h-16 flex-col items-center justify-center gap-1 rounded-2xl text-sm font-semibold transition-colors active:scale-[0.97]',
+                tab === key ? 'bg-white text-stone-950' : 'text-white/75 hover:bg-white/10 hover:text-white',
+              )}
+            >
+              <Icon aria-hidden className="size-6" />
+              {t(`checkin.tab.${key}`)}
+            </button>
+          ))}
+        </div>
+      </nav>
 
       {sheet && (
         <ResultSheet
@@ -273,26 +414,6 @@ export function ScannerPage() {
           onNext={() => setSheet(null)}
         />
       )}
-      {/* Hidden, not unmounted, while a result shows: the camera keeps running for the next guest. */}
-      <div hidden={sheet !== null} className="space-y-4">
-        <div role="tablist" className="grid grid-cols-3 gap-1 rounded-lg bg-brand-100 p-1 text-sm">
-          {(['scan', 'manual', 'mine'] as const).map((key) => (
-            <button
-              key={key}
-              type="button"
-              role="tab"
-              aria-selected={tab === key}
-              onClick={() => setTab(key)}
-              className="rounded-md py-2 font-medium text-brand-900 aria-selected:bg-white aria-selected:shadow-sm"
-            >
-              {t(`checkin.tab.${key}`)}
-            </button>
-          ))}
-        </div>
-        {tab === 'scan' && <QrScanner paused={sheet !== null} onDetect={scanned} />}
-        {tab === 'manual' && <ManualEntry eventId={id} onPick={(target) => void open(target)} />}
-        {tab === 'mine' && <MyActivity eventId={id} />}
-      </div>
     </section>
   )
 }

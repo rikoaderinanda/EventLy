@@ -88,6 +88,16 @@ Status is never shown by colour alone: badges always have a word and an icon.
 - **Charts** follow the dataviz rules: status colours only for status and always with an icon and a word; one hue for a single series; marks at least 3:1 against the surface; values in text, not in the series colour.
 - **Long words** (an e-mail as a name) wrap in headings (`overflow-wrap: anywhere`), so they never widen the page on a phone.
 
+## Staff scanner (UI-4)
+
+- **Own layout** (`ScannerLayout`): full screen on near-black (`stone-950`), no app bar, so the camera and the result stand out at a dark venue. The staff event list keeps the normal frame and shows Active events first, each with its check-in progress and a large "Buka scanner check-in" button.
+- **Top:** back, event name, the counter and a green progress bar of people arrived.
+- **Scanner:** rounded camera view with four corner brackets and a moving gold scan line (hidden with reduced motion). The camera stays on while a result shows.
+- **Bottom:** three large tabs (64px): Scan QR, Cari tamu, Riwayat saya. Manual entry and history sit on white panels for contrast.
+- **Result:** a bottom sheet (`Modal`): a status mark that pops in (green check, amber warning for a repeat, red for invalid), the guest's name large, the type, warnings, the photo step, and one main button that already has focus, so Enter (or a Bluetooth scanner) confirms.
+- **Haptics** (`shared/lib/haptics.ts`): one short buzz for a new check-in, a double tap for a repeat scan, one long buzz for an invalid invitation (Android; iPhone Safari has no Vibration API).
+- **Staff camera** (`CameraCapture`) renders through a portal above the sheet; Escape closes only the camera.
+
 ## Motion
 
 - **Motion** (`motion/react`, MIT) for the modal, sheet and invitation opening; CSS transitions for hover and press.

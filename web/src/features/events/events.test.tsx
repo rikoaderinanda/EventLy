@@ -130,6 +130,8 @@ describe('event pages', () => {
               date: '2026-12-12T04:00:00Z',
               venue: 'Gedung Serbaguna',
               status: 'Active',
+              coverUrl: null,
+              counts: { invitations: 10, people: 25, rsvpAnswered: 4, checkedInPeople: 5 },
             },
           ]),
       },

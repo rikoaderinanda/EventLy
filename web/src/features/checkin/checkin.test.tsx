@@ -1,6 +1,6 @@
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { EventDetail } from '@/features/events/api'
 import { changeLocale } from '@/i18n'
 import { renderRoute } from '@/test/renderRoute'
@@ -62,6 +62,8 @@ describe('check-in', () => {
           ),
       },
     ])
+    const vibrate = vi.fn(() => true)
+    Object.defineProperty(navigator, 'vibrate', { value: vibrate, configurable: true })
     renderRoute('/staff/events/e1')
 
     expect(await screen.findByText('5 dari 25 orang hadir · 2/10 undangan')).toBeInTheDocument()
@@ -75,7 +77,9 @@ describe('check-in', () => {
     expect(screen.getByText(/Tamu sebelumnya menjawab tidak hadir/)).toBeInTheDocument()
     await userEvent.click(screen.getByRole('button', { name: 'Check-in' }))
 
-    expect(await screen.findByText('✓ Check-in berhasil')).toBeInTheDocument()
+    expect(await screen.findByText('Check-in berhasil')).toBeInTheDocument()
+    // One short buzz for a new check-in.
+    expect(vibrate).toHaveBeenCalledWith([60])
     const post = fetchMock.mock.calls.find((c) => c[1]?.method === 'POST')!
     expect(JSON.parse(String(post[1]!.body))).toEqual({ code, invitationId: null })
     await userEvent.click(screen.getByRole('button', { name: 'Tamu berikutnya' }))
@@ -165,7 +169,7 @@ describe('check-in', () => {
     await userEvent.type(screen.getByLabelText('Cari nama tamu'), 'wija')
     await userEvent.click(await screen.findByRole('button', { name: /Keluarga Wijaya/ }))
 
-    expect(await screen.findByText('✓ Check-in berhasil')).toBeInTheDocument()
+    expect(await screen.findByText('Check-in berhasil')).toBeInTheDocument()
     const post = fetchMock.mock.calls.find((c) => c[1]?.method === 'POST')!
     expect(JSON.parse(String(post[1]!.body))).toEqual({ code: null, invitationId: 'i1' })
   })
@@ -184,6 +188,8 @@ describe('check-in', () => {
               date: event.date,
               venue: 'Gedung',
               status: 'Active',
+              coverUrl: null,
+              counts: { invitations: 10, people: 25, rsvpAnswered: 4, checkedInPeople: 5 },
             },
           ]),
       },
