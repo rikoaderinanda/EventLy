@@ -35,36 +35,34 @@ export function StatisticCard({
   }[tone]
   const Trend = trend?.up ? TrendingUp : TrendingDown
   return (
-    <div
-      className={cn(
-        'flex items-center gap-4 rounded-2xl border border-brand-100 bg-white p-4 shadow-soft sm:p-5',
-        className,
-      )}
-    >
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2.5">
-          <span className={cn('flex size-9 shrink-0 items-center justify-center rounded-xl', iconTone)}>
-            <Icon aria-hidden className="size-[1.125rem]" />
-          </span>
-          <p className="truncate text-sm font-medium text-stone-500">{label}</p>
-        </div>
-        <p className="mt-3 text-[1.75rem] leading-none font-semibold tracking-tight text-brand-950 tabular-nums">
-          {value}
-        </p>
-        {caption && <p className="mt-1.5 truncate text-xs text-stone-500">{caption}</p>}
-        {trend && (
-          <p
-            className={cn(
-              'mt-1.5 inline-flex items-center gap-1 text-xs font-medium',
-              trend.up ? 'text-success-700' : 'text-danger-700',
-            )}
-          >
-            <Trend aria-hidden className="size-3.5" />
-            {trend.value}
-          </p>
-        )}
+    <div className={cn('rounded-2xl border border-brand-100 bg-white p-4 shadow-soft sm:p-5', className)}>
+      {/* The label gets the full width; value and the optional visual share the row below. */}
+      <div className="flex items-center gap-2.5">
+        <span className={cn('flex size-9 shrink-0 items-center justify-center rounded-xl', iconTone)}>
+          <Icon aria-hidden className="size-[1.125rem]" />
+        </span>
+        <p className="line-clamp-2 text-sm leading-tight font-medium text-stone-500">{label}</p>
       </div>
-      {visual}
+      <div className="mt-3 flex items-end justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[1.75rem] leading-none font-semibold tracking-tight text-brand-950 tabular-nums">
+            {value}
+          </p>
+          {caption && <p className="mt-1.5 line-clamp-2 text-xs text-stone-500">{caption}</p>}
+          {trend && (
+            <p
+              className={cn(
+                'mt-1.5 inline-flex items-center gap-1 text-xs font-medium',
+                trend.up ? 'text-success-700' : 'text-danger-700',
+              )}
+            >
+              <Trend aria-hidden className="size-3.5" />
+              {trend.value}
+            </p>
+          )}
+        </div>
+        {visual && <div className="shrink-0">{visual}</div>}
+      </div>
     </div>
   )
 }

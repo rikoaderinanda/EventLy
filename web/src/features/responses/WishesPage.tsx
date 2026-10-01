@@ -1,6 +1,15 @@
+import { Eye, EyeOff, Quote, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { Link, useParams } from 'react-router'
-import { useEvent } from '@/features/events/api'
+import { useParams } from 'react-router'
+import { Avatar } from '@/components/ui/Avatar'
+import { Badge } from '@/components/ui/Badge'
+import { Button } from '@/components/ui/Button'
+import { Card } from '@/components/ui/Card'
+import { cn } from '@/components/ui/cn'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { Notice } from '@/components/ui/Feedback'
+import { Skeleton } from '@/components/ui/Spinner'
+import { EventPageHeader } from '@/features/events/EventPageHeader'
 import { errorMessage } from '@/shared/lib/errors'
 import { useModerateWish, useWishes } from './api'
 
@@ -8,55 +17,82 @@ import { useModerateWish, useWishes } from './api'
 export function WishesPage() {
   const { t, i18n } = useTranslation()
   const { id = '' } = useParams()
-  const event = useEvent(id)
   const wishes = useWishes(id)
   const moderate = useModerateWish(id)
 
   return (
-    <section className="mx-auto max-w-3xl space-y-4 py-8">
-      <Link to={`/app/events/${id}`} className="text-sm text-brand-700 underline">
-        ← {event.data?.name ?? t('events.title')}
-      </Link>
-      <h1 className="text-2xl font-semibold text-brand-900">{t('responses.wishesTitle')}</h1>
-      <p className="text-sm text-stone-600">{t('responses.wishesHint')}</p>
+    <section className="mx-auto max-w-5xl space-y-5 py-6 sm:py-10">
+      <EventPageHeader eventId={id} title={t('responses.wishesTitle')} subtitle={t('responses.wishesHint')} />
       {(wishes.isError || moderate.isError) && (
-        <p className="text-red-700">{errorMessage(t, wishes.error ?? moderate.error)}</p>
+        <Notice tone="danger">{errorMessage(t, wishes.error ?? moderate.error)}</Notice>
       )}
-      {wishes.data?.length === 0 && <p className="text-stone-500">{t('responses.noWishes')}</p>}
-      <ul className="space-y-3">
+      {wishes.isPending && (
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Skeleton className="h-36 rounded-2xl" />
+          <Skeleton className="h-36 rounded-2xl" />
+        </div>
+      )}
+      {wishes.data?.length === 0 && (
+        <Card>
+          <EmptyState kind="wishes" title={t('responses.noWishes')} />
+        </Card>
+      )}
+      <ul className="columns-1 gap-4 sm:columns-2 [&>li]:mb-4 [&>li]:break-inside-avoid">
         {wishes.data?.map((w) => (
           <li
             key={w.id}
-            className={`rounded-lg border bg-white p-4 ${w.isHidden ? 'border-dashed border-stone-300 opacity-70' : 'border-brand-100'}`}
+            className={cn(
+              'relative rounded-2xl border bg-white p-5 shadow-soft',
+              w.isHidden ? 'border-dashed border-stone-300 bg-stone-50 shadow-none' : 'border-brand-100',
+            )}
           >
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="font-medium text-brand-900">
-                {w.guestName}
-                {w.isHidden && <span className="ml-2 text-xs text-stone-500">({t('responses.hidden')})</span>}
-              </p>
-              <p className="text-xs text-stone-500">{new Date(w.updatedAt).toLocaleString(i18n.language)}</p>
+            <Quote aria-hidden className="absolute top-4 right-4 size-6 text-brand-200" />
+            <div className="flex items-center gap-3">
+              <Avatar name={w.guestName} size="sm" />
+              <div className="min-w-0">
+                <p className="truncate font-medium text-brand-950">{w.guestName}</p>
+                <p className="text-xs text-stone-500">
+                  {new Date(w.updatedAt).toLocaleString(i18n.language)}
+                </p>
+              </div>
             </div>
-            <p className="mt-1 text-sm whitespace-pre-line text-stone-700">{w.message}</p>
-            <div className="mt-2 flex gap-3 text-sm">
-              <button
-                type="button"
+            <p
+              className={cn(
+                'mt-3 text-body whitespace-pre-line',
+                w.isHidden ? 'text-stone-500' : 'text-stone-700',
+              )}
+            >
+              {w.message}
+            </p>
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              {w.isHidden && (
+                <Badge tone="neutral" icon={EyeOff}>
+                  {t('responses.hidden')}
+                </Badge>
+              )}
+              <span className="flex-1" />
+              <Button
+                variant="ghost"
+                size="sm"
+                icon={w.isHidden ? Eye : EyeOff}
                 disabled={moderate.isPending}
                 onClick={() => moderate.mutate({ id: w.id, action: w.isHidden ? 'unhide' : 'hide' })}
-                className="text-brand-700 underline"
               >
                 {w.isHidden ? t('responses.show') : t('responses.hide')}
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                icon={Trash2}
                 disabled={moderate.isPending}
+                className="text-danger-700 hover:bg-danger-50 hover:text-danger-700"
                 onClick={() =>
                   window.confirm(t('responses.confirmDeleteWish')) &&
                   moderate.mutate({ id: w.id, action: 'delete' })
                 }
-                className="text-red-700 underline"
               >
                 {t('responses.delete')}
-              </button>
+              </Button>
             </div>
           </li>
         ))}

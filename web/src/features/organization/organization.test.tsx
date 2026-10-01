@@ -58,7 +58,7 @@ describe('onboarding', () => {
     await userEvent.click(screen.getByRole('checkbox'))
     await userEvent.click(submit)
 
-    expect(await screen.findByRole('heading', { name: 'Acara' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /^Halo, Rina/ })).toBeInTheDocument()
     expect(useSession.getState().accessToken).toBe('access-token-with-org')
     const body = JSON.parse(String(fetchMock.mock.calls.find((c) => c[1]?.method === 'POST')![1]!.body))
     expect(body).toMatchObject({ name: 'Santoso WO', acceptTerms: true, termsVersion: '2026-09-29' })

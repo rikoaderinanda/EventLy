@@ -227,25 +227,30 @@ Details: [docs/modules/photos.md](../modules/photos.md).
 
 | Method | Path | Roles | Description |
 |---|---|---|---|
-| GET | `/events/{eventId}/dashboard` | O A | Statistics (below). Cached for 30 s |
-| GET | `/dashboard` | O A | Organization overview across events |
+| GET | `/events/{eventId}/stats` | O A | Statistics of one event (below). **Built in UI-3 (Q-60)**; no cache yet (the queries are small) |
+| GET | `/events` | O A S | Each item also carries `coverUrl` (signed) and `counts {invitations, people, rsvpAnswered, checkedInPeople}` for the event cards and the dashboard (UI-3) |
 | GET | `/events/{eventId}/reports/guests?format=csv\|xlsx` | O A | Guest, RSVP and check-in report |
 | GET | `/events/{eventId}/reports/check-ins?format=csv\|xlsx` | O A | Check-in timeline with staff |
 | GET | `/events/{eventId}/reports/photos?format=csv\|xlsx` | O A | Photo counts per invitation |
 
 `xlsx` is gated by the package's `excelExport` flag (Q-2).
 
-Dashboard response:
+Statistics response (`/events/{eventId}/stats`; counts are active invitations of guests still on the list, "people" counts each invitation's number of people):
 
 ```json
 {
-  "invitations": { "total": 320, "individual": 180, "group": 140, "opened": 250, "totalPeople": 610 },
-  "rsvp":        { "pending": 40, "attending": 250, "notAttending": 30, "expectedPeople": 480 },
-  "checkIn":     { "checkedIn": 210, "notYet": 110, "peopleArrived": 402, "rate": 0.656,
-                   "byHour": [{ "hour": "2026-10-10T03:00:00Z", "count": 55 }] },
-  "photos":      { "total": 640, "invitationsWithPhotos": 198, "storageBytes": 1288490188 }
+  "eventId": "…",
+  "guests":   { "invitations": 120, "people": 250, "peopleLimit": 500, "opened": 100 },
+  "rsvp":     { "attending": 80, "notAttending": 10, "pending": 30, "attendingPeople": 182 },
+  "checkIns": { "invitations": 40, "people": 96, "byHour": [{ "hour": "2026-12-12T03:00:00Z", "people": 30 }] },
+  "wishes": 34,
+  "gifts":    { "confirmations": 12, "amount": 3500000 },
+  "photos":   { "count": 210, "limit": 1500 },
+  "staff": 3
 }
 ```
+
+`byHour` is in UTC hour buckets; the PWA labels them in the event's time zone. The organization overview is the dashboard page itself, built from `/events` (counts) and the stats of the event in focus.
 
 ### 2.14 Audit log
 

@@ -15,6 +15,8 @@ const event = (id: string, status: EventListItem['status'], name = `Acara ${id}`
   date: '2026-12-12T04:00:00Z',
   venue: 'Gedung',
   status,
+  coverUrl: null,
+  counts: { invitations: 0, people: 0, rsvpAnswered: 0, checkedInPeople: 0 },
 })
 
 describe('selected event (Q-59)', () => {

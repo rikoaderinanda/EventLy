@@ -3,6 +3,7 @@ using EventLy.Api.Common.Errors;
 using EventLy.Api.Data;
 using EventLy.Api.Dtos.Events;
 using EventLy.Api.Entities;
+using EventLy.Api.Storage;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventLy.Api.Services;
@@ -12,7 +13,13 @@ namespace EventLy.Api.Services;
 /// the caller's organization; Staff additionally see only events they are assigned to (others are 404).
 /// </summary>
 public sealed class EventService(
-    AppDbContext db, ICurrentUser currentUser, AuditService audit, PaymentService payments, TimeProvider timeProvider)
+    AppDbContext db,
+    ICurrentUser currentUser,
+    AuditService audit,
+    PaymentService payments,
+    EventStatsService stats,
+    IFileStorage storage,
+    TimeProvider timeProvider)
 {
     public async Task<IReadOnlyList<EventListItemDto>> ListAsync(EventListQuery filter, CancellationToken ct)
     {
@@ -34,11 +41,18 @@ public sealed class EventService(
             query = query.Where(e => e.Date <= to);
         }
 
-        return await query
+        var events = await query
             .OrderByDescending(e => e.Date)
-            .Select(e => new EventListItemDto(e.Id, e.Name, e.Category, e.TimeZone, e.Date, e.Venue, e.Status))
+            .Select(e => new { e.Id, e.Name, e.Category, e.TimeZone, e.Date, e.Venue, e.Status, e.CoverImageKey })
             .Take(500)
             .ToListAsync(ct);
+        var counts = await stats.CountsAsync([.. events.Select(e => e.Id)], ct);
+        return
+        [
+            .. events.Select(e => new EventListItemDto(e.Id, e.Name, e.Category, e.TimeZone, e.Date, e.Venue, e.Status,
+                e.CoverImageKey is null ? null : storage.GetReadUrl(e.CoverImageKey, PhotoService.UrlLifetime),
+                counts.GetValueOrDefault(e.Id, EventCountsDto.None))),
+        ];
     }
 
     public async Task<EventDto> GetAsync(Guid id, CancellationToken ct) =>

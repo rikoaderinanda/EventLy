@@ -9,7 +9,7 @@ namespace EventLy.Api.Controllers;
 
 [ApiController]
 [Route("api/v1/events")]
-public sealed class EventsController(EventService events) : ControllerBase
+public sealed class EventsController(EventService events, EventStatsService stats) : ControllerBase
 {
     /// <summary>Owner/Admin: all events of the organization. Staff: only events they are assigned to.</summary>
     [HttpGet]
@@ -34,6 +34,11 @@ public sealed class EventsController(EventService events) : ControllerBase
     [HttpGet("{id:guid}")]
     [Authorize(Policy = Permissions.EventView)]
     public Task<EventDto> Get(Guid id, CancellationToken ct) => events.GetAsync(id, ct);
+
+    /// <summary>Owner/Admin: the event's numbers for the dashboard and the statistics page (Q-60).</summary>
+    [HttpGet("{id:guid}/stats")]
+    [Authorize(Policy = Permissions.DashboardView)]
+    public Task<EventStatsDto> Stats(Guid id, CancellationToken ct) => stats.GetAsync(id, ct);
 
     [HttpPut("{id:guid}")]
     [Authorize(Policy = Permissions.EventManage)]

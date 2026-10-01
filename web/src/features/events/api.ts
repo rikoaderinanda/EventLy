@@ -43,10 +43,34 @@ export type EventDetail = {
   version: number
 }
 
+/** Active invitations, people on them, invitations that answered the RSVP, people checked in. */
+export type EventCounts = {
+  invitations: number
+  people: number
+  rsvpAnswered: number
+  checkedInPeople: number
+}
+
 export type EventListItem = Pick<
   EventDetail,
   'id' | 'name' | 'category' | 'timeZone' | 'date' | 'venue' | 'status'
->
+> & {
+  /** Signed cover photo URL (10 minutes), or null. */
+  coverUrl: string | null
+  counts: EventCounts
+}
+
+/** The numbers of one event (GET /events/{id}/stats, Owner/Admin). */
+export type EventStats = {
+  eventId: string
+  guests: { invitations: number; people: number; peopleLimit: number | null; opened: number }
+  rsvp: { attending: number; notAttending: number; pending: number; attendingPeople: number }
+  checkIns: { invitations: number; people: number; byHour: { hour: string; people: number }[] }
+  wishes: number
+  gifts: { confirmations: number; amount: number }
+  photos: { count: number; limit: number | null }
+  staff: number
+}
 
 export type SessionInput = {
   id: string | null
@@ -76,10 +100,19 @@ export const eventKeys = {
   all: ['events'] as const,
   detail: (id: string) => ['events', id] as const,
   staff: (id: string) => ['events', id, 'staff'] as const,
+  stats: (id: string) => ['events', id, 'stats'] as const,
 }
 
 export function useEvents() {
   return useQuery({ queryKey: eventKeys.all, queryFn: () => apiFetch<EventListItem[]>('/events') })
+}
+
+export function useEventStats(id: string | undefined) {
+  return useQuery({
+    queryKey: eventKeys.stats(id ?? ''),
+    queryFn: () => apiFetch<EventStats>(`/events/${id}/stats`),
+    enabled: !!id,
+  })
 }
 
 export function useEvent(id: string) {

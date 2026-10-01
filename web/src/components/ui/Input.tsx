@@ -2,6 +2,7 @@ import { ChevronDown, CircleAlert, CircleCheck, type LucideIcon } from 'lucide-r
 import {
   type InputHTMLAttributes,
   type ReactNode,
+  type Ref,
   type SelectHTMLAttributes,
   type TextareaHTMLAttributes,
   useId,
@@ -93,7 +94,8 @@ function TrailingState({
   return null
 }
 
-export type TextFieldProps = InputHTMLAttributes<HTMLInputElement> & FieldExtras
+export type TextFieldProps = InputHTMLAttributes<HTMLInputElement> &
+  FieldExtras & { ref?: Ref<HTMLInputElement> }
 
 /**
  * Text input with a floating label. The label is a real <label> (so `getByLabelText` and screen readers

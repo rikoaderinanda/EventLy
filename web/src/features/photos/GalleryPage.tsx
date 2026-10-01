@@ -1,7 +1,16 @@
+import { Archive, Camera, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, useParams } from 'react-router'
+import { useParams } from 'react-router'
+import { Avatar } from '@/components/ui/Avatar'
+import { Button } from '@/components/ui/Button'
+import { Card } from '@/components/ui/Card'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { Notice, ProgressBar } from '@/components/ui/Feedback'
+import { Switch } from '@/components/ui/Input'
+import { Skeleton } from '@/components/ui/Spinner'
 import { useEvent } from '@/features/events/api'
+import { EventPageHeader } from '@/features/events/EventPageHeader'
 import { errorMessage } from '@/shared/lib/errors'
 import { downloadZip, useDeletePhoto, useGallery, useGuestCameraSwitch, type Photo } from './api'
 
@@ -39,84 +48,92 @@ export function GalleryPage() {
   }
 
   return (
-    <section className="mx-auto max-w-5xl space-y-4 py-8">
-      <Link to={`/app/events/${id}`} className="text-sm text-brand-700 underline">
-        ← {event.data?.name ?? t('events.title')}
-      </Link>
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-2xl font-semibold text-brand-900">{t('photos.galleryTitle')}</h1>
-        {data?.zipAllowed && data.total > 0 && (
-          <button
-            type="button"
-            disabled={zipping}
-            onClick={() => void zip()}
-            className="rounded-md bg-brand-700 px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
-          >
-            {zipping ? t('common.loading') : t('photos.downloadAll')}
-          </button>
-        )}
-      </div>
-      {data && (
-        <p className="text-sm text-stone-600">
-          {data.limit != null
+    <section className="mx-auto max-w-6xl space-y-5 py-6 sm:py-10">
+      <EventPageHeader
+        eventId={id}
+        title={t('photos.galleryTitle')}
+        subtitle={
+          data &&
+          (data.limit != null
             ? t('photos.countWithLimit', {
                 total: data.total,
                 limit: data.limit,
                 mb: megabytes(data.storageBytes, i18n.language),
               })
-            : t('photos.count', { total: data.total, mb: megabytes(data.storageBytes, i18n.language) })}
-        </p>
+            : t('photos.count', { total: data.total, mb: megabytes(data.storageBytes, i18n.language) }))
+        }
+        actions={
+          data?.zipAllowed &&
+          data.total > 0 && (
+            <Button icon={Archive} loading={zipping} onClick={() => void zip()} block="mobile">
+              {t('photos.downloadAll')}
+            </Button>
+          )
+        }
+      />
+
+      {data?.limit != null && (
+        <ProgressBar value={data.total} max={data.limit} label={t('stats.photos')} className="max-w-md" />
       )}
-      {data && !data.guestCameraInPackage && (
-        <p className="rounded-lg bg-stone-100 p-3 text-sm text-stone-600">
-          {t('photos.guestCameraNotInPackage')}
-        </p>
-      )}
+      {data && !data.guestCameraInPackage && <Notice>{t('photos.guestCameraNotInPackage')}</Notice>}
       {data?.guestCameraInPackage && (
-        <label className="flex items-center gap-2 rounded-lg border border-brand-100 bg-white p-3 text-sm text-stone-700">
-          <input
-            type="checkbox"
+        <Card padding="sm">
+          <Switch
+            label={t('photos.guestCameraSwitch')}
+            description={t('photos.guestCameraHint')}
             checked={data.guestCameraEnabled}
             disabled={camera.isPending}
             onChange={(e) => camera.mutate(e.target.checked)}
           />
-          {t('photos.guestCameraSwitch')}
-        </label>
+        </Card>
       )}
       {(gallery.isError || remove.isError || zipError !== null) && (
-        <p role="alert" className="text-red-700">
-          {errorMessage(t, gallery.error ?? remove.error ?? zipError)}
-        </p>
+        <Notice tone="danger">{errorMessage(t, gallery.error ?? remove.error ?? zipError)}</Notice>
       )}
-      {data?.total === 0 && <p className="text-stone-500">{t('photos.empty')}</p>}
+      {gallery.isPending && (
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+          {[0, 1, 2, 3, 4, 5].map((i) => (
+            <Skeleton key={i} className="aspect-square" />
+          ))}
+        </div>
+      )}
+      {data?.total === 0 && (
+        <Card>
+          <EmptyState kind="photos" title={t('photos.empty')} />
+        </Card>
+      )}
 
       {[...groups].map(([guestName, photos]) => (
-        <div key={guestName} className="space-y-2">
-          <h2 className="font-semibold text-brand-900">
+        <div key={guestName} className="space-y-3">
+          <h2 className="flex items-center gap-2.5 text-card">
+            <Avatar name={guestName} size="sm" />
             {guestName} <span className="text-sm font-normal text-stone-500">({photos.length})</span>
           </h2>
-          <ul className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+          <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-6">
             {photos.map((photo) => (
-              <li key={photo.id} className="group relative">
+              <li key={photo.id} className="group relative overflow-hidden rounded-xl">
                 <a href={photo.url} target="_blank" rel="noreferrer noopener">
                   <img
                     src={photo.thumbnailUrl}
                     alt={t('photos.photoOf', { name: guestName })}
                     loading="lazy"
-                    className="aspect-square w-full rounded-md object-cover"
+                    className="aspect-square w-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
                 </a>
                 {photo.source === 'Guest' && (
-                  <span className="absolute left-1 top-1 rounded bg-black/60 px-1 text-xs text-white">
+                  <span className="absolute top-1.5 left-1.5 inline-flex items-center gap-1 rounded-full bg-black/60 px-2 py-0.5 text-[0.6875rem] text-white backdrop-blur">
+                    <Camera aria-hidden className="size-3" />
                     {t('photos.byGuest')}
                   </span>
                 )}
                 <button
                   type="button"
+                  aria-label={t('photos.delete')}
+                  title={t('photos.delete')}
                   onClick={() => window.confirm(t('photos.confirmDelete')) && remove.mutate(photo.id)}
-                  className="absolute right-1 top-1 rounded bg-white/90 px-1.5 text-xs text-red-700"
+                  className="absolute top-1.5 right-1.5 flex size-9 items-center justify-center rounded-full bg-white/90 text-danger-700 shadow-soft transition-opacity hover:bg-white sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100 pointer-coarse:opacity-100"
                 >
-                  {t('photos.delete')}
+                  <Trash2 aria-hidden className="size-4" />
                 </button>
               </li>
             ))}

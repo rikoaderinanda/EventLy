@@ -113,7 +113,7 @@ describe('organizer responses', () => {
     ])
     renderRoute('/app/events/e1/gifts')
 
-    await userEvent.click(await screen.findByRole('button', { name: '+ Tambah rekening' }))
+    await userEvent.click(await screen.findByRole('button', { name: 'Tambah rekening' }))
     const account = screen.getByRole('group', { name: 'Rekening 1' })
     await userEvent.type(within(account).getByLabelText('Bank / e-wallet'), 'BSI')
     await userEvent.type(within(account).getByLabelText('Nomor rekening / HP'), '7123456789')

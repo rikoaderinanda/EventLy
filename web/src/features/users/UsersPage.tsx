@@ -1,6 +1,13 @@
+import { Mail, Power, PowerOff, User, UserPlus, X } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Field } from '@/shared/components/Field'
+import { Avatar } from '@/components/ui/Avatar'
+import { Badge, type BadgeTone } from '@/components/ui/Badge'
+import { Button } from '@/components/ui/Button'
+import { Card, PageHeader, SectionHeader } from '@/components/ui/Card'
+import { Notice } from '@/components/ui/Feedback'
+import { Select, TextField } from '@/components/ui/Input'
+import { Skeleton } from '@/components/ui/Spinner'
 import { errorMessage, fieldErrors } from '@/shared/lib/errors'
 import {
   useCancelInvitation,
@@ -11,10 +18,10 @@ import {
   type OrganizationUser,
 } from './api'
 
-const statusStyle: Record<OrganizationUser['status'], string> = {
-  Active: 'bg-emerald-50 text-emerald-700',
-  Invited: 'bg-amber-50 text-amber-800',
-  Disabled: 'bg-stone-100 text-stone-500',
+const statusTone: Record<OrganizationUser['status'], BadgeTone> = {
+  Active: 'success',
+  Invited: 'warning',
+  Disabled: 'neutral',
 }
 
 function InviteForm() {
@@ -39,53 +46,50 @@ function InviteForm() {
   }
 
   return (
-    <form onSubmit={submit} className="rounded-lg border border-brand-100 bg-white p-4">
-      <h2 className="font-semibold text-brand-900">{t('users.inviteTitle')}</h2>
-      <p className="mt-1 text-sm text-stone-500">{t('users.inviteHint')}</p>
-      <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
-        <Field
-          label={t('users.name')}
-          name="name"
-          required
-          maxLength={100}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          error={errors.name}
-        />
-        <Field
-          label={t('users.googleEmail')}
-          name="email"
-          type="email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          error={errors.email}
-        />
-        <label className="block text-left text-sm">
-          <span className="font-medium text-stone-700">{t('users.role')}</span>
-          <select
+    <Card as="section">
+      <form onSubmit={submit}>
+        <SectionHeader title={t('users.inviteTitle')} description={t('users.inviteHint')} level={2} />
+        <div className="grid gap-3 sm:grid-cols-[1fr_1fr_10rem]">
+          <TextField
+            label={t('users.name')}
+            name="name"
+            icon={User}
+            required
+            maxLength={100}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            error={errors.name}
+          />
+          <TextField
+            label={t('users.googleEmail')}
+            name="email"
+            type="email"
+            icon={Mail}
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            error={errors.email}
+          />
+          <Select
+            label={t('users.role')}
+            name="role"
             value={role}
             onChange={(e) => setRole(e.target.value as MemberRole)}
-            className="mt-1 w-full rounded-md border border-stone-300 bg-white px-3 py-2"
           >
             <option value="Staff">{t('roles.Staff')}</option>
             <option value="Admin">{t('roles.Admin')}</option>
-          </select>
-        </label>
-      </div>
-      {invite.isError && !Object.keys(errors).length && (
-        <p role="alert" className="mt-3 text-sm text-red-700">
-          {errorMessage(t, invite.error)}
-        </p>
-      )}
-      <button
-        type="submit"
-        disabled={invite.isPending}
-        className="mt-4 rounded-md bg-brand-700 px-4 py-2 font-medium text-white disabled:opacity-50"
-      >
-        {t('users.inviteSubmit')}
-      </button>
-    </form>
+          </Select>
+        </div>
+        {invite.isError && !Object.keys(errors).length && (
+          <Notice tone="danger" className="mt-3">
+            {errorMessage(t, invite.error)}
+          </Notice>
+        )}
+        <Button type="submit" icon={UserPlus} loading={invite.isPending} block="mobile" className="mt-4">
+          {t('users.inviteSubmit')}
+        </Button>
+      </form>
+    </Card>
   )
 }
 
@@ -106,46 +110,48 @@ function UserRow({ user }: { user: OrganizationUser }) {
   }
 
   return (
-    <li className="flex flex-wrap items-center gap-3 py-3">
+    <li className="flex flex-wrap items-center gap-3 px-4 py-3.5 sm:px-5">
+      <Avatar name={user.name} />
       <div className="min-w-0 flex-1">
-        <p className="truncate font-medium text-stone-800">{user.name}</p>
+        <p className="truncate font-medium text-brand-950">{user.name}</p>
         <p className="truncate text-sm text-stone-500">{user.email}</p>
-        {error && <p className="text-xs text-red-700">{errorMessage(t, error)}</p>}
+        {error && <p className="text-xs text-danger-700">{errorMessage(t, error)}</p>}
       </div>
-      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusStyle[user.status]}`}>
-        {t(`users.status.${user.status}`)}
-      </span>
+      <Badge tone={statusTone[user.status]}>{t(`users.status.${user.status}`)}</Badge>
       {editable ? (
         <select
           aria-label={t('users.roleOf', { name: user.name })}
           value={user.role}
           disabled={update.isPending}
           onChange={(e) => change({ role: e.target.value as MemberRole })}
-          className="rounded-md border border-stone-300 bg-white px-2 py-1 text-sm"
+          className="h-9 rounded-lg border border-stone-300 bg-white px-2 text-sm hover:border-stone-400 pointer-coarse:h-11"
         >
           <option value="Staff">{t('roles.Staff')}</option>
           <option value="Admin">{t('roles.Admin')}</option>
         </select>
       ) : (
-        <span className="text-sm text-stone-600">{t(`roles.${user.role}`)}</span>
+        <Badge tone="brand">{t(`roles.${user.role}`)}</Badge>
       )}
       {editable && user.status === 'Invited' && (
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="sm"
+          icon={X}
+          className="text-danger-700 hover:bg-danger-50 hover:text-danger-700"
           onClick={() => cancel.mutate(user.id)}
-          className="text-sm text-red-700 underline"
         >
           {t('users.cancelInvite')}
-        </button>
+        </Button>
       )}
       {editable && user.status !== 'Invited' && (
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="sm"
+          icon={user.status === 'Disabled' ? Power : PowerOff}
           onClick={() => change({ status: user.status === 'Disabled' ? 'Active' : 'Disabled' })}
-          className="text-sm text-stone-700 underline"
         >
           {user.status === 'Disabled' ? t('users.enable') : t('users.disable')}
-        </button>
+        </Button>
       )}
     </li>
   )
@@ -157,13 +163,13 @@ export function UsersPage() {
   const { data, isPending, isError, error } = useUsers()
 
   return (
-    <section className="mx-auto max-w-3xl space-y-6 py-8">
-      <h1 className="text-2xl font-semibold text-brand-900">{t('users.title')}</h1>
+    <section className="mx-auto max-w-4xl space-y-6 py-6 sm:py-10">
+      <PageHeader title={t('users.title')} subtitle={t('users.subtitle')} />
       <InviteForm />
-      {isPending && <p className="text-stone-500">{t('common.loading')}</p>}
-      {isError && <p className="text-red-700">{errorMessage(t, error)}</p>}
+      {isPending && <Skeleton className="h-40 rounded-2xl" />}
+      {isError && <Notice tone="danger">{errorMessage(t, error)}</Notice>}
       {data && (
-        <ul className="divide-y divide-brand-100 rounded-lg border border-brand-100 bg-white px-4">
+        <ul className="divide-y divide-brand-100 overflow-hidden rounded-2xl border border-brand-100 bg-white shadow-soft">
           {data.map((user) => (
             <UserRow key={user.id} user={user} />
           ))}

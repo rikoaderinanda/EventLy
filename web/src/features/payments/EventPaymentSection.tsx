@@ -1,6 +1,13 @@
+import { Check, CreditCard, ReceiptText, Sparkles } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router'
+import { Badge, PaymentBadge } from '@/components/ui/Badge'
+import { Button, ButtonLink } from '@/components/ui/Button'
+import { SectionHeader } from '@/components/ui/Card'
+import { cn } from '@/components/ui/cn'
+import { Notice } from '@/components/ui/Feedback'
+import { ToolPanel } from '@/components/ui/ToolPanel'
 import { useSession } from '@/features/auth/session-store'
 import type { EventDetail } from '@/features/events/api'
 import { errorMessage } from '@/shared/lib/errors'
@@ -14,7 +21,6 @@ import {
   type PackageFeatures,
   type Payment,
 } from './api'
-import { PaymentStatusBadge } from './PaymentStatusBadge'
 
 /** The limits an Owner compares when choosing, and sees on a paid event. */
 export function FeatureList({ features }: { features: PackageFeatures }) {
@@ -33,9 +39,12 @@ export function FeatureList({ features }: { features: PackageFeatures }) {
   ].filter((item): item is string => item !== null)
 
   return (
-    <ul className="space-y-0.5 text-sm text-stone-600">
+    <ul className="space-y-1.5 text-sm text-stone-600">
       {items.map((item) => (
-        <li key={item}>· {item}</li>
+        <li key={item} className="flex items-start gap-2">
+          <Check aria-hidden className="mt-0.5 size-4 shrink-0 text-success-500" />
+          {item}
+        </li>
       ))}
     </ul>
   )
@@ -60,40 +69,53 @@ function PackagePicker({ event, current }: { event: EventDetail; current: Paymen
 
   const chosen = packages.data?.find((p) => p.id === selected)
   return (
-    <div className="space-y-3">
-      {packages.isError && <p className="text-sm text-red-700">{errorMessage(t, packages.error)}</p>}
-      <div role="radiogroup" aria-label={t('packages.choose')} className="grid gap-3 sm:grid-cols-3">
-        {packages.data?.map((pkg) => (
-          <label
-            key={pkg.id}
-            className={`cursor-pointer rounded-lg border bg-white p-4 ${selected === pkg.id ? 'border-brand-700 ring-2 ring-brand-200' : 'border-brand-100'}`}
-          >
-            <input
-              type="radio"
-              name="package"
-              value={pkg.id}
-              checked={selected === pkg.id}
-              onChange={() => setSelected(pkg.id)}
-              className="sr-only"
-            />
-            <span className="block font-semibold text-brand-900">{pkg.name}</span>
-            <span className="mb-2 block text-lg font-medium text-stone-800">
-              {formatMoney(pkg.price, pkg.currency, i18n.language)}
-            </span>
-            <FeatureList features={pkg.features} />
-          </label>
-        ))}
+    <div className="space-y-4">
+      {packages.isError && <Notice tone="danger">{errorMessage(t, packages.error)}</Notice>}
+      <div role="radiogroup" aria-label={t('packages.choose')} className="grid gap-3 md:grid-cols-3">
+        {packages.data?.map((pkg) => {
+          const isSelected = selected === pkg.id
+          return (
+            <label
+              key={pkg.id}
+              className={cn(
+                'relative flex cursor-pointer flex-col rounded-2xl border bg-white p-5 transition-[border-color,box-shadow] has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-brand-600',
+                isSelected
+                  ? 'border-brand-500 shadow-lift ring-2 ring-brand-200'
+                  : 'border-brand-100 hover:border-brand-200',
+              )}
+            >
+              <input
+                type="radio"
+                name="package"
+                value={pkg.id}
+                checked={isSelected}
+                onChange={() => setSelected(pkg.id)}
+                className="sr-only"
+              />
+              <span className="flex items-center justify-between gap-2">
+                <span className="font-semibold text-brand-950">{pkg.name}</span>
+                {isSelected && (
+                  <span className="flex size-6 items-center justify-center rounded-full bg-brand-600 text-white">
+                    <Check aria-hidden className="size-4" />
+                  </span>
+                )}
+              </span>
+              <span className="mt-1 mb-4 block text-2xl font-semibold tracking-tight text-brand-950">
+                {formatMoney(pkg.price, pkg.currency, i18n.language)}
+              </span>
+              <FeatureList features={pkg.features} />
+            </label>
+          )
+        })}
       </div>
-      {checkout.isError && (
-        <p role="alert" className="text-sm text-red-700">
-          {errorMessage(t, checkout.error)}
-        </p>
-      )}
-      <button
-        type="button"
-        disabled={!chosen || checkout.isPending}
+      {checkout.isError && <Notice tone="danger">{errorMessage(t, checkout.error)}</Notice>}
+      <Button
+        size="lg"
+        block="mobile"
+        icon={CreditCard}
+        disabled={!chosen}
+        loading={checkout.isPending}
         onClick={() => chosen && pay(chosen)}
-        className="rounded-md bg-brand-700 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
       >
         {chosen
           ? t('packages.payFor', {
@@ -101,7 +123,7 @@ function PackagePicker({ event, current }: { event: EventDetail; current: Paymen
               price: formatMoney(chosen.price, chosen.currency, i18n.language),
             })
           : t('packages.choose')}
-      </button>
+      </Button>
     </div>
   )
 }
@@ -110,25 +132,31 @@ function PaymentHistory({ payments }: { payments: Payment[] }) {
   const { t, i18n } = useTranslation()
   if (payments.length === 0) return null
   return (
-    <details className="text-sm">
-      <summary className="cursor-pointer text-stone-600">{t('payments.history')}</summary>
-      <ul className="mt-2 divide-y divide-brand-100 rounded-lg border border-brand-100 bg-white px-3">
+    <ToolPanel title={t('payments.history')} icon={ReceiptText}>
+      <ul className="-my-2 divide-y divide-brand-100">
         {payments.map((p) => (
-          <li key={p.id} className="flex flex-wrap items-center gap-2 py-2">
-            <span className="flex-1 text-stone-700">
-              {p.packageName} · {formatMoney(p.amount, p.currency, i18n.language)} ·{' '}
-              {new Date(p.createdAt).toLocaleString(i18n.language)}
+          <li key={p.id} className="flex flex-wrap items-center gap-2 py-3">
+            <span className="min-w-0 flex-1">
+              <span className="block font-medium text-brand-950">
+                {p.packageName} · {formatMoney(p.amount, p.currency, i18n.language)}
+              </span>
+              <span className="block text-xs text-stone-500">
+                {new Date(p.createdAt).toLocaleString(i18n.language)}
+              </span>
             </span>
-            <PaymentStatusBadge status={p.status} />
+            <PaymentBadge status={p.status} />
             {p.status === 'Paid' && (
-              <Link to={`/app/payments/${p.id}/receipt`} className="text-brand-700 underline">
+              <Link
+                to={`/app/payments/${p.id}/receipt`}
+                className="text-sm font-medium text-brand-700 hover:underline"
+              >
                 {t('payments.receipt')}
               </Link>
             )}
           </li>
         ))}
       </ul>
-    </details>
+    </ToolPanel>
   )
 }
 
@@ -145,37 +173,49 @@ export function EventPaymentSection({ event }: { event: EventDetail }) {
   const payable = event.status === 'Draft' || event.status === 'PendingPayment'
 
   return (
-    <section className="space-y-3">
-      <h2 className="font-semibold text-brand-900">{t('packages.sectionTitle')}</h2>
+    <section className="space-y-4">
+      <SectionHeader title={t('packages.sectionTitle')} level={2} className="mb-0" />
 
       {event.package && (
-        <div className="rounded-lg border border-brand-100 bg-white p-4">
-          <p className="mb-1 font-medium text-stone-800">
-            {t('packages.current', { name: event.package.name })}
-          </p>
+        <div className="rounded-2xl bg-linear-to-br from-brand-50 to-gold-100/50 p-5 ring-1 ring-brand-100">
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <Badge tone="gold" icon={Sparkles}>
+              {event.package.name}
+            </Badge>
+            <p className="font-medium text-brand-950">
+              {t('packages.current', { name: event.package.name })}
+            </p>
+          </div>
           <FeatureList features={event.package.features} />
           {isOwner && paid && (
-            <Link
+            <ButtonLink
               to={`/app/payments/${paid.id}/receipt`}
-              className="mt-2 inline-block text-sm text-brand-700 underline"
+              variant="secondary"
+              size="sm"
+              icon={ReceiptText}
+              className="mt-4"
             >
               {t('payments.receipt')}
-            </Link>
+            </ButtonLink>
           )}
         </div>
       )}
 
-      {payable && !isOwner && <p className="text-sm text-stone-600">{t('packages.ownerPays')}</p>}
+      {payable && !isOwner && <Notice>{t('packages.ownerPays')}</Notice>}
 
       {payable && isOwner && (
         <>
           {pending && (
-            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-              <p>{t('payments.pendingNotice', { name: pending.packageName })}</p>
-              <Link to={`/app/payments/${pending.id}`} className="font-medium underline">
-                {t('payments.continue')}
-              </Link>
-            </div>
+            <Notice
+              tone="warning"
+              action={
+                <ButtonLink to={`/app/payments/${pending.id}`} size="sm">
+                  {t('payments.continue')}
+                </ButtonLink>
+              }
+            >
+              {t('payments.pendingNotice', { name: pending.packageName })}
+            </Notice>
           )}
           <p className="text-sm text-stone-600">
             {t(pending ? 'packages.changeHint' : 'packages.chooseHint')}

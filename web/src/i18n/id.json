@@ -103,7 +103,8 @@
     "nameHint": "Misalnya nama wedding organizer atau keluarga penyelenggara.",
     "contactEmail": "Email kontak (opsional)",
     "contactPhone": "Nomor telepon (opsional)",
-    "since": "Dibuat {{date}}"
+    "since": "Dibuat {{date}}",
+    "ownerOnly": "Hanya Owner yang bisa mengubah data organisasi."
   },
   "users": {
     "title": "Pengguna",
@@ -121,7 +122,8 @@
       "Active": "Aktif",
       "Invited": "Diundang",
       "Disabled": "Nonaktif"
-    }
+    },
+    "subtitle": "Admin membantu mengelola acara; Staff memindai check-in di lokasi."
   },
   "platform": {
     "ownersTitle": "Owner",
@@ -263,7 +265,7 @@
     "mapsUrl": "Link Google Maps (opsional)",
     "checkInHere": "Tamu check-in di sesi ini",
     "checkInSession": "Sesi check-in",
-    "addSession": "+ Tambah sesi (misalnya Akad Nikah)",
+    "addSession": "Tambah sesi",
     "removeSession": "Hapus sesi",
     "openMaps": "Buka di Google Maps",
     "edit": "Ubah",
@@ -289,7 +291,31 @@
       "Community": "Komunitas",
       "Other": "Lainnya"
     },
-    "sectionsNav": "Bagian acara"
+    "sectionsNav": "Bagian acara",
+    "listSubtitle": "Semua acara organisasi Anda.",
+    "filterLabel": "Saring acara",
+    "filter": {
+      "all": "Semua",
+      "upcoming": "Aktif",
+      "draft": "Draf",
+      "past": "Selesai"
+    },
+    "filterEmpty": "Tidak ada acara di sini",
+    "staffHint": "Hanya Staff yang dipilih bisa memindai check-in acara ini.",
+    "tile": {
+      "invited_other": "{{count}} orang diundang",
+      "answered_other": "{{count}} menjawab",
+      "wishes_other": "{{count}} ucapan",
+      "gifts_other": "{{count}} konfirmasi",
+      "checkedIn_other": "{{count}} orang hadir",
+      "photos_other": "{{count}} foto",
+      "media": "Sampul, musik, QRIS",
+      "unpaid": "Belum dibayar",
+      "stats": "Grafik dan angka"
+    },
+    "basics": "Informasi acara",
+    "newSubtitle": "Isi nama dan jadwal; tamu bisa ditambahkan setelahnya.",
+    "descriptionHint": "Tampil sebagai cerita di halaman undangan."
   },
   "staffArea": {
     "title": "Acara saya",
@@ -420,7 +446,15 @@
     "importSubmit": "Import",
     "importDone": "{{n}} tamu ({{people}} orang) berhasil diimpor.",
     "importFailed": "Tidak ada yang diimpor. Perbaiki baris berikut lalu coba lagi:",
-    "importLine": "Baris {{line}} ({{name}}):"
+    "importLine": "Baris {{line}} ({{name}}):",
+    "column": {
+      "guest": "Tamu",
+      "rsvp": "RSVP",
+      "checkIn": "Check-in",
+      "invitation": "Undangan"
+    },
+    "noMatch": "Tidak ada tamu yang cocok",
+    "emptyTitle": "Belum ada tamu"
   },
   "invitation": {
     "dear": "Kepada Yth. Bapak/Ibu/Saudara/i",
@@ -511,11 +545,14 @@
     "accountNumber": "Nomor rekening / HP",
     "accountHolder": "Atas nama",
     "removeAccount": "Hapus rekening",
-    "addAccount": "+ Tambah rekening",
+    "addAccount": "Tambah rekening",
     "giftAddress": "Alamat kirim hadiah (opsional)",
     "confirmationsTitle": "Konfirmasi hadiah dari tamu",
     "noConfirmations": "Belum ada konfirmasi.",
-    "noAmount": "tanpa jumlah"
+    "noAmount": "tanpa jumlah",
+    "accountsTitle": "Rekening & e-wallet",
+    "noAccounts": "Belum ada rekening.",
+    "confirmationsTotal_other": "{{count}} konfirmasi · total {{amount}}"
   },
   "checkin": {
     "open": "Buka scanner check-in",
@@ -551,7 +588,8 @@
     "method": {
       "Scan": "scan QR",
       "Manual": "cari nama"
-    }
+    },
+    "openScanner": "Buka scanner"
   },
   "photos": {
     "galleryTitle": "Galeri foto",
@@ -582,7 +620,8 @@
     "cameraLeft": "Sisa {{n}} dari {{limit}} foto",
     "cameraUntil": "kamera tersedia sampai {{time}}",
     "pickFiles": "atau pilih file foto",
-    "guestCameraNotInPackage": "Paket acara ini tidak termasuk kamera tamu, jadi tamu tidak bisa memotret dari halaman undangannya. Foto dari Staff tetap bisa ditambahkan."
+    "guestCameraNotInPackage": "Paket acara ini tidak termasuk kamera tamu, jadi tamu tidak bisa memotret dari halaman undangannya. Foto dari Staff tetap bisa ditambahkan.",
+    "guestCameraHint": "Tamu yang sudah check-in bisa memotret dari halaman undangannya."
   },
   "media": {
     "title": "Media undangan",
@@ -647,5 +686,47 @@
     "iosBefore": "Ketuk",
     "iosAfter": "lalu \"Tambah ke Layar Utama\".",
     "share": "Bagikan"
+  },
+  "dashboard": {
+    "greeting": "Halo, {{name}}",
+    "activeThisWeek_other": "{{count}} acara aktif minggu ini",
+    "noneThisWeek": "Tidak ada acara minggu ini. Siapkan acara berikutnya di bawah.",
+    "welcome": "Selamat datang. Mulai dengan membuat acara pertama Anda.",
+    "quickActions": "Aksi cepat",
+    "addEvent": "Tambah acara",
+    "manageGuests": "Kelola tamu",
+    "scan": "Scan check-in",
+    "viewStats": "Lihat statistik",
+    "statsTitle": "Ringkasan",
+    "details": "Detail",
+    "otherEvents": "Acara lainnya",
+    "allEvents": "Semua acara",
+    "totalGuests": "Total tamu",
+    "ofLimit": "dari kuota {{limit}}",
+    "invitations_other": "{{count}} undangan",
+    "rsvp": "RSVP terjawab",
+    "attendingPeople_other": "{{count}} orang akan hadir",
+    "checkedIn": "Sudah check-in",
+    "ofPeople_other": "dari {{count}} orang",
+    "wishes": "Ucapan"
+  },
+  "stats": {
+    "title": "Statistik",
+    "subtitle": "Jangkauan undangan, jawaban tamu dan kehadiran.",
+    "opened": "Undangan dibuka",
+    "ofInvitations_other": "dari {{count}} undangan",
+    "attendingPeople": "Akan hadir (orang)",
+    "rsvpTitle": "Jawaban RSVP",
+    "rsvpHint": "Per undangan.",
+    "checkInsByHour": "Check-in per jam",
+    "checkInsHint": "Jumlah orang, menurut waktu lokasi acara.",
+    "noCheckIns": "Belum ada check-in.",
+    "hour": "Jam",
+    "people": "Orang",
+    "peopleCount_other": "{{count}} orang",
+    "gifts": "Konfirmasi hadiah",
+    "photos": "Foto",
+    "staff": "Staff bertugas",
+    "quota": "Kuota tamu paket"
   }
 }

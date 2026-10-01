@@ -1,6 +1,6 @@
 import { cn } from './cn'
 
-export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost'
+export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost' | 'success'
 export type ButtonSize = 'sm' | 'md' | 'lg'
 
 export type StyleProps = {
@@ -17,6 +17,9 @@ const variants: Record<ButtonVariant, string> = {
     'border border-brand-200 bg-white/70 text-brand-800 hover:border-brand-300 hover:bg-white active:bg-brand-100',
   danger: 'border border-danger-100 bg-danger-50 text-danger-700 hover:bg-danger-100 active:bg-danger-100',
   ghost: 'text-stone-600 hover:bg-brand-100/70 hover:text-brand-900 active:bg-brand-100',
+  // Confirming, positive actions (WhatsApp send, check-in).
+  // The darker green keeps white text above 4.5:1.
+  success: 'bg-success-700 text-white shadow-soft hover:brightness-110 active:brightness-95',
 }
 
 // sm stays 44px tall on touch screens (minimum touch target), compact only with a mouse.

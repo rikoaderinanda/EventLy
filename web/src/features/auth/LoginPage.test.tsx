@@ -54,7 +54,7 @@ describe('LoginPage', () => {
     await userEvent.type(await screen.findByLabelText('Email'), 'rina@example.test')
     await userEvent.click(screen.getByRole('button', { name: 'Masuk (test)' }))
 
-    expect(await screen.findByRole('heading', { name: 'Acara' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /^Halo, Rina/ })).toBeInTheDocument()
   })
 
   it('shows a readable message when the account is disabled', async () => {

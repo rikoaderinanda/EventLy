@@ -1,5 +1,10 @@
+import { ArrowLeft, Printer } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { Link, useParams } from 'react-router'
+import { useParams } from 'react-router'
+import { Button, ButtonLink } from '@/components/ui/Button'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { Notice } from '@/components/ui/Feedback'
+import { Loading } from '@/components/ui/Spinner'
 import { useEvent } from '@/features/events/api'
 import { errorMessage } from '@/shared/lib/errors'
 import { useQrSheet } from './api'
@@ -14,37 +19,38 @@ export function QrSheetPage() {
   const event = useEvent(id)
   const sheet = useQrSheet(id)
 
-  if (sheet.isPending) return <p className="py-8 text-stone-500">{t('common.loading')}</p>
-  if (sheet.isError) return <p className="py-8 text-red-700">{errorMessage(t, sheet.error)}</p>
+  if (sheet.isPending) return <Loading className="py-20" />
+  if (sheet.isError) return <Notice tone="danger">{errorMessage(t, sheet.error)}</Notice>
 
   return (
-    <section className="mx-auto max-w-5xl space-y-4 py-8 print:max-w-none print:py-0">
+    <section className="mx-auto max-w-5xl space-y-5 py-6 sm:py-10 print:max-w-none print:py-0">
       <div className="flex flex-wrap items-center justify-between gap-2 print:hidden">
-        <Link to={`/app/events/${id}/guests`} className="text-sm text-brand-700 underline">
-          ← {t('guests.title')}
-        </Link>
-        <button
-          type="button"
-          onClick={() => window.print()}
-          disabled={sheet.data.length === 0}
-          className="rounded-md bg-brand-700 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+        <ButtonLink
+          to={`/app/events/${id}/guests`}
+          variant="ghost"
+          size="sm"
+          icon={ArrowLeft}
+          className="-ml-3"
         >
+          {t('guests.title')}
+        </ButtonLink>
+        <Button icon={Printer} onClick={() => window.print()} disabled={sheet.data.length === 0}>
           {t('payments.print')}
-        </button>
+        </Button>
       </div>
-      <h1 className="text-xl font-semibold text-brand-900">
+      <h1 className="text-section print:text-xl">
         {t('guests.qrSheetTitle', { event: event.data?.name ?? '' })}
       </h1>
-      {sheet.data.length === 0 && <p className="text-stone-600">{t('guests.qrSheetEmpty')}</p>}
+      {sheet.data.length === 0 && <EmptyState kind="guests" title={t('guests.qrSheetEmpty')} />}
       <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 print:grid-cols-3">
         {sheet.data.map((item) => (
           <li
             key={item.invitationId}
-            className="flex break-inside-avoid flex-col items-center gap-2 rounded-lg border border-stone-300 p-3 text-center"
+            className="flex break-inside-avoid flex-col items-center gap-2 rounded-2xl border border-brand-100 bg-white p-4 text-center shadow-soft print:rounded-lg print:border-stone-300 print:shadow-none"
           >
             {/* Trusted markup: rendered by our API from the invitation URL (QRCoder), no user input. */}
             <div className="w-full max-w-40" dangerouslySetInnerHTML={{ __html: item.svg }} />
-            <p className="font-medium text-stone-900">{item.guestName}</p>
+            <p className="font-semibold text-brand-950">{item.guestName}</p>
             <p className="text-xs text-stone-600">
               {item.type === 'Group'
                 ? t('guests.groupOf', { n: item.numberOfPeople })

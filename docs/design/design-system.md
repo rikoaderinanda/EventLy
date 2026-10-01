@@ -77,6 +77,17 @@ Status is never shown by colour alone: badges always have a word and an icon.
 - **New pages:** `/app/events` (list; `/app` becomes the dashboard in UI-3), `/app/events/:id/payments`, `/app/events/:id/stats` (placeholder until UI-3), and `/app|/staff|/platform/settings` (profile, language, links, sign out; Q-65).
 - **PWA:** `shared/lib/pwa.ts` catches the browser's install event at start-up. `InstallPrompt` (organizer and staff) offers "Pasang" where the browser supports it and the Share → "Tambah ke Layar Utama" steps on iPhone Safari; hidden once installed and for 30 days after "Nanti". `OfflineBanner` (every area) says changes can't be saved while offline (the app is online-only, Q-9). `index.html` shows a splash (icon on cream) until React renders. Theme colour is the cream background, so the status bar blends with the header.
 
+## Organizer pages (UI-3)
+
+- **Dashboard** (`/app`, `features/dashboard`): greeting with the week's active events; a hero card of the event in focus (the selected one, else the next upcoming) with cover, date, place, people and RSVP progress; four quick actions (add event, manage guests, scan check-in, statistics); four numbers (total guests, RSVP answered with a ring, checked in with a mini chart, wishes); other events as cards.
+- **Statistics** (`/app/events/:id/stats`): reach (opened), answers (stacked bar with legend), attendance, check-ins per hour (one-hue bar chart with a hover value and a screen-reader table), wishes, gift confirmations with the total amount, photos, staff, package quota. Built from `GET /events/{id}/stats`.
+- **Events**: card grid with cover, category, status, date, venue, people and RSVP progress, filtered by stage (all, active, draft, finished).
+- **Event detail**: cover banner, badges, actions, a tile grid of the sections with their current number, a session timeline, package and payment, staff assignment.
+- **Guests**: table from 640px, cards below (one or the other is rendered, chosen with `useIsDesktop`), search and filters, collapsible tools (WhatsApp message, Excel import), quota bar.
+- **Every sub-page** uses `EventPageHeader` (back to the event, title, subtitle, actions), `Notice` for messages, `EmptyState` for empty lists and skeletons while loading.
+- **Charts** follow the dataviz rules: status colours only for status and always with an icon and a word; one hue for a single series; marks at least 3:1 against the surface; values in text, not in the series colour.
+- **Long words** (an e-mail as a name) wrap in headings (`overflow-wrap: anywhere`), so they never widen the page on a phone.
+
 ## Motion
 
 - **Motion** (`motion/react`, MIT) for the modal, sheet and invitation opening; CSS transitions for hover and press.

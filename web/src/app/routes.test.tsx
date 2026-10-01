@@ -32,8 +32,8 @@ describe('routes', () => {
   })
 
   it.each([
-    ['/app', 'Owner', 'Acara'],
-    ['/app', 'Admin', 'Acara'],
+    ['/app', 'Owner', /^Halo, Rina/],
+    ['/app', 'Admin', /^Halo, Rina/],
     ['/staff', 'Staff', 'Acara saya'],
     ['/staff', 'Owner', 'Acara saya'],
     ['/platform', 'Root', 'Owner'],
@@ -58,7 +58,7 @@ describe('routes', () => {
   })
 
   it.each([
-    ['/platform', 'Owner', 'Acara'],
+    ['/platform', 'Owner', /^Halo, Rina/],
     ['/app', 'Staff', 'Acara saya'],
     ['/app', 'Root', 'Owner'],
   ] as const)('redirects %s to the home of a %s', async (path, role, expectedTitle) => {

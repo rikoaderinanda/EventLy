@@ -1,5 +1,7 @@
+import { Check, Copy, MessageCircle } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Button } from '@/components/ui/Button'
 import { errorMessage } from '@/shared/lib/errors'
 import { fetchWhatsAppLink, type InvitationSummary } from './api'
 
@@ -41,21 +43,13 @@ export function InvitationActions({ invitation }: { invitation: InvitationSummar
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <button
-        type="button"
-        onClick={() => void sendWhatsApp()}
-        className="rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white"
-      >
+      <Button size="sm" variant="success" icon={MessageCircle} onClick={() => void sendWhatsApp()}>
         {t('guests.sendWhatsApp')}
-      </button>
-      <button
-        type="button"
-        onClick={() => void copy(url)}
-        className="rounded-md border border-stone-300 px-3 py-1.5 text-sm text-stone-700"
-      >
+      </Button>
+      <Button size="sm" variant="secondary" icon={copied ? Check : Copy} onClick={() => void copy(url)}>
         {copied ? t('guests.copied') : t('guests.copyLink')}
-      </button>
-      {error !== null && <span className="text-sm text-red-700">{errorMessage(t, error)}</span>}
+      </Button>
+      {error !== null && <span className="text-sm text-danger-700">{errorMessage(t, error)}</span>}
     </div>
   )
 }

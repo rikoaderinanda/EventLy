@@ -80,7 +80,7 @@ describe('photos', () => {
 
     const sari = screen.getByRole('heading', { name: /Sari/ }).parentElement!
     await userEvent.click(within(sari).getByRole('button', { name: 'Hapus' }))
-    await userEvent.click(screen.getByRole('checkbox', { name: /Tamu boleh memotret/ }))
+    await userEvent.click(screen.getByRole('switch', { name: /Tamu boleh memotret/ }))
 
     expect(
       fetchMock.mock.calls.some((c) => String(c[0]).endsWith('/photos/p3') && c[1]?.method === 'DELETE'),

@@ -103,7 +103,8 @@
     "nameHint": "For example your wedding organizer or the hosting family.",
     "contactEmail": "Contact email (optional)",
     "contactPhone": "Phone number (optional)",
-    "since": "Created {{date}}"
+    "since": "Created {{date}}",
+    "ownerOnly": "Only the Owner can change the organization details."
   },
   "users": {
     "title": "Users",
@@ -121,7 +122,8 @@
       "Active": "Active",
       "Invited": "Invited",
       "Disabled": "Disabled"
-    }
+    },
+    "subtitle": "Admins help manage events; Staff scan check-ins at the venue."
   },
   "platform": {
     "ownersTitle": "Owners",
@@ -263,7 +265,7 @@
     "mapsUrl": "Google Maps link (optional)",
     "checkInHere": "Guests check in at this session",
     "checkInSession": "Check-in session",
-    "addSession": "+ Add a session (for example the akad)",
+    "addSession": "Add session",
     "removeSession": "Remove session",
     "openMaps": "Open in Google Maps",
     "edit": "Edit",
@@ -289,7 +291,37 @@
       "Community": "Community",
       "Other": "Other"
     },
-    "sectionsNav": "Event sections"
+    "sectionsNav": "Event sections",
+    "listSubtitle": "All events of your organization.",
+    "filterLabel": "Filter events",
+    "filter": {
+      "all": "All",
+      "upcoming": "Active",
+      "draft": "Draft",
+      "past": "Finished"
+    },
+    "filterEmpty": "No events here",
+    "staffHint": "Only the selected Staff can scan check-ins for this event.",
+    "tile": {
+      "invited_one": "{{count}} person invited",
+      "invited_other": "{{count}} people invited",
+      "answered_one": "{{count}} answered",
+      "answered_other": "{{count}} answered",
+      "wishes_one": "{{count}} wish",
+      "wishes_other": "{{count}} wishes",
+      "gifts_one": "{{count}} confirmation",
+      "gifts_other": "{{count}} confirmations",
+      "checkedIn_one": "{{count}} person arrived",
+      "checkedIn_other": "{{count}} people arrived",
+      "photos_one": "{{count}} photo",
+      "photos_other": "{{count}} photos",
+      "media": "Cover, music, QRIS",
+      "unpaid": "Not paid yet",
+      "stats": "Charts and numbers"
+    },
+    "basics": "Event details",
+    "newSubtitle": "Enter the name and schedule; add guests afterwards.",
+    "descriptionHint": "Shown as the story on the invitation page."
   },
   "staffArea": {
     "title": "My events",
@@ -420,7 +452,15 @@
     "importSubmit": "Import",
     "importDone": "{{n}} guests ({{people}} people) imported.",
     "importFailed": "Nothing was imported. Fix these rows and try again:",
-    "importLine": "Row {{line}} ({{name}}):"
+    "importLine": "Row {{line}} ({{name}}):",
+    "column": {
+      "guest": "Guest",
+      "rsvp": "RSVP",
+      "checkIn": "Check-in",
+      "invitation": "Invitation"
+    },
+    "noMatch": "No matching guests",
+    "emptyTitle": "No guests yet"
   },
   "invitation": {
     "dear": "Dear",
@@ -511,11 +551,15 @@
     "accountNumber": "Account / phone number",
     "accountHolder": "Account holder",
     "removeAccount": "Remove account",
-    "addAccount": "+ Add account",
+    "addAccount": "Add account",
     "giftAddress": "Gift delivery address (optional)",
     "confirmationsTitle": "Gift confirmations from guests",
     "noConfirmations": "No confirmations yet.",
-    "noAmount": "no amount"
+    "noAmount": "no amount",
+    "accountsTitle": "Bank & e-wallet accounts",
+    "noAccounts": "No accounts yet.",
+    "confirmationsTotal_one": "{{count}} confirmation · total {{amount}}",
+    "confirmationsTotal_other": "{{count}} confirmations · total {{amount}}"
   },
   "checkin": {
     "open": "Open the check-in scanner",
@@ -551,7 +595,8 @@
     "method": {
       "Scan": "QR scan",
       "Manual": "name search"
-    }
+    },
+    "openScanner": "Open scanner"
   },
   "photos": {
     "galleryTitle": "Photo gallery",
@@ -582,7 +627,8 @@
     "cameraLeft": "{{n}} of {{limit}} photos left",
     "cameraUntil": "camera available until {{time}}",
     "pickFiles": "or choose photo files",
-    "guestCameraNotInPackage": "This event's package doesn't include the guest camera, so guests can't take photos on their invitation page. Staff can still add photos."
+    "guestCameraNotInPackage": "This event's package doesn't include the guest camera, so guests can't take photos on their invitation page. Staff can still add photos.",
+    "guestCameraHint": "Guests who have checked in can take photos on their invitation page."
   },
   "media": {
     "title": "Invitation media",
@@ -649,5 +695,53 @@
     "iosBefore": "Tap",
     "iosAfter": "then \"Add to Home Screen\".",
     "share": "Share"
+  },
+  "dashboard": {
+    "greeting": "Hi, {{name}}",
+    "activeThisWeek_one": "{{count}} active event this week",
+    "activeThisWeek_other": "{{count}} active events this week",
+    "noneThisWeek": "No events this week. Get the next one ready below.",
+    "welcome": "Welcome. Start by creating your first event.",
+    "quickActions": "Quick actions",
+    "addEvent": "Add event",
+    "manageGuests": "Manage guests",
+    "scan": "Scan check-in",
+    "viewStats": "View statistics",
+    "statsTitle": "Overview",
+    "details": "Details",
+    "otherEvents": "Other events",
+    "allEvents": "All events",
+    "totalGuests": "Total guests",
+    "ofLimit": "of {{limit}} allowed",
+    "invitations_one": "{{count}} invitation",
+    "invitations_other": "{{count}} invitations",
+    "rsvp": "RSVP answered",
+    "attendingPeople_one": "{{count}} person attending",
+    "attendingPeople_other": "{{count}} people attending",
+    "checkedIn": "Checked in",
+    "ofPeople_one": "of {{count}} person",
+    "ofPeople_other": "of {{count}} people",
+    "wishes": "Wishes"
+  },
+  "stats": {
+    "title": "Statistics",
+    "subtitle": "Invitation reach, guest answers and attendance.",
+    "opened": "Invitations opened",
+    "ofInvitations_one": "of {{count}} invitation",
+    "ofInvitations_other": "of {{count}} invitations",
+    "attendingPeople": "Attending (people)",
+    "rsvpTitle": "RSVP answers",
+    "rsvpHint": "Per invitation.",
+    "checkInsByHour": "Check-ins per hour",
+    "checkInsHint": "People, in the venue's local time.",
+    "noCheckIns": "No check-ins yet.",
+    "hour": "Hour",
+    "people": "People",
+    "peopleCount_one": "{{count}} person",
+    "peopleCount_other": "{{count}} people",
+    "gifts": "Gift confirmations",
+    "photos": "Photos",
+    "staff": "Staff assigned",
+    "quota": "Package guest quota"
   }
 }

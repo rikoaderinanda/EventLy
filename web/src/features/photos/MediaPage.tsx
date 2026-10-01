@@ -1,39 +1,78 @@
+import { ImageIcon, Music, QrCode, RefreshCw, Trash2, Upload, type LucideIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { Link, useParams } from 'react-router'
+import { useParams } from 'react-router'
+import { Button } from '@/components/ui/Button'
+import { buttonClass } from '@/components/ui/buttonClass'
+import { Card } from '@/components/ui/Card'
+import { cn } from '@/components/ui/cn'
+import { Notice } from '@/components/ui/Feedback'
+import { Skeleton, Spinner } from '@/components/ui/Spinner'
 import { isEditable, useEvent } from '@/features/events/api'
+import { EventPageHeader } from '@/features/events/EventPageHeader'
 import { errorMessage } from '@/shared/lib/errors'
 import { useEventMedia, useSetMedia, type MediaKind } from './api'
+
+const icons: Record<MediaKind, LucideIcon> = { cover: ImageIcon, music: Music, qris: QrCode }
 
 function MediaItem({
   eventId,
   kind,
   url,
   readOnly,
+  className,
 }: {
   eventId: string
   kind: MediaKind
   url: string | null
   readOnly: boolean
+  className?: string
 }) {
   const { t } = useTranslation()
   const save = useSetMedia(eventId)
   const accept = kind === 'music' ? '.mp3,.m4a,audio/mpeg,audio/mp4' : 'image/jpeg,image/png,image/webp'
+  const Icon = icons[kind]
 
   return (
-    <section className="space-y-3 rounded-lg border border-brand-100 bg-white p-4">
-      <h2 className="font-semibold text-brand-900">{t(`media.${kind}.title`)}</h2>
-      <p className="text-sm text-stone-600">{t(`media.${kind}.hint`)}</p>
+    <Card as="section" className={cn('flex flex-col gap-4', className)}>
+      <div className="flex items-start gap-3">
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand-100 text-brand-700">
+          <Icon aria-hidden className="size-5" />
+        </span>
+        <div className="min-w-0">
+          <h2 className="text-card">{t(`media.${kind}.title`)}</h2>
+          <p className="mt-0.5 text-sm text-stone-500">{t(`media.${kind}.hint`)}</p>
+        </div>
+      </div>
+
       {url && kind === 'music' && <audio controls src={url} className="w-full" />}
       {url && kind !== 'music' && (
         <img
           src={url}
           alt={t(`media.${kind}.title`)}
-          className="max-h-60 rounded-md border border-stone-200"
+          className={cn(
+            'w-full rounded-xl border border-brand-100 bg-brand-50',
+            kind === 'cover' ? 'aspect-[16/9] object-cover' : 'mx-auto max-h-64 object-contain',
+          )}
         />
       )}
+      {!url && (
+        <div className="flex flex-1 items-center justify-center rounded-xl border-2 border-dashed border-brand-200 bg-brand-50/50 py-10">
+          <Icon aria-hidden className="size-8 text-brand-300" strokeWidth={1.5} />
+        </div>
+      )}
+
       {!readOnly && (
-        <div className="flex flex-wrap items-center gap-3 text-sm">
-          <label className="cursor-pointer rounded-md border border-brand-700 px-3 py-1.5 font-medium text-brand-700">
+        <div className="flex flex-wrap items-center gap-2">
+          <label
+            className={buttonClass(
+              { variant: url ? 'secondary' : 'primary', size: 'sm' },
+              cn(
+                'cursor-pointer has-focus-visible:outline-2 has-focus-visible:outline-brand-600',
+                save.isPending && 'opacity-50',
+              ),
+            )}
+          >
+            {save.isPending ? <Spinner /> : url ? <RefreshCw aria-hidden /> : <Upload aria-hidden />}
             {url ? t('media.replace') : t('media.upload')}
             <input
               type="file"
@@ -49,20 +88,21 @@ function MediaItem({
             />
           </label>
           {url && (
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="sm"
+              icon={Trash2}
               disabled={save.isPending}
+              className="text-danger-700 hover:bg-danger-50 hover:text-danger-700"
               onClick={() => save.mutate({ kind, file: null })}
-              className="text-red-700 underline"
             >
               {t('media.remove')}
-            </button>
+            </Button>
           )}
-          {save.isPending && <span className="text-stone-500">{t('common.loading')}</span>}
         </div>
       )}
-      {save.isError && <p className="text-sm text-red-700">{errorMessage(t, save.error)}</p>}
-    </section>
+      {save.isError && <Notice tone="danger">{errorMessage(t, save.error)}</Notice>}
+    </Card>
   )
 }
 
@@ -75,18 +115,22 @@ export function MediaPage() {
   const readOnly = event.data ? !isEditable(event.data.status) : true
 
   return (
-    <section className="mx-auto max-w-2xl space-y-4 py-8">
-      <Link to={`/app/events/${id}`} className="text-sm text-brand-700 underline">
-        ← {event.data?.name ?? t('events.title')}
-      </Link>
-      <h1 className="text-2xl font-semibold text-brand-900">{t('media.title')}</h1>
-      {media.isError && <p className="text-red-700">{errorMessage(t, media.error)}</p>}
+    <section className="mx-auto max-w-5xl space-y-5 py-6 sm:py-10">
+      <EventPageHeader eventId={id} title={t('media.title')} subtitle={t('media.entry')} />
+      {media.isError && <Notice tone="danger">{errorMessage(t, media.error)}</Notice>}
+      {media.isPending && <Skeleton className="h-72 rounded-2xl" />}
       {media.data && (
-        <>
-          <MediaItem eventId={id} kind="cover" url={media.data.coverUrl} readOnly={readOnly} />
+        <div className="grid gap-4 md:grid-cols-2">
+          <MediaItem
+            eventId={id}
+            kind="cover"
+            url={media.data.coverUrl}
+            readOnly={readOnly}
+            className="md:col-span-2"
+          />
           <MediaItem eventId={id} kind="music" url={media.data.musicUrl} readOnly={readOnly} />
           <MediaItem eventId={id} kind="qris" url={media.data.qrisUrl} readOnly={readOnly} />
-        </>
+        </div>
       )}
     </section>
   )

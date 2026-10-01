@@ -126,7 +126,7 @@ describe('guests and invitations', () => {
     renderRoute('/app/events/e1/guests')
 
     expect(await screen.findByText('3 dari 150 tamu · 1 undangan')).toBeInTheDocument()
-    const row = screen.getByRole('link', { name: 'Keluarga Wijaya' }).closest('li')!
+    const row = screen.getByRole('link', { name: 'Keluarga Wijaya' }).closest('tr')!
     expect(within(row).getByText(/Rombongan 3 orang/)).toBeInTheDocument()
     await userEvent.click(within(row).getByRole('button', { name: 'Kirim via WhatsApp' }))
 
@@ -145,7 +145,7 @@ describe('guests and invitations', () => {
     ])
     renderRoute('/app/events/e1/guests')
 
-    const row = (await screen.findByRole('link', { name: 'Keluarga Wijaya' })).closest('li')!
+    const row = (await screen.findByRole('link', { name: 'Keluarga Wijaya' })).closest('tr')!
     expect(within(row).getByText('Bisa dikirim setelah acara dibayar')).toBeInTheDocument()
     expect(within(row).queryByRole('button', { name: 'Kirim via WhatsApp' })).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Tambah tamu' })).toBeInTheDocument()

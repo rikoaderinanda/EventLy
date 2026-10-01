@@ -80,6 +80,8 @@
   h2,
   h3 {
     @apply text-brand-950;
+    /* A long name or e-mail address wraps instead of widening the page. */
+    overflow-wrap: anywhere;
   }
   /* One visible focus style for every interactive element, keyboard only. */
   :focus-visible {

@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react'
+import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it } from 'vitest'
 import type { EventDetail } from '@/features/events/api'
@@ -221,6 +221,8 @@ describe('check-in', () => {
     renderRoute('/app/events/e1/check-ins')
 
     expect(await screen.findByText('Keluarga Wijaya')).toBeInTheDocument()
-    expect(screen.getByText(/Sari · scan QR/)).toBeInTheDocument()
+    const row = screen.getByText('Keluarga Wijaya').closest('li')!
+    expect(within(row).getByText('Sari')).toBeInTheDocument()
+    expect(within(row).getByText('scan QR')).toBeInTheDocument()
   })
 })

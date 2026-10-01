@@ -2,6 +2,11 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRef, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { apiFetch, apiFetchBlob } from '@/api/client'
+import { Download, FileSpreadsheet, Upload } from 'lucide-react'
+import { Button } from '@/components/ui/Button'
+import { Notice } from '@/components/ui/Feedback'
+import { TextField } from '@/components/ui/Input'
+import { ToolPanel } from '@/components/ui/ToolPanel'
 import { errorMessage } from '@/shared/lib/errors'
 import { guestKeys } from './api'
 
@@ -53,53 +58,43 @@ export function GuestImport({ eventId }: { eventId: string }) {
   }
 
   return (
-    <details className="rounded-lg border border-brand-100 bg-white p-4 text-sm">
-      <summary className="cursor-pointer font-medium text-brand-900">{t('guests.importTitle')}</summary>
-      <form onSubmit={submit} className="mt-3 space-y-3">
+    <ToolPanel title={t('guests.importTitle')} icon={FileSpreadsheet}>
+      <form onSubmit={submit} className="space-y-3">
         <p className="text-stone-600">{t('guests.importHint')}</p>
-        <button
-          type="button"
+        <Button
+          variant="secondary"
+          size="sm"
+          icon={Download}
           onClick={() => void downloadTemplate(eventId).catch(setTemplateError)}
-          className="text-brand-700 underline"
         >
           {t('guests.importTemplate')}
-        </button>
-        {templateError !== null && <p className="text-red-700">{errorMessage(t, templateError)}</p>}
-        <div>
-          <label htmlFor="guest-file" className="block font-medium text-stone-700">
-            {t('guests.importFile')}
-          </label>
-          <input
-            id="guest-file"
-            ref={input}
-            type="file"
-            accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            onChange={(e) => setChosen((e.target.files?.length ?? 0) > 0)}
-            className="mt-1 block"
-          />
-        </div>
-        <button
-          type="submit"
-          disabled={upload.isPending || !chosen}
-          className="rounded-md bg-brand-700 px-3 py-1.5 font-medium text-white disabled:opacity-50"
-        >
+        </Button>
+        {templateError !== null && <Notice tone="danger">{errorMessage(t, templateError)}</Notice>}
+        <TextField
+          id="guest-file"
+          ref={input}
+          type="file"
+          label={t('guests.importFile')}
+          accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          onChange={(e) => setChosen((e.target.files?.length ?? 0) > 0)}
+        />
+        <Button type="submit" size="sm" icon={Upload} loading={upload.isPending} disabled={!chosen}>
           {t('guests.importSubmit')}
-        </button>
+        </Button>
       </form>
 
       {upload.isError && (
-        <p role="alert" className="mt-3 text-red-700">
+        <Notice tone="danger" className="mt-3">
           {errorMessage(t, upload.error)}
-        </p>
+        </Notice>
       )}
       {result && result.errors.length === 0 && (
-        <p role="status" className="mt-3 text-emerald-700">
+        <Notice tone="success" className="mt-3">
           {t('guests.importDone', { n: result.imported, people: result.people })}
-        </p>
+        </Notice>
       )}
       {result && result.errors.length > 0 && (
-        <div role="alert" className="mt-3 space-y-2 text-red-800">
-          <p className="font-medium">{t('guests.importFailed')}</p>
+        <Notice tone="danger" className="mt-3" title={t('guests.importFailed')}>
           <ul className="list-disc space-y-1 pl-5">
             {result.errors.map((error) => (
               <li key={error.line}>
@@ -108,8 +103,8 @@ export function GuestImport({ eventId }: { eventId: string }) {
               </li>
             ))}
           </ul>
-        </div>
+        </Notice>
       )}
-    </details>
+    </ToolPanel>
   )
 }

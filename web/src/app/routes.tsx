@@ -52,7 +52,7 @@ export const routes: RouteObject[] = [
               {
                 index: true,
                 lazy: async () => ({
-                  Component: (await import('@/features/events/EventListPage')).EventListPage,
+                  Component: (await import('@/features/dashboard/DashboardPage')).DashboardPage,
                 }),
               },
               {

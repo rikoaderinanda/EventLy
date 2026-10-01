@@ -159,7 +159,7 @@ describe('package and payment', () => {
     renderRoute('/app/events/e1')
 
     expect(await screen.findByText('Paket Premium')).toBeInTheDocument()
-    expect(screen.getByText('· Hingga 500 tamu')).toBeInTheDocument()
+    expect(screen.getByText('Hingga 500 tamu')).toBeInTheDocument()
     expect(screen.queryByRole('radiogroup')).not.toBeInTheDocument()
   })
 

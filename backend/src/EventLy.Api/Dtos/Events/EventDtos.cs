@@ -76,6 +76,8 @@ public sealed record EventDto(
 /// <summary>The package the event paid for (its snapshot, Q-20). Null before payment, and for Staff.</summary>
 public sealed record EventPackageDto(Guid Id, string Code, string Name, PackageFeatures Features);
 
+/// <param name="CoverUrl">Signed URL of the cover photo (10 minutes), or null.</param>
+/// <param name="Counts">Guests, RSVP and check-in numbers for the cards (Q-60).</param>
 public sealed record EventListItemDto(
     Guid Id,
     string Name,
@@ -83,7 +85,15 @@ public sealed record EventListItemDto(
     string TimeZone,
     DateTimeOffset Date,
     string Venue,
-    EventStatus Status);
+    EventStatus Status,
+    string? CoverUrl,
+    EventCountsDto Counts);
+
+/// <summary>Active invitations, the people on them, invitations that answered the RSVP, and people checked in.</summary>
+public sealed record EventCountsDto(int Invitations, int People, int RsvpAnswered, int CheckedInPeople)
+{
+    public static readonly EventCountsDto None = new(0, 0, 0, 0);
+}
 
 public sealed record EventListQuery(EventStatus? Status, EventCategory? Category, DateTimeOffset? From, DateTimeOffset? To);
 

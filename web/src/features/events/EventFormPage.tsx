@@ -1,7 +1,24 @@
+import {
+  ArrowLeft,
+  Briefcase,
+  Cake,
+  Heart,
+  MapPin,
+  PartyPopper,
+  Plus,
+  ScanLine,
+  Trash2,
+  Users,
+} from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router'
-import { Field } from '@/shared/components/Field'
+import { Button, ButtonLink } from '@/components/ui/Button'
+import { Card, PageHeader, SectionHeader } from '@/components/ui/Card'
+import { cn } from '@/components/ui/cn'
+import { Notice } from '@/components/ui/Feedback'
+import { Select, TextArea, TextField } from '@/components/ui/Input'
+import { Loading } from '@/components/ui/Spinner'
 import { errorMessage } from '@/shared/lib/errors'
 import {
   eventCategories,
@@ -18,6 +35,14 @@ import {
 import { joinLocal, splitLocal, timeZoneLabel } from './format'
 
 const maxSessions = 5
+
+const categoryIcons: Record<EventCategory, typeof Heart> = {
+  Wedding: Heart,
+  Birthday: Cake,
+  Corporate: Briefcase,
+  Community: Users,
+  Other: PartyPopper,
+}
 
 type SessionDraft = {
   key: string
@@ -93,11 +118,16 @@ function SessionEditor({
   const id = (field: string) => `session-${session.key}-${field}`
 
   return (
-    <fieldset className="space-y-3 rounded-lg border border-brand-100 bg-white p-4">
-      <legend className="px-1 text-sm font-semibold text-brand-900">
+    <fieldset
+      className={cn(
+        'space-y-4 rounded-2xl border bg-white p-4 shadow-soft sm:p-5',
+        session.isCheckInSession ? 'border-brand-300 ring-2 ring-brand-100' : 'border-brand-100',
+      )}
+    >
+      <legend className="float-left mb-1 w-full text-sm font-semibold text-brand-900">
         {t('events.sessionN', { n: index + 1 })}
       </legend>
-      <Field
+      <TextField
         id={id('name')}
         label={t('events.sessionName')}
         required
@@ -105,8 +135,8 @@ function SessionEditor({
         value={session.name}
         onChange={(e) => onChange({ name: e.target.value })}
       />
-      <div className="grid grid-cols-3 gap-2">
-        <Field
+      <div className="grid gap-3 sm:grid-cols-3">
+        <TextField
           id={id('date')}
           label={t('events.date')}
           type="date"
@@ -114,32 +144,35 @@ function SessionEditor({
           value={session.date}
           onChange={(e) => onChange({ date: e.target.value })}
         />
-        <Field
-          id={id('start')}
-          label={t('events.start')}
-          type="time"
-          required
-          value={session.startTime}
-          onChange={(e) => onChange({ startTime: e.target.value })}
-        />
-        <Field
-          id={id('end')}
-          label={t('events.end')}
-          type="time"
-          required
-          value={session.endTime}
-          onChange={(e) => onChange({ endTime: e.target.value })}
-        />
+        <div className="grid grid-cols-2 gap-3 sm:col-span-2">
+          <TextField
+            id={id('start')}
+            label={t('events.start')}
+            type="time"
+            required
+            value={session.startTime}
+            onChange={(e) => onChange({ startTime: e.target.value })}
+          />
+          <TextField
+            id={id('end')}
+            label={t('events.end')}
+            type="time"
+            required
+            value={session.endTime}
+            onChange={(e) => onChange({ endTime: e.target.value })}
+          />
+        </div>
       </div>
-      <Field
+      <TextField
         id={id('venue')}
         label={t('events.venue')}
+        icon={MapPin}
         required
         maxLength={200}
         value={session.venue}
         onChange={(e) => onChange({ venue: e.target.value })}
       />
-      <Field
+      <TextField
         id={id('maps')}
         label={t('events.mapsUrl')}
         type="url"
@@ -147,16 +180,74 @@ function SessionEditor({
         value={session.mapsUrl}
         onChange={(e) => onChange({ mapsUrl: e.target.value })}
       />
-      <div className="flex items-center justify-between gap-3">
-        <label className="flex items-center gap-2 text-sm text-stone-700">
-          <input type="radio" name="checkInSession" checked={session.isCheckInSession} onChange={onCheckIn} />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <label
+          className={cn(
+            'inline-flex cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2 text-sm transition-colors',
+            session.isCheckInSession
+              ? 'bg-brand-100 font-medium text-brand-900'
+              : 'text-stone-600 hover:bg-brand-50',
+          )}
+        >
+          <input
+            type="radio"
+            name="checkInSession"
+            className="size-4 accent-brand-600"
+            checked={session.isCheckInSession}
+            onChange={onCheckIn}
+          />
+          <ScanLine aria-hidden className="size-4" />
           {t('events.checkInHere')}
         </label>
         {canRemove && (
-          <button type="button" onClick={onRemove} className="text-sm text-red-700 underline">
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={Trash2}
+            onClick={onRemove}
+            className="text-danger-700 hover:bg-danger-50 hover:text-danger-700"
+          >
             {t('events.removeSession')}
-          </button>
+          </Button>
         )}
+      </div>
+    </fieldset>
+  )
+}
+
+/** Category as a row of icon tiles (a radio group), rather than a select. */
+function CategoryPicker({ value, onChange }: { value: EventCategory; onChange: (c: EventCategory) => void }) {
+  const { t } = useTranslation()
+  return (
+    <fieldset>
+      <legend className="mb-2 text-sm font-medium text-stone-700">{t('events.categoryLabel')}</legend>
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+        {eventCategories.map((c) => {
+          const Icon = categoryIcons[c]
+          const selected = value === c
+          return (
+            <label
+              key={c}
+              className={cn(
+                'flex cursor-pointer flex-col items-center gap-2 rounded-xl border px-2 py-3 text-center text-sm transition-colors has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-brand-600',
+                selected
+                  ? 'border-brand-500 bg-brand-50 font-medium text-brand-900'
+                  : 'border-stone-200 text-stone-600 hover:border-brand-200',
+              )}
+            >
+              <input
+                type="radio"
+                name="category"
+                value={c}
+                checked={selected}
+                onChange={() => onChange(c)}
+                className="sr-only"
+              />
+              <Icon aria-hidden className={cn('size-5', selected ? 'text-brand-600' : 'text-stone-400')} />
+              {t(`events.category.${c}`)}
+            </label>
+          )
+        })}
       </div>
     </fieldset>
   )
@@ -197,61 +288,62 @@ function EventForm({ event }: { event?: EventDetail }) {
   }
 
   return (
-    <form onSubmit={submit} className="mt-6 space-y-5">
-      <Field
-        label={t('events.name')}
-        name="name"
-        required
-        maxLength={150}
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        hint={t('events.nameHint')}
-      />
-      <div className="grid gap-3 sm:grid-cols-2">
-        <label className="block text-left text-sm">
-          <span className="font-medium text-stone-700">{t('events.categoryLabel')}</span>
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value as EventCategory)}
-            className="mt-1 w-full rounded-md border border-stone-300 bg-white px-3 py-2"
-          >
-            {eventCategories.map((c) => (
-              <option key={c} value={c}>
-                {t(`events.category.${c}`)}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="block text-left text-sm">
-          <span className="font-medium text-stone-700">{t('events.timeZone')}</span>
-          <select
-            value={timeZone}
-            onChange={(e) => setTimeZone(e.target.value as EventTimeZone)}
-            className="mt-1 w-full rounded-md border border-stone-300 bg-white px-3 py-2"
-          >
-            {timeZones.map((tz) => (
-              <option key={tz} value={tz}>
-                {timeZoneLabel[tz]} ({tz})
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-      <label className="block text-left text-sm">
-        <span className="font-medium text-stone-700">{t('events.description')}</span>
-        <textarea
+    <form onSubmit={submit} className="space-y-6">
+      <Card className="space-y-5">
+        <SectionHeader title={t('events.basics')} level={3} className="mb-0" />
+        <TextField
+          label={t('events.name')}
+          name="name"
+          required
+          maxLength={150}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          hint={t('events.nameHint')}
+        />
+        <CategoryPicker value={category} onChange={setCategory} />
+        <Select
+          label={t('events.timeZone')}
+          name="timeZone"
+          value={timeZone}
+          onChange={(e) => setTimeZone(e.target.value as EventTimeZone)}
+        >
+          {timeZones.map((tz) => (
+            <option key={tz} value={tz}>
+              {timeZoneLabel[tz]} ({tz})
+            </option>
+          ))}
+        </Select>
+        <TextArea
+          label={t('events.description')}
+          name="description"
           value={description}
           maxLength={2000}
           rows={3}
           onChange={(e) => setDescription(e.target.value)}
           placeholder={t('events.descriptionPlaceholder')}
-          className="mt-1 w-full rounded-md border border-stone-300 bg-white px-3 py-2"
+          hint={t('events.descriptionHint')}
         />
-      </label>
+      </Card>
 
-      <div className="space-y-3">
-        <h2 className="font-semibold text-brand-900">{t('events.sessions')}</h2>
-        <p className="text-sm text-stone-500">{t('events.sessionsHint', { tz: timeZoneLabel[timeZone] })}</p>
+      <section className="space-y-3">
+        <SectionHeader
+          title={t('events.sessions')}
+          description={t('events.sessionsHint', { tz: timeZoneLabel[timeZone] })}
+          level={3}
+          className="mb-1"
+          actions={
+            sessions.length < maxSessions && (
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={Plus}
+                onClick={() => setSessions((all) => [emptySession('', false), ...all])}
+              >
+                {t('events.addSession')}
+              </Button>
+            )
+          }
+        />
         {sessions.map((session, index) => (
           <SessionEditor
             key={session.key}
@@ -273,29 +365,12 @@ function EventForm({ event }: { event?: EventDetail }) {
             }
           />
         ))}
-        {sessions.length < maxSessions && (
-          <button
-            type="button"
-            onClick={() => setSessions((all) => [emptySession('', false), ...all])}
-            className="text-sm font-medium text-brand-700 underline"
-          >
-            {t('events.addSession')}
-          </button>
-        )}
-      </div>
+      </section>
 
-      {mutation.isError && (
-        <p role="alert" className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
-          {errorMessage(t, mutation.error)}
-        </p>
-      )}
-      <button
-        type="submit"
-        disabled={mutation.isPending}
-        className="rounded-md bg-brand-700 px-5 py-2.5 font-medium text-white disabled:opacity-50"
-      >
+      {mutation.isError && <Notice tone="danger">{errorMessage(t, mutation.error)}</Notice>}
+      <Button type="submit" size="lg" block="mobile" loading={mutation.isPending}>
         {event ? t('common.save') : t('events.create')}
-      </button>
+      </Button>
     </form>
   )
 }
@@ -303,8 +378,11 @@ function EventForm({ event }: { event?: EventDetail }) {
 export function NewEventPage() {
   const { t } = useTranslation()
   return (
-    <section className="mx-auto max-w-2xl py-8">
-      <h1 className="text-2xl font-semibold text-brand-900">{t('events.newTitle')}</h1>
+    <section className="mx-auto max-w-3xl py-6 sm:py-10">
+      <ButtonLink to="/app/events" variant="ghost" size="sm" icon={ArrowLeft} className="mb-4 -ml-3">
+        {t('events.title')}
+      </ButtonLink>
+      <PageHeader title={t('events.newTitle')} subtitle={t('events.newSubtitle')} />
       <EventForm />
     </section>
   )
@@ -315,10 +393,13 @@ export function EditEventPage() {
   const { id = '' } = useParams()
   const { data, isPending, isError, error } = useEvent(id)
   return (
-    <section className="mx-auto max-w-2xl py-8">
-      <h1 className="text-2xl font-semibold text-brand-900">{t('events.editTitle')}</h1>
-      {isPending && <p className="mt-4 text-stone-500">{t('common.loading')}</p>}
-      {isError && <p className="mt-4 text-red-700">{errorMessage(t, error)}</p>}
+    <section className="mx-auto max-w-3xl py-6 sm:py-10">
+      <ButtonLink to={`/app/events/${id}`} variant="ghost" size="sm" icon={ArrowLeft} className="mb-4 -ml-3">
+        {data?.name ?? t('events.title')}
+      </ButtonLink>
+      <PageHeader title={t('events.editTitle')} />
+      {isPending && <Loading />}
+      {isError && <Notice tone="danger">{errorMessage(t, error)}</Notice>}
       {data && <EventForm key={data.version} event={data} />}
     </section>
   )

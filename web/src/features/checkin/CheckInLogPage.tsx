@@ -1,6 +1,15 @@
+import { QrCode, ScanLine, Search } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { Link, useParams } from 'react-router'
-import { useEvent } from '@/features/events/api'
+import { useParams } from 'react-router'
+import { Avatar } from '@/components/ui/Avatar'
+import { Badge } from '@/components/ui/Badge'
+import { ButtonLink } from '@/components/ui/Button'
+import { Card } from '@/components/ui/Card'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { Notice, ProgressRing } from '@/components/ui/Feedback'
+import { Skeleton } from '@/components/ui/Spinner'
+import { useSession } from '@/features/auth/session-store'
+import { EventPageHeader } from '@/features/events/EventPageHeader'
 import { errorMessage } from '@/shared/lib/errors'
 import { useCheckInLog, useCheckInSummary } from './api'
 
@@ -8,46 +17,91 @@ import { useCheckInLog, useCheckInSummary } from './api'
 export function CheckInLogPage() {
   const { t, i18n } = useTranslation()
   const { id = '' } = useParams()
-  const event = useEvent(id)
+  const role = useSession((s) => s.user?.role)
   const summary = useCheckInSummary(id)
   const log = useCheckInLog(id)
 
   return (
-    <section className="mx-auto max-w-3xl space-y-4 py-8">
-      <Link to={`/app/events/${id}`} className="text-sm text-brand-700 underline">
-        ← {event.data?.name ?? t('events.title')}
-      </Link>
-      <h1 className="text-2xl font-semibold text-brand-900">{t('checkin.logTitle')}</h1>
+    <section className="mx-auto max-w-4xl space-y-5 py-6 sm:py-10">
+      <EventPageHeader
+        eventId={id}
+        title={t('checkin.logTitle')}
+        subtitle={t('checkin.logEntry')}
+        actions={
+          role === 'Owner' && (
+            <ButtonLink to={`/staff/events/${id}`} icon={ScanLine} block="mobile">
+              {t('checkin.openScanner')}
+            </ButtonLink>
+          )
+        }
+      />
+
+      {summary.isPending && <Skeleton className="h-28 rounded-2xl" />}
       {summary.data && (
-        <p className="text-stone-700">
-          {t('checkin.counter', {
-            arrived: summary.data.checkedInPeople,
-            total: summary.data.people,
-            invitations: summary.data.checkedInInvitations,
-            allInvitations: summary.data.invitations,
-          })}
-        </p>
+        <Card className="flex items-center gap-5">
+          <ProgressRing
+            value={summary.data.checkedInPeople}
+            max={summary.data.people}
+            label={t('dashboard.checkedIn')}
+            size={84}
+            stroke={9}
+            tone="success"
+          />
+          <div className="min-w-0">
+            <p className="text-3xl font-semibold text-brand-950 tabular-nums">
+              {summary.data.checkedInPeople}
+              <span className="text-lg font-normal text-stone-400"> / {summary.data.people}</span>
+            </p>
+            <p className="mt-1 text-sm text-stone-600">
+              {t('checkin.counter', {
+                arrived: summary.data.checkedInPeople,
+                total: summary.data.people,
+                invitations: summary.data.checkedInInvitations,
+                allInvitations: summary.data.invitations,
+              })}
+            </p>
+          </div>
+        </Card>
       )}
+
       {(log.isError || summary.isError) && (
-        <p className="text-red-700">{errorMessage(t, log.error ?? summary.error)}</p>
+        <Notice tone="danger">{errorMessage(t, log.error ?? summary.error)}</Notice>
       )}
-      {log.data?.length === 0 && <p className="text-stone-500">{t('checkin.noCheckIns')}</p>}
-      <ul className="divide-y divide-brand-100 rounded-lg border border-brand-100 bg-white px-4 empty:hidden">
-        {log.data?.map((item) => (
-          <li key={item.id} className="flex flex-wrap justify-between gap-2 py-3 text-sm">
-            <span className="font-medium text-stone-800">
-              {item.guestName} <span className="font-normal text-stone-500">({item.numberOfPeople})</span>
-            </span>
-            <span className="text-stone-500">
-              {new Date(item.checkedInAt).toLocaleTimeString(i18n.language, {
-                hour: '2-digit',
-                minute: '2-digit',
-              })}{' '}
-              · {item.staffName} · {t(`checkin.method.${item.method}`)}
-            </span>
-          </li>
-        ))}
-      </ul>
+      {log.data?.length === 0 && (
+        <Card>
+          <EmptyState icon={ScanLine} title={t('checkin.noCheckIns')} />
+        </Card>
+      )}
+      {log.data && log.data.length > 0 && (
+        <ol className="divide-y divide-brand-100 overflow-hidden rounded-2xl border border-brand-100 bg-white shadow-soft">
+          {log.data.map((item) => (
+            <li key={item.id} className="flex items-center gap-3 px-4 py-3 sm:px-5">
+              <time
+                dateTime={item.checkedInAt}
+                className="w-12 shrink-0 text-sm font-semibold text-brand-700 tabular-nums"
+              >
+                {new Date(item.checkedInAt).toLocaleTimeString(i18n.language, {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </time>
+              <Avatar name={item.guestName} size="sm" />
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-medium text-brand-950">
+                  {item.guestName}{' '}
+                  <span className="font-normal text-stone-500">
+                    ({t('stats.peopleCount', { count: item.numberOfPeople })})
+                  </span>
+                </p>
+                <p className="truncate text-xs text-stone-500">{item.staffName}</p>
+              </div>
+              <Badge tone="neutral" icon={item.method === 'Scan' ? QrCode : Search}>
+                {t(`checkin.method.${item.method}`)}
+              </Badge>
+            </li>
+          ))}
+        </ol>
+      )}
     </section>
   )
 }
