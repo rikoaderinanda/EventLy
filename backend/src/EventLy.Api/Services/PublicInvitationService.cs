@@ -257,7 +257,8 @@ public sealed class PublicInvitationService(AppDbContext db, InvitationLinks lin
 
         return new PublicInvitationDto(
             guest.Name, invitation.Type, guest.NumberOfPeople,
-            new PublicEventDto(ev.Name, ev.Category, ev.Description, ev.TimeZone, ev.Status, Url(ev.CoverImageKey), sessions),
+            new PublicEventDto(ev.Name, ev.Category, ev.Description, ev.TimeZone, ev.Status, Url(ev.CoverImageKey), sessions,
+                ev.Theme),
             new PublicRsvpDto(rsvp?.Status ?? RsvpStatus.Pending, rsvp?.RespondedAt, RsvpOpen(ev), ev.EndsAt),
             new PublicFeaturesDto(
                 features.CountdownEnabled,

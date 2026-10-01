@@ -29,6 +29,7 @@ const event: EventDetail = {
   createdAt: '',
   updatedAt: '',
   version: 1,
+  theme: 'Elegant',
 }
 
 const photo = (id: string, guestName: string, source: 'Staff' | 'Guest' = 'Staff') => ({

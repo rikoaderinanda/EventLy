@@ -3,6 +3,7 @@ import { apiFetch } from '@/api/client'
 import { env } from '@/config/env'
 import type { EventCategory, EventStatus, EventTimeZone, LocalDateTime } from '@/features/events/api'
 import type { GuestType } from '@/features/guests/api'
+import type { InvitationTheme } from './themes'
 
 export type RsvpStatus = 'Pending' | 'Attending' | 'NotAttending'
 
@@ -31,6 +32,7 @@ export type PublicInvitation = {
     status: EventStatus
     coverUrl: string | null
     sessions: PublicSession[]
+    theme: InvitationTheme
   }
   rsvp: PublicRsvp
   features: {

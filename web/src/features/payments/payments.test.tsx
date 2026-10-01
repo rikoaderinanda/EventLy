@@ -52,6 +52,7 @@ const event: EventDetail = {
   createdAt: '',
   updatedAt: '',
   version: 1,
+  theme: 'Elegant',
 }
 
 const pending: Payment = {

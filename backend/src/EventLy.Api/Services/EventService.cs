@@ -65,6 +65,7 @@ public sealed class EventService(
         {
             Name = request.Name.Trim(),
             Category = request.Category,
+            Theme = request.Theme ?? InvitationThemes.For(request.Category),
             TimeZone = request.TimeZone,
             Description = Normalize(request.Description),
         };
@@ -91,6 +92,7 @@ public sealed class EventService(
         var timeZone = EventTimeZones.Find(request.TimeZone);
         ev.Name = request.Name.Trim();
         ev.Category = request.Category;
+        ev.Theme = request.Theme ?? ev.Theme;
         ev.TimeZone = request.TimeZone;
         ev.Description = Normalize(request.Description);
         ApplySessions(ev, request.Sessions, timeZone);
@@ -273,7 +275,7 @@ public sealed class EventService(
             [.. e.Sessions.OrderBy(s => s.SortOrder).Select(s => new EventSessionDto(
                 s.Id, s.Name, s.StartsAt, s.EndsAt, ToLocal(s.StartsAt, timeZone), ToLocal(s.EndsAt, timeZone),
                 s.Venue, s.MapsUrl, s.IsCheckInSession))],
-            e.StaffAssignments.Count, PackageOf(e), e.ActivatedAt, e.CreatedAt, e.UpdatedAt, e.Version);
+            e.StaffAssignments.Count, PackageOf(e), e.ActivatedAt, e.CreatedAt, e.UpdatedAt, e.Version, e.Theme);
     }
 
     /// <summary>The package the event paid for (its snapshot). Staff get no package details.</summary>

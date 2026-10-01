@@ -1,5 +1,31 @@
 namespace EventLy.Api.Entities;
 
+/// <summary>
+/// The look of the guest invitation page (Q-62). The default follows the category; the Owner can change it.
+/// All themes are in every package.
+/// </summary>
+public enum InvitationTheme
+{
+    /// <summary>Cream and gold, serif headings: weddings, and community or other events.</summary>
+    Elegant,
+
+    /// <summary>Soft pastel colours.</summary>
+    Birthday,
+
+    /// <summary>Modern dark.</summary>
+    Corporate,
+}
+
+public static class InvitationThemes
+{
+    public static InvitationTheme For(EventCategory category) => category switch
+    {
+        EventCategory.Birthday => InvitationTheme.Birthday,
+        EventCategory.Corporate => InvitationTheme.Corporate,
+        _ => InvitationTheme.Elegant,
+    };
+}
+
 public enum EventCategory
 {
     Wedding,
@@ -31,6 +57,9 @@ public sealed class Event : ITenantOwned, ISoftDeletable, IHasTimestamps
     public required string Name { get; set; }
 
     public EventCategory Category { get; set; }
+
+    /// <summary>Look of the invitation page (Q-62).</summary>
+    public InvitationTheme Theme { get; set; } = InvitationTheme.Elegant;
 
     /// <summary>Couple's names and greeting shown on the invitation page.</summary>
     public string? Description { get; set; }

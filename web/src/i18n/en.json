@@ -475,7 +475,7 @@
     "seconds": "Seconds",
     "ongoing": "The event is happening now",
     "finished": "The event has ended",
-    "when": "When & where",
+    "when": "Schedule",
     "until": "until {{time}}",
     "rsvpTitle": "RSVP",
     "forPeople": "Invitation for {{n}} people",
@@ -515,7 +515,21 @@
     "checkedIn": "You've checked in. Enjoy the event!",
     "mute": "Mute music",
     "unmute": "Play music",
-    "qrisHint": "Scan with a banking or e-wallet app."
+    "qrisHint": "Scan with a banking or e-wallet app.",
+    "locationTitle": "Location",
+    "countdownTitle": "Counting down",
+    "storyWedding": "Our story",
+    "storyOther": "About the event",
+    "forGuest": "With respect, for {{name}}",
+    "madeWith": "Digital invitation by {{app}}",
+    "coverEyebrow": {
+      "Wedding": "Wedding Invitation",
+      "Birthday": "Birthday Invitation",
+      "Corporate": "Official Invitation",
+      "Community": "Invitation",
+      "Other": "Invitation"
+    },
+    "countdownOther": "Counting down to the day"
   },
   "responses": {
     "rsvpTitle": "RSVP monitor",
@@ -750,5 +764,12 @@
     "photos": "Photos",
     "staff": "Staff assigned",
     "quota": "Package guest quota"
+  },
+  "themes": {
+    "label": "Invitation theme",
+    "hint": "How the invitation page looks to guests. You can change it any time.",
+    "Elegant": "Elegant",
+    "Birthday": "Playful",
+    "Corporate": "Modern dark"
   }
 }

@@ -15,6 +15,7 @@ public abstract class EventInputValidator<T> : AbstractValidator<T>
     {
         RuleFor(r => r.Name).NotEmpty().MaximumLength(150);
         RuleFor(r => r.Category).IsInEnum();
+        RuleFor(r => r.Theme).IsInEnum();
         RuleFor(r => r.TimeZone).Must(tz => EventTimeZones.Allowed.Contains(tz))
             .WithMessage(_ => Texts.T($"Zona waktu harus salah satu dari: {string.Join(", ", EventTimeZones.Allowed)}.", $"Time zone must be one of: {string.Join(", ", EventTimeZones.Allowed)}."));
         RuleFor(r => r.Description).MaximumLength(2000);

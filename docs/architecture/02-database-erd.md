@@ -130,6 +130,7 @@ erDiagram
         uuid organization_id FK
         text name
         text category "Wedding|Corporate|Birthday|Community|Other"
+        text theme "+ Elegant|Birthday|Corporate (Q-62)"
         timestamptz date "= check-in session (kept in sync)"
         text venue "= check-in session (kept in sync)"
         text description "+ couple names + greeting"

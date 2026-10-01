@@ -98,6 +98,13 @@ Status is never shown by colour alone: badges always have a word and an icon.
 - **Haptics** (`shared/lib/haptics.ts`): one short buzz for a new check-in, a double tap for a repeat scan, one long buzz for an invalid invitation (Android; iPhone Safari has no Vibration API).
 - **Staff camera** (`CameraCapture`) renders through a portal above the sheet; Escape closes only the camera.
 
+## Guest invitation and themes (UI-5)
+
+- **Themes** (`features/invitation/themes.ts`, Q-62): `Elegant` (cream and gold, Cormorant Garamond), `Birthday` (pastels, Playfair Display), `Corporate` (modern dark, Inter, gold accent). Each theme object has `primaryColor`, `secondaryColor`, `fontHeading` and `backgroundStyle`, plus surface, ink, muted and line colours so text stays at WCAG AA on it. The page sets them as CSS variables (`--inv-primary`, `--inv-surface`, …) and the blocks use `bg-(--inv-…)` / `text-(--inv-…)`. The event's `theme` column defaults from the category; the event form has a visual picker (a new event follows its category until the Owner picks a theme). All themes in every package.
+- **Cover:** full screen; the cover photo with a slow zoom and a dark gradient, or the theme background. Category eyebrow, the event name in the heading face, the date, an ornament, "Kepada Yth." and the guest, and "Buka Undangan". Opening slides the cover up (0.9 s); while it slides it is `inert` and `aria-hidden`. The tap also starts the music (Q-43).
+- **Blocks** (rounded-3xl cards on the theme surface, fading in as they scroll into view with `Reveal`, not at all with reduced motion): hero, story (the description, Q-63), countdown, schedule (names and times), location (each place once with its sessions and a Google Maps button), RSVP (two large choices), QR (always on white, so any scanner reads it), the guest's photos after check-in, wishes, digital gift (accounts with copy, QRIS, address, optional confirmation). A floating music button.
+- **Headings** inside a theme set their colour on the element: the global `h1–h3` colour would otherwise win over the inherited theme ink.
+
 ## Motion
 
 - **Motion** (`motion/react`, MIT) for the modal, sheet and invitation opening; CSS transitions for hover and press.

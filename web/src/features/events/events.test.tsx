@@ -46,6 +46,7 @@ const detail: EventDetail = {
   createdAt: '',
   updatedAt: '',
   version: 7,
+  theme: 'Elegant',
 }
 
 describe('event pages', () => {
@@ -87,6 +88,36 @@ describe('event pages', () => {
         },
       ],
     })
+  })
+
+  it('gives a new event the theme of its category until the owner picks one (Q-62)', async () => {
+    signInAs('Owner')
+    const fetchMock = stubApi([
+      { path: '/events', response: () => jsonResponse([]) },
+      { method: 'POST', path: '/events', response: () => jsonResponse(detail, 201) },
+      { path: '/events/e1', response: () => jsonResponse(detail) },
+    ])
+    renderRoute('/app/events/new')
+
+    expect(await screen.findByRole('radio', { name: 'Elegan' })).toBeChecked()
+    await userEvent.click(screen.getByRole('radio', { name: 'Ulang tahun' }))
+    expect(screen.getByRole('radio', { name: 'Ceria' })).toBeChecked()
+    await userEvent.click(screen.getByRole('radio', { name: 'Modern gelap' }))
+    // Picked by hand: changing the category no longer changes it.
+    await userEvent.click(screen.getByRole('radio', { name: 'Pernikahan' }))
+    expect(screen.getByRole('radio', { name: 'Modern gelap' })).toBeChecked()
+
+    await userEvent.type(screen.getByLabelText('Nama acara'), 'Resepsi')
+    const session = screen.getByRole('group', { name: 'Sesi 1' })
+    await userEvent.type(within(session).getByLabelText('Tanggal'), '2026-12-12')
+    await userEvent.type(within(session).getByLabelText('Mulai'), '11:00')
+    await userEvent.type(within(session).getByLabelText('Selesai'), '14:00')
+    await userEvent.type(within(session).getByLabelText('Lokasi'), 'Gedung')
+    await userEvent.click(screen.getByRole('button', { name: 'Buat acara' }))
+
+    await screen.findByRole('heading', { name: 'Pernikahan Rina & Budi' })
+    const post = fetchMock.mock.calls.find((c) => c[1]?.method === 'POST')!
+    expect(JSON.parse(String(post[1]!.body))).toMatchObject({ category: 'Wedding', theme: 'Corporate' })
   })
 
   it('shows session times in the venue time zone and the owner-only actions', async () => {

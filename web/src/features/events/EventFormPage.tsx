@@ -19,6 +19,8 @@ import { cn } from '@/components/ui/cn'
 import { Notice } from '@/components/ui/Feedback'
 import { Select, TextArea, TextField } from '@/components/ui/Input'
 import { Loading } from '@/components/ui/Spinner'
+import { ThemePicker } from '@/features/invitation/ThemePicker'
+import { themeForCategory, type InvitationTheme } from '@/features/invitation/themes'
 import { errorMessage } from '@/shared/lib/errors'
 import {
   eventCategories,
@@ -262,6 +264,9 @@ function EventForm({ event }: { event?: EventDetail }) {
 
   const [name, setName] = useState(event?.name ?? '')
   const [category, setCategory] = useState<EventCategory>(event?.category ?? 'Wedding')
+  const [theme, setTheme] = useState<InvitationTheme>(event?.theme ?? 'Elegant')
+  // A new event's theme follows its category until the Owner picks one themselves (Q-62).
+  const [themeChosen, setThemeChosen] = useState(!!event)
   const [timeZone, setTimeZone] = useState<EventTimeZone>(event?.timeZone ?? 'Asia/Jakarta')
   const [description, setDescription] = useState(event?.description ?? '')
   const [sessions, setSessions] = useState<SessionDraft[]>(() =>
@@ -279,6 +284,7 @@ function EventForm({ event }: { event?: EventDetail }) {
       timeZone,
       description: description || null,
       sessions: sessions.map(toInput),
+      theme,
     }
     const onSuccess = (saved: EventDetail | void) => {
       if (saved) navigate(`/app/events/${saved.id}`, { replace: true })
@@ -300,7 +306,20 @@ function EventForm({ event }: { event?: EventDetail }) {
           onChange={(e) => setName(e.target.value)}
           hint={t('events.nameHint')}
         />
-        <CategoryPicker value={category} onChange={setCategory} />
+        <CategoryPicker
+          value={category}
+          onChange={(c) => {
+            setCategory(c)
+            if (!themeChosen) setTheme(themeForCategory(c))
+          }}
+        />
+        <ThemePicker
+          value={theme}
+          onChange={(next) => {
+            setTheme(next)
+            setThemeChosen(true)
+          }}
+        />
         <Select
           label={t('events.timeZone')}
           name="timeZone"

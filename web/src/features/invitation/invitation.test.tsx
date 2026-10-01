@@ -20,6 +20,7 @@ const invitation: PublicInvitation = {
     timeZone: 'Asia/Jakarta',
     status: 'Active',
     coverUrl: null,
+    theme: 'Elegant',
     sessions: [
       {
         name: 'Resepsi',
@@ -79,6 +80,28 @@ describe('guest invitation page', () => {
     expect(await screen.findByText('Terima kasih, Anda akan hadir.')).toBeInTheDocument()
     const put = fetchMock.mock.calls.find((c) => c[1]?.method === 'PUT')!
     expect(JSON.parse(String(put[1]!.body))).toEqual({ status: 'Attending' })
+  })
+
+  it('dresses the page in the event theme', async () => {
+    stubApi([
+      {
+        path: base,
+        response: () => jsonResponse({ ...invitation, event: { ...invitation.event, theme: 'Corporate' } }),
+      },
+      {
+        path: `${base}/wishes?page=1`,
+        response: () => jsonResponse({ wishes: [], page: 1, hasMore: false }),
+      },
+      { path: `${base}/gifts`, response: () => jsonResponse({ accounts: [], address: null, qrisUrl: null }) },
+    ])
+    const { container } = renderRoute(`/i/${code}`)
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Buka Undangan' }))
+    const page = container.querySelector<HTMLElement>('[style*="--inv-surface"]')!
+    expect(page.style.getPropertyValue('--inv-surface')).toBe('#181b22')
+    expect(page.style.colorScheme).toBe('dark')
+    // The cover is gone from the accessibility tree once opened: one page heading.
+    expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1)
   })
 
   it('says so when the invitation is not found', async () => {

@@ -14,11 +14,13 @@ public sealed class EventConfiguration : IEntityTypeConfiguration<Event>
                 "category IN ('Wedding','Corporate','Birthday','Community','Other')");
             t.HasCheckConstraint("ck_events_status",
                 "status IN ('Draft','PendingPayment','Active','Completed','Cancelled')");
+            t.HasCheckConstraint("ck_events_theme", "theme IN ('Elegant','Birthday','Corporate')");
         });
 
         builder.Property(e => e.Id).ValueGeneratedNever();
         builder.Property(e => e.Name).HasMaxLength(150);
         builder.Property(e => e.Category).HasConversion<string>().HasMaxLength(20);
+        builder.Property(e => e.Theme).HasConversion<string>().HasMaxLength(20);
         builder.Property(e => e.Description).HasMaxLength(2000);
         builder.Property(e => e.TimeZone).HasMaxLength(64);
         builder.Property(e => e.Venue).HasMaxLength(200);

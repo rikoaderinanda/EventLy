@@ -77,9 +77,9 @@ The route is singular because a user belongs to exactly one organization.
 | Method | Path | Roles | Description |
 |---|---|---|---|
 | GET | `/events?status=&category=&from=&to=` | O A · S (assigned only) | List events |
-| POST | `/events` | O A | Create a Draft `{name, category, timeZone, description, sessions: [{name, startsAtLocal, endsAtLocal, venue, mapsUrl, isCheckInSession}]}`. Times are venue-local (no offset) and converted with the event time zone (WIB/WITA/WIT). Exactly one check-in session. Date/venue of the event = the check-in session's |
+| POST | `/events` | O A | Create a Draft `{name, category, timeZone, description, sessions: [{name, startsAtLocal, endsAtLocal, venue, mapsUrl, isCheckInSession}]}`. Times are venue-local (no offset) and converted with the event time zone (WIB/WITA/WIT). Exactly one check-in session. Date/venue of the event = the check-in session's. Optional `theme` (`Elegant`, `Birthday`, `Corporate`, Q-62); without it the category decides (Birthday → Birthday, Corporate → Corporate, else Elegant) |
 | GET | `/events/{id}` | O A · S (assigned) | Event details (Staff get a reduced DTO with no package or payment fields) |
-| PUT | `/events/{id}` | O A | Update, same body plus `version` (optimistic concurrency: a stale version gives 409 `event.modified_elsewhere`). Sessions with an `id` are updated in place, new ones added, missing ones removed. Completed/Cancelled events are read-only |
+| PUT | `/events/{id}` | O A | Update, same body plus `version` (optimistic concurrency: a stale version gives 409 `event.modified_elsewhere`). Sessions with an `id` are updated in place, new ones added, missing ones removed. `theme` is optional: left out, the current theme stays. Completed/Cancelled events are read-only |
 | DELETE | `/events/{id}` | O A | Soft delete. Allowed only in `Draft` or `Cancelled` **[Q-4]** |
 | POST | `/events/{id}/cancel` | O | Cancel |
 | POST | `/events/{id}/complete` | O A | Mark the event completed |

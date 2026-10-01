@@ -27,14 +27,19 @@ public interface IEventInput
     string? Description { get; }
 
     IReadOnlyList<EventSessionInput> Sessions { get; }
+
+    /// <summary>Null on create takes the category's default; null on update keeps the current theme.</summary>
+    InvitationTheme? Theme { get; }
 }
 
+/// <param name="Theme">The invitation look (Q-62); null takes the category's default.</param>
 public sealed record CreateEventRequest(
     string Name,
     EventCategory Category,
     string TimeZone,
     string? Description,
-    IReadOnlyList<EventSessionInput> Sessions) : IEventInput;
+    IReadOnlyList<EventSessionInput> Sessions,
+    InvitationTheme? Theme = null) : IEventInput;
 
 /// <summary><see cref="Version"/> is the value read with the event; a newer change elsewhere gives 409.</summary>
 public sealed record UpdateEventRequest(
@@ -43,7 +48,8 @@ public sealed record UpdateEventRequest(
     string TimeZone,
     string? Description,
     IReadOnlyList<EventSessionInput> Sessions,
-    uint Version) : IEventInput;
+    uint Version,
+    InvitationTheme? Theme = null) : IEventInput;
 
 public sealed record EventSessionDto(
     Guid Id,
@@ -71,7 +77,8 @@ public sealed record EventDto(
     DateTimeOffset? ActivatedAt,
     DateTimeOffset CreatedAt,
     DateTimeOffset UpdatedAt,
-    uint Version);
+    uint Version,
+    InvitationTheme Theme);
 
 /// <summary>The package the event paid for (its snapshot, Q-20). Null before payment, and for Staff.</summary>
 public sealed record EventPackageDto(Guid Id, string Code, string Name, PackageFeatures Features);

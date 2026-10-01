@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '@/api/client'
+import type { InvitationTheme } from '@/features/invitation/themes'
 import type { PackageFeatures } from '@/features/payments/api'
 
 export type EventCategory = 'Wedding' | 'Corporate' | 'Birthday' | 'Community' | 'Other'
@@ -41,6 +42,8 @@ export type EventDetail = {
   createdAt: string
   updatedAt: string
   version: number
+  /** The invitation look (Q-62). */
+  theme: InvitationTheme
 }
 
 /** Active invitations, people on them, invitations that answered the RSVP, people checked in. */
@@ -88,6 +91,7 @@ export type EventInput = {
   timeZone: EventTimeZone
   description: string | null
   sessions: SessionInput[]
+  theme: InvitationTheme
 }
 
 export type EventStaff = { userId: string; name: string; email: string; status: string }

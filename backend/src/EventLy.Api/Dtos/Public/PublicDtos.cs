@@ -24,7 +24,8 @@ public sealed record PublicEventDto(
     string TimeZone,
     EventStatus Status,
     string? CoverUrl,
-    IReadOnlyList<PublicSessionDto> Sessions);
+    IReadOnlyList<PublicSessionDto> Sessions,
+    InvitationTheme Theme);
 
 public sealed record PublicSessionDto(
     string Name,

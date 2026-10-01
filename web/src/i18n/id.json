@@ -469,7 +469,7 @@
     "seconds": "Detik",
     "ongoing": "Acara sedang berlangsung",
     "finished": "Acara telah selesai",
-    "when": "Waktu & tempat",
+    "when": "Jadwal acara",
     "until": "s.d. {{time}}",
     "rsvpTitle": "Konfirmasi kehadiran",
     "forPeople": "Undangan untuk {{n}} orang",
@@ -509,7 +509,21 @@
     "checkedIn": "Anda sudah check-in. Selamat menikmati acara!",
     "mute": "Matikan musik",
     "unmute": "Nyalakan musik",
-    "qrisHint": "Pindai dengan aplikasi bank atau e-wallet."
+    "qrisHint": "Pindai dengan aplikasi bank atau e-wallet.",
+    "locationTitle": "Lokasi",
+    "countdownTitle": "Menuju hari bahagia",
+    "storyWedding": "Kisah kami",
+    "storyOther": "Tentang acara",
+    "forGuest": "Dengan penuh hormat, untuk {{name}}",
+    "madeWith": "Undangan digital oleh {{app}}",
+    "coverEyebrow": {
+      "Wedding": "Undangan Pernikahan",
+      "Birthday": "Undangan Ulang Tahun",
+      "Corporate": "Undangan Resmi",
+      "Community": "Undangan",
+      "Other": "Undangan"
+    },
+    "countdownOther": "Menuju hari H"
   },
   "responses": {
     "rsvpTitle": "Monitor RSVP",
@@ -735,5 +749,12 @@
     "photos": "Foto",
     "staff": "Staff bertugas",
     "quota": "Kuota tamu paket"
+  },
+  "themes": {
+    "label": "Tema undangan",
+    "hint": "Tampilan halaman undangan untuk tamu. Bisa diganti kapan saja.",
+    "Elegant": "Elegan",
+    "Birthday": "Ceria",
+    "Corporate": "Modern gelap"
   }
 }
