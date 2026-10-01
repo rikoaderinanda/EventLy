@@ -61,7 +61,7 @@ npm run dev
 
 The API reads the connection string `ConnectionStrings:Database`. `appsettings.Development.json` points at `localhost:5432` with the compose defaults. Override it with the environment variable `ConnectionStrings__Database`.
 
-More details: [docs/setup-guide.md](docs/setup-guide.md).
+More details: [docs/setup-guide.md](docs/setup-guide.md). Going online: [docs/deployment-guide.md](docs/deployment-guide.md).
 
 ## Common commands
 
