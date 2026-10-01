@@ -589,5 +589,21 @@
       "title": "QRIS image",
       "hint": "For the digital gift: guests scan this QRIS and pay you directly."
     }
+  },
+  "ui": {
+    "close": "Close",
+    "checkIn": {
+      "no": "Not checked in",
+      "at": "Checked in {{time}}"
+    },
+    "event": {
+      "guests_one": "{{count}} guest",
+      "guests_other": "{{count}} guests",
+      "rsvpProgress": "RSVP answered"
+    },
+    "guest": {
+      "people_one": "{{count}} person",
+      "people_other": "{{count}} people"
+    }
   }
 }

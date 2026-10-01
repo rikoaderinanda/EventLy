@@ -55,6 +55,14 @@
 | Q-55 | Unique guests | In one event, a **guest name** and a **WhatsApp number** appear only once among guests still on the list. Names ignore case and extra spaces; numbers are compared after normalisation (0812… = +62 812…). Guests without a number are fine. Checked when adding, editing and importing; enforced by unique indexes | 2026-10-01 |
 | Q-56 | Import format | Guests are imported from an **Excel workbook (.xlsx)**, not CSV | 2026-10-01 |
 | Q-57 | Message language | Messages from the server that people read (form validation, import rows) follow the app language: **Indonesian by default**, English when the app is switched to English (`Accept-Language`) | 2026-10-01 |
+| Q-58 | UI redesign (2026-10-01) | Full redesign before Phase 10, in stages UI-1 → UI-6, checked and committed per stage: design system, app frame, organizer, staff scanner, guest invitation with themes, platform/login. Four personalities: organizer = modern SaaS, scanner = functional/high contrast, invitation = emotional/luxury, platform = enterprise minimal. See [docs/design/design-system.md](../design/design-system.md) | 2026-10-01 |
+| Q-59 | Global menus | Sidebar/bottom-nav items Guests, Check-in, Payments and Analytics open the page of the **selected event** (event picker in the frame; the only Active event is picked automatically). Bottom nav on phones: Beranda · Acara · Tamu · Statistik · Profil | 2026-10-01 |
+| Q-60 | Analytics and Phase 10 | The dashboard home and the statistics page (with their summary endpoint) are built in UI-3; Phase 10 then adds the Excel exports | 2026-10-01 |
+| Q-61 | "Gift received" card | Replaced by a card that exists in the data (wishes or photos). Note: guests' optional "Konfirmasi hadiah" (Q-41) can also be counted; to be confirmed in UI-3 | 2026-10-01 |
+| Q-62 | Invitation themes | New event field (migration) and a picker in the event form. The default follows the category: Wedding → Wedding Elegant (cream + gold), Birthday → Birthday (pastel), Corporate → Corporate (modern dark), Community/Other → Elegant. The Owner can change it. All themes in every package | 2026-10-01 |
+| Q-63 | Story, cover, location | "Story" uses the event description; the cover shows the event name (e.g. "Rina & Budi"); location uses each session's Google Maps link as an "Open map" button (no embedded map) | 2026-10-01 |
+| Q-64 | Guest avatars | Initials on a soft colour (guests have no photo) | 2026-10-01 |
+| Q-65 | Settings | A Profile/Settings page: name, email, language, sign out, link to Organization | 2026-10-01 |
 | Q-9 | Offline | **Online only** for the MVP. Upload retries automatically. Photo step can be skipped. Offline mode is a future phase | 2026-09-29 |
 
 ## Accepted recommendations ("sisanya sesuai saran", 2026-09-29)

@@ -589,5 +589,19 @@
       "title": "Gambar QRIS",
       "hint": "Untuk amplop digital: tamu memindai QRIS ini dan membayar langsung ke Anda."
     }
+  },
+  "ui": {
+    "close": "Tutup",
+    "checkIn": {
+      "no": "Belum check-in",
+      "at": "Check-in {{time}}"
+    },
+    "event": {
+      "guests_other": "{{count}} tamu",
+      "rsvpProgress": "RSVP terjawab"
+    },
+    "guest": {
+      "people_other": "{{count}} orang"
+    }
   }
 }

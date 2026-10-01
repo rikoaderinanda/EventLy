@@ -52,7 +52,16 @@ cd backend && dotnet run --project src/EventLy.Api      # http://localhost:5080
 cd web && npm install && npm run dev                     # http://localhost:5173
 ```
 
-The Vite dev server proxies `/api`, `/health`, `/docs` and `/openapi` to the API. To apply migrations:
+The Vite dev server proxies `/api`, `/health`, `/docs` and `/openapi` to the API at `http://localhost:5080`. When the API runs in Docker instead (`docker compose up -d`, port 8080), point the proxy there, otherwise Vite logs `http proxy error … ECONNREFUSED`:
+
+```powershell
+$env:EVENTLY_API_URL = "http://127.0.0.1:8080"; npm run dev      # PowerShell
+```
+```bash
+EVENTLY_API_URL=http://127.0.0.1:8080 npm run dev                 # bash
+```
+
+To apply migrations:
 
 ```bash
 cd backend && dotnet run --project src/EventLy.Api -- migrate

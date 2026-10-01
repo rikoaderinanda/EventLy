@@ -235,6 +235,18 @@ export const routes: RouteObject[] = [
           },
         ],
       },
+      // Design system gallery, development only: the condition is false in production builds,
+      // so the page isn't bundled.
+      ...(import.meta.env.DEV
+        ? [
+            {
+              path: 'dev/ui',
+              lazy: async () => ({
+                Component: (await import('@/features/dev/UiShowcasePage')).UiShowcasePage,
+              }),
+            },
+          ]
+        : []),
     ],
   },
 ]

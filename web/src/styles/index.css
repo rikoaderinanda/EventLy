@@ -1,21 +1,119 @@
 @import 'tailwindcss';
 
+/*
+ * EventLy design tokens (docs/design/design-system.md).
+ * brand-* is the warm terracotta scale: brand-600 is the primary action, brand-900 the warm brown for
+ * headings, brand-300 champagne for highlights, brand-50 the cream background. Status colours are muted
+ * on purpose: nothing on screen is saturated.
+ */
 @theme {
-  --color-brand-50: #fbf8f4;
-  --color-brand-100: #f3e9df;
-  --color-brand-300: #e6b980;
-  --color-brand-500: #b0694f;
-  --color-brand-700: #8a4b3c;
-  --color-brand-900: #4a2820;
-  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --color-brand-50: #faf7f2;
+  --color-brand-100: #f4ece2;
+  --color-brand-200: #eddcc8;
+  --color-brand-300: #e8c9a5;
+  --color-brand-400: #c99273;
+  --color-brand-500: #b06c52;
+  --color-brand-600: #9b5a43;
+  --color-brand-700: #87503c;
+  --color-brand-800: #7a4837;
+  --color-brand-900: #6f4032;
+  --color-brand-950: #3d231b;
+
+  --color-gold-100: #f6eccb;
+  --color-gold-300: #e2c766;
+  --color-gold-500: #c9a227;
+  --color-gold-700: #8c7019;
+
+  --color-success-50: #edf6f1;
+  --color-success-100: #d5ebdf;
+  --color-success-500: #3f8f6b;
+  --color-success-700: #2d6b50;
+
+  --color-warning-50: #fbf4e6;
+  --color-warning-100: #f5e3c2;
+  --color-warning-500: #c58a25;
+  --color-warning-700: #8a5f15;
+
+  --color-danger-50: #fbefee;
+  --color-danger-100: #f3d6d5;
+  --color-danger-500: #b94a48;
+  --color-danger-700: #93383a;
+
+  --font-sans: 'Inter Variable', 'Inter', ui-sans-serif, system-ui, sans-serif;
+  /* Loaded only on the invitation pages (see features/invitation/fonts.ts). */
+  --font-serif: 'Cormorant Garamond Variable', 'Cormorant Garamond', ui-serif, Georgia, serif;
+  --font-display: 'Playfair Display Variable', 'Playfair Display', ui-serif, Georgia, serif;
+
+  /* Type scale: page 32–40, section 24, card 18, body 15–16. */
+  --text-page: 2rem;
+  --text-page--line-height: 1.15;
+  --text-page--letter-spacing: -0.02em;
+  --text-page--font-weight: 650;
+  --text-section: 1.5rem;
+  --text-section--line-height: 1.25;
+  --text-section--letter-spacing: -0.01em;
+  --text-section--font-weight: 600;
+  --text-card: 1.125rem;
+  --text-card--line-height: 1.4;
+  --text-card--font-weight: 600;
+  --text-body: 0.9375rem;
+  --text-body--line-height: 1.6;
+
+  --radius-4xl: 2rem;
+
+  --shadow-soft: 0 1px 2px rgb(61 35 27 / 0.04), 0 4px 16px -4px rgb(61 35 27 / 0.08);
+  --shadow-lift: 0 2px 4px rgb(61 35 27 / 0.05), 0 12px 32px -8px rgb(61 35 27 / 0.16);
+  --shadow-primary: 0 1px 2px rgb(111 64 50 / 0.2), 0 6px 16px -6px rgb(155 90 67 / 0.55);
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @layer base {
   html {
     -webkit-tap-highlight-color: transparent;
+    text-size-adjust: 100%;
   }
   body {
-    @apply bg-brand-50 text-stone-800 antialiased;
+    @apply bg-brand-50 font-sans text-body text-stone-800 antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply text-brand-950;
+  }
+  /* One visible focus style for every interactive element, keyboard only. */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-600;
+  }
+  ::selection {
+    @apply bg-brand-300/60;
+  }
+}
+
+@utility text-page-responsive {
+  font-size: var(--text-page);
+  line-height: var(--text-page--line-height);
+  letter-spacing: var(--text-page--letter-spacing);
+  font-weight: var(--text-page--font-weight);
+  @media (width >= 48rem) {
+    font-size: 2.5rem;
+  }
+}
+
+/* Primary actions: a soft terracotta gradient rather than a flat fill. */
+@utility bg-primary-gradient {
+  background-image: linear-gradient(
+    180deg,
+    var(--color-brand-500) 0%,
+    var(--color-brand-600) 55%,
+    var(--color-brand-700) 100%
+  );
+}
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
   }
 }
 
@@ -42,5 +140,5 @@
   @apply list-decimal pl-5;
 }
 .prose-legal blockquote {
-  @apply border-l-4 border-amber-400 bg-amber-50 px-4 py-2 text-amber-900;
+  @apply border-l-4 border-gold-500 bg-gold-100/50 px-4 py-2 text-brand-950;
 }
