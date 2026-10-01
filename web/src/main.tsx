@@ -5,6 +5,7 @@ import { AppProviders } from './app/providers'
 import { routes } from './app/routes'
 import '@fontsource-variable/inter'
 import './i18n'
+import './shared/lib/pwa'
 import './styles/index.css'
 
 const router = createBrowserRouter(routes)

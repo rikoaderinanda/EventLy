@@ -43,7 +43,11 @@ describe('UsersPage', () => {
     expect(within(budi).getByText('Diundang')).toBeInTheDocument()
     expect(within(budi).getByRole('button', { name: 'Batalkan undangan' })).toBeInTheDocument()
     // The Owner row has no controls.
-    expect(within(screen.getByText('Rina').closest('li')!).queryByRole('button')).not.toBeInTheDocument()
+    // (The signed-in Owner's name also shows in the account menu, so look inside the page.)
+    const page = screen.getByRole('main')
+    expect(
+      within(within(page).getByText('Rina').closest('li')!).queryByRole('button'),
+    ).not.toBeInTheDocument()
   })
 
   it('invites a staff member by Google email', async () => {

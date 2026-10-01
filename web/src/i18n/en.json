@@ -65,7 +65,20 @@
     "users": "Users",
     "events": "Events",
     "owners": "Owners",
-    "packages": "Packages"
+    "packages": "Packages",
+    "home": "Home",
+    "guests": "Guests",
+    "checkIn": "Check-in",
+    "payments": "Payments",
+    "analytics": "Analytics",
+    "stats": "Stats",
+    "profile": "Profile",
+    "settings": "Settings",
+    "selectedEvent": "Selected event",
+    "collapse": "Collapse menu",
+    "expand": "Expand menu",
+    "accountMenu": "Account menu",
+    "manageEvent": "Manage event"
   },
   "roles": {
     "Root": "Root",
@@ -605,5 +618,36 @@
       "people_one": "{{count}} person",
       "people_other": "{{count}} people"
     }
+  },
+  "eventPicker": {
+    "title": "Choose an event",
+    "description": "Guests, Check-in, Payments and Analytics will open this event.",
+    "create": "Create a new event",
+    "empty": "No events yet",
+    "none": "Choose an event",
+    "change": "Selected event: {{name}}. Change event",
+    "pickFirst": "Choose an event first"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Your profile and account preferences.",
+    "languageHint": "Language of the app and of messages from the server.",
+    "locale": {
+      "id": "Bahasa Indonesia",
+      "en": "English"
+    },
+    "organizationHint": "Name and organization details",
+    "usersHint": "Invite Admins and Staff",
+    "cancelledNoPayment": "This event was cancelled, so there is no payment."
+  },
+  "pwa": {
+    "offline": "You're offline. Changes can't be saved until the connection is back.",
+    "installTitle": "Install EventLy",
+    "installBody": "Open it faster from your home screen, like an app.",
+    "install": "Install",
+    "later": "Later",
+    "iosBefore": "Tap",
+    "iosAfter": "then \"Add to Home Screen\".",
+    "share": "Share"
   }
 }

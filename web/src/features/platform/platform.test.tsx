@@ -122,7 +122,8 @@ describe('Root platform pages', () => {
     ])
     renderRoute('/platform')
 
-    await userEvent.click(await screen.findByRole('link', { name: 'Paket' }))
+    // The sidebar and the phone bottom navigation both have the link (CSS decides which one shows).
+    await userEvent.click((await screen.findAllByRole('link', { name: 'Paket' }))[0]!)
 
     // The packages page is lazy-loaded; give it more than the default 1 s on a busy machine.
     expect(await screen.findByRole('heading', { name: 'Paket' }, { timeout: 5000 })).toBeInTheDocument()

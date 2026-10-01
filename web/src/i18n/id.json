@@ -65,7 +65,20 @@
     "users": "Pengguna",
     "events": "Acara",
     "owners": "Owner",
-    "packages": "Paket"
+    "packages": "Paket",
+    "home": "Beranda",
+    "guests": "Tamu",
+    "checkIn": "Check-in",
+    "payments": "Pembayaran",
+    "analytics": "Statistik",
+    "stats": "Statistik",
+    "profile": "Profil",
+    "settings": "Pengaturan",
+    "selectedEvent": "Acara terpilih",
+    "collapse": "Ciutkan menu",
+    "expand": "Lebarkan menu",
+    "accountMenu": "Menu akun",
+    "manageEvent": "Kelola acara"
   },
   "roles": {
     "Root": "Root",
@@ -603,5 +616,36 @@
     "guest": {
       "people_other": "{{count}} orang"
     }
+  },
+  "eventPicker": {
+    "title": "Pilih acara",
+    "description": "Menu Tamu, Check-in, Pembayaran dan Statistik akan membuka acara ini.",
+    "create": "Buat acara baru",
+    "empty": "Belum ada acara",
+    "none": "Pilih acara",
+    "change": "Acara terpilih: {{name}}. Ganti acara",
+    "pickFirst": "Pilih acara dulu"
+  },
+  "settings": {
+    "title": "Pengaturan",
+    "subtitle": "Profil dan preferensi akun Anda.",
+    "languageHint": "Bahasa tampilan aplikasi dan pesan dari server.",
+    "locale": {
+      "id": "Bahasa Indonesia",
+      "en": "English"
+    },
+    "organizationHint": "Nama dan data organisasi",
+    "usersHint": "Undang Admin dan Staff",
+    "cancelledNoPayment": "Acara ini dibatalkan, jadi tidak ada pembayaran."
+  },
+  "pwa": {
+    "offline": "Anda sedang offline. Perubahan belum bisa disimpan sampai koneksi kembali.",
+    "installTitle": "Pasang EventLy",
+    "installBody": "Buka lebih cepat dari layar utama, seperti aplikasi.",
+    "install": "Pasang",
+    "later": "Nanti",
+    "iosBefore": "Ketuk",
+    "iosAfter": "lalu \"Tambah ke Layar Utama\".",
+    "share": "Bagikan"
   }
 }

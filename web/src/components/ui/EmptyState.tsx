@@ -71,6 +71,7 @@ export function EmptyState({
   title,
   description,
   action,
+  headingLevel = 2,
   className,
 }: {
   kind?: EmptyKind
@@ -78,12 +79,15 @@ export function EmptyState({
   title: ReactNode
   description?: ReactNode
   action?: ReactNode
+  /** 1 when the empty state is the whole page (error pages). */
+  headingLevel?: 1 | 2 | 3
   className?: string
 }) {
+  const Heading = `h${headingLevel}` as const
   return (
     <div className={cn('mx-auto flex max-w-sm flex-col items-center px-4 py-10 text-center', className)}>
       <Illustration icon={icon ?? icons[kind]} />
-      <h2 className="mt-4 text-card">{title}</h2>
+      <Heading className="mt-4 text-card">{title}</Heading>
       {description && <p className="mt-1.5 text-sm text-stone-500">{description}</p>}
       {action && <div className="mt-5 flex flex-wrap justify-center gap-2">{action}</div>}
     </div>

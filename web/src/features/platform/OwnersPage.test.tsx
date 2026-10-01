@@ -35,7 +35,7 @@ describe('OwnersPage (Root)', () => {
     )
     renderRoute('/platform')
 
-    const row = (await screen.findByText('Rina')).closest('li')!
+    const row = (await within(await screen.findByRole('main')).findByText('Rina')).closest('li')!
     expect(within(row).getByText('Santoso WO')).toBeInTheDocument()
     await userEvent.click(within(row).getByRole('button', { name: 'Nonaktifkan' }))
 

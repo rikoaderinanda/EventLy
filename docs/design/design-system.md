@@ -62,7 +62,20 @@ Status is never shown by colour alone: badges always have a word and an icon.
 | `GuestCard` | `event/GuestCard.tsx` | Phone layout of the guest list |
 | `StatisticCard` | `event/StatisticCard.tsx` | Icon, label, value, caption or trend, optional ring/chart |
 
-`layout/` (sidebar, bottom navigation, header) arrives in UI-2.
+## App frame (UI-2)
+
+`components/layout/` and `app/layouts/index.tsx`:
+
+| Area | Desktop (from 1024px) | Phone and tablet |
+|---|---|---|
+| Organizer `/app` | `Sidebar`: logo, event picker, Dashboard · Acara · *Kelola acara* (Tamu, Check-in, Pembayaran, Statistik) · Organisasi · Pengguna (Owner) · Pengaturan; collapsible to icons (remembered per browser). `TopBar`: language and the account menu | `MobileHeader`: mark, slim event picker, avatar → profile. `MobileNavigation`: Beranda · Acara · Tamu · Statistik · Profil |
+| Platform `/platform` | Sidebar: Owner · Paket · Pengaturan | Bottom nav: Owner · Paket · Profil |
+| Staff `/staff` | Slim bar (logo, language, account); the scanner gets its own full-screen design in UI-4 | Same |
+| Public, guest | `PublicHeader` (logo, language); the invitation has no app chrome | Same |
+
+- **Selected event (Q-59):** `features/events/selected-event.ts`. The user's last choice (stored per user id in `localStorage`, ids only), else the only Active event, else the only event. Opening any `/app/events/:id/...` page selects that event. With a real choice to make, the event menus open the picker (`EventPickerProvider`, a `Modal`) and then the chosen event's page; switching events keeps the same kind of page.
+- **New pages:** `/app/events` (list; `/app` becomes the dashboard in UI-3), `/app/events/:id/payments`, `/app/events/:id/stats` (placeholder until UI-3), and `/app|/staff|/platform/settings` (profile, language, links, sign out; Q-65).
+- **PWA:** `shared/lib/pwa.ts` catches the browser's install event at start-up. `InstallPrompt` (organizer and staff) offers "Pasang" where the browser supports it and the Share → "Tambah ke Layar Utama" steps on iPhone Safari; hidden once installed and for 30 days after "Nanti". `OfflineBanner` (every area) says changes can't be saved while offline (the app is online-only, Q-9). `index.html` shows a splash (icon on cream) until React renders. Theme colour is the cream background, so the status bar blends with the header.
 
 ## Motion
 

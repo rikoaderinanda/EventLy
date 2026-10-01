@@ -56,6 +56,12 @@ export const routes: RouteObject[] = [
                 }),
               },
               {
+                path: 'events',
+                lazy: async () => ({
+                  Component: (await import('@/features/events/EventListPage')).EventListPage,
+                }),
+              },
+              {
                 path: 'events/new',
                 lazy: async () => ({
                   Component: (await import('@/features/events/EventFormPage')).NewEventPage,
@@ -128,6 +134,24 @@ export const routes: RouteObject[] = [
                 }),
               },
               {
+                path: 'events/:id/payments',
+                lazy: async () => ({
+                  Component: (await import('@/features/payments/EventPaymentsPage')).EventPaymentsPage,
+                }),
+              },
+              {
+                path: 'events/:id/stats',
+                lazy: async () => ({
+                  Component: (await import('@/features/stats/StatsPage')).StatsPage,
+                }),
+              },
+              {
+                path: 'settings',
+                lazy: async () => ({
+                  Component: (await import('@/features/settings/SettingsPage')).SettingsPage,
+                }),
+              },
+              {
                 path: 'events/:id/qr-sheet',
                 lazy: async () => ({
                   Component: (await import('@/features/guests/QrSheetPage')).QrSheetPage,
@@ -185,6 +209,12 @@ export const routes: RouteObject[] = [
                 }),
               },
               {
+                path: 'settings',
+                lazy: async () => ({
+                  Component: (await import('@/features/settings/SettingsPage')).SettingsPage,
+                }),
+              },
+              {
                 path: 'events/:id',
                 lazy: async () => ({
                   Component: (await import('@/features/checkin/ScannerPage')).ScannerPage,
@@ -211,6 +241,12 @@ export const routes: RouteObject[] = [
                 path: 'owners/:id',
                 lazy: async () => ({
                   Component: (await import('@/features/platform/OwnerDetailPage')).OwnerDetailPage,
+                }),
+              },
+              {
+                path: 'settings',
+                lazy: async () => ({
+                  Component: (await import('@/features/settings/SettingsPage')).SettingsPage,
                 }),
               },
               {
