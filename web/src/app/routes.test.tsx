@@ -2,7 +2,7 @@ import { screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { changeLocale } from '@/i18n'
 import { renderRoute } from '@/test/renderRoute'
-import { jsonResponse, signInAs } from '@/test/session'
+import { jsonResponse, signInAs, stubApi } from '@/test/session'
 
 describe('routes', () => {
   beforeEach(() => {
@@ -69,10 +69,11 @@ describe('routes', () => {
     expect(await screen.findByRole('heading', { name: expectedTitle })).toBeInTheDocument()
   })
 
-  it('keeps guest invitation pages public', () => {
+  it('keeps guest invitation pages public', async () => {
+    stubApi([]) // unknown code: the API answers 404
     renderRoute('/i/abc123')
 
-    expect(screen.getByRole('heading', { name: 'Undangan' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Undangan tidak ditemukan' })).toBeInTheDocument()
   })
 
   it('shows a 404 page for unknown routes', () => {

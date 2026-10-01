@@ -194,18 +194,28 @@ export function EventDetailPage() {
 
       <Actions event={event} />
 
-      <Link
-        to={`/app/events/${event.id}/guests`}
-        className="flex items-center justify-between rounded-lg border border-brand-100 bg-white p-4 hover:border-brand-300"
-      >
-        <span>
-          <span className="block font-semibold text-brand-900">{t('guests.title')}</span>
-          <span className="text-sm text-stone-600">{t('guests.entryHint')}</span>
-        </span>
-        <span aria-hidden="true" className="text-brand-700">
-          →
-        </span>
-      </Link>
+      <nav aria-label={t('events.sectionsNav')} className="grid gap-3 sm:grid-cols-2">
+        {[
+          { to: 'guests', title: t('guests.title'), hint: t('guests.entryHint') },
+          { to: 'rsvps', title: t('responses.rsvpTitle'), hint: t('responses.rsvpHint') },
+          { to: 'wishes', title: t('responses.wishesTitle'), hint: t('responses.wishesEntry') },
+          { to: 'gifts', title: t('responses.giftsTitle'), hint: t('responses.giftsEntry') },
+        ].map((entry) => (
+          <Link
+            key={entry.to}
+            to={`/app/events/${event.id}/${entry.to}`}
+            className="flex items-center justify-between gap-2 rounded-lg border border-brand-100 bg-white p-4 hover:border-brand-300"
+          >
+            <span>
+              <span className="block font-semibold text-brand-900">{entry.title}</span>
+              <span className="text-sm text-stone-600">{entry.hint}</span>
+            </span>
+            <span aria-hidden="true" className="text-brand-700">
+              →
+            </span>
+          </Link>
+        ))}
+      </nav>
 
       <div className="space-y-3">
         <h2 className="font-semibold text-brand-900">{t('events.sessions')}</h2>

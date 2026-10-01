@@ -1,0 +1,129 @@
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { apiFetch } from '@/api/client'
+import { env } from '@/config/env'
+import type { EventCategory, EventStatus, EventTimeZone, LocalDateTime } from '@/features/events/api'
+import type { GuestType } from '@/features/guests/api'
+
+export type RsvpStatus = 'Pending' | 'Attending' | 'NotAttending'
+
+export type PublicSession = {
+  name: string
+  startsAt: string
+  endsAt: string
+  startsAtLocal: LocalDateTime
+  endsAtLocal: LocalDateTime
+  venue: string
+  mapsUrl: string | null
+  isCheckInSession: boolean
+}
+
+export type PublicRsvp = { status: RsvpStatus; respondedAt: string | null; isOpen: boolean; closesAt: string }
+
+export type PublicInvitation = {
+  guestName: string
+  type: GuestType
+  numberOfPeople: number
+  event: {
+    name: string
+    category: EventCategory
+    description: string | null
+    timeZone: EventTimeZone
+    status: EventStatus
+    coverUrl: string | null
+    sessions: PublicSession[]
+  }
+  rsvp: PublicRsvp
+  features: {
+    countdown: boolean
+    wishes: boolean
+    wishesOpen: boolean
+    digitalGift: boolean
+    backgroundMusic: boolean
+  }
+  myWish: string | null
+}
+
+export type PublicWish = { guestName: string; message: string; createdAt: string; isMine: boolean }
+export type PublicWishPage = { wishes: PublicWish[]; page: number; hasMore: boolean }
+
+export type GiftAccountKind = 'Bank' | 'EWallet'
+export type GiftAccount = {
+  kind: GiftAccountKind
+  provider: string
+  accountNumber: string
+  accountHolder: string
+}
+export type PublicGifts = { accounts: GiftAccount[]; address: string | null; qrisUrl: string | null }
+
+const base = (code: string) => `/public/invitations/${encodeURIComponent(code)}`
+
+export const publicKeys = {
+  invitation: (code: string) => ['public', code] as const,
+  wishes: (code: string) => ['public', code, 'wishes'] as const,
+  gifts: (code: string) => ['public', code, 'gifts'] as const,
+}
+
+/** The QR image is public (the code is the credential), so an <img> can load it directly. */
+export const publicQrUrl = (code: string) => `${env.apiBaseUrl}${base(code)}/qr?size=480`
+
+export function usePublicInvitation(code: string) {
+  return useQuery({
+    queryKey: publicKeys.invitation(code),
+    queryFn: () => apiFetch<PublicInvitation>(base(code), { skipAuthRefresh: true }),
+    retry: false,
+  })
+}
+
+export function useSetRsvp(code: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (status: Exclude<RsvpStatus, 'Pending'>) =>
+      apiFetch<PublicRsvp>(`${base(code)}/rsvp`, { method: 'PUT', body: { status }, skipAuthRefresh: true }),
+    onSuccess: (rsvp) =>
+      queryClient.setQueryData<PublicInvitation>(
+        publicKeys.invitation(code),
+        (old) => old && { ...old, rsvp },
+      ),
+  })
+}
+
+export function usePublicWishes(code: string, enabled: boolean) {
+  return useInfiniteQuery({
+    queryKey: publicKeys.wishes(code),
+    queryFn: ({ pageParam }) =>
+      apiFetch<PublicWishPage>(`${base(code)}/wishes?page=${pageParam}`, { skipAuthRefresh: true }),
+    initialPageParam: 1,
+    getNextPageParam: (last) => (last.hasMore ? last.page + 1 : undefined),
+    enabled,
+  })
+}
+
+export function useSetWish(code: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (message: string) =>
+      apiFetch<PublicWish>(`${base(code)}/wish`, { method: 'PUT', body: { message }, skipAuthRefresh: true }),
+    onSuccess: (wish) => {
+      queryClient.setQueryData<PublicInvitation>(
+        publicKeys.invitation(code),
+        (old) => old && { ...old, myWish: wish.message },
+      )
+      return queryClient.invalidateQueries({ queryKey: publicKeys.wishes(code) })
+    },
+  })
+}
+
+export function usePublicGifts(code: string, enabled: boolean) {
+  return useQuery({
+    queryKey: publicKeys.gifts(code),
+    queryFn: () => apiFetch<PublicGifts>(`${base(code)}/gifts`, { skipAuthRefresh: true }),
+    enabled,
+  })
+}
+
+export function useConfirmGift(code: string) {
+  return useMutation({
+    mutationFn: (body: { senderName: string; amount: number | null; note: string | null }) =>
+      apiFetch<void>(`${base(code)}/gift-confirmations`, { method: 'POST', body, skipAuthRefresh: true }),
+  })
+}

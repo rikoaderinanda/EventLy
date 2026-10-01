@@ -38,17 +38,35 @@ public sealed class GuestService(
         {
             query = query.Where(g => g.Invitation!.Status == status);
         }
+        if (filter.Rsvp is { } rsvp)
+        {
+            // No RSVP row is the same as Pending.
+            query = rsvp == RsvpStatus.Pending
+                ? query.Where(g => !db.Rsvps.Any(r => r.InvitationId == g.Invitation!.Id && r.Status != RsvpStatus.Pending))
+                : query.Where(g => db.Rsvps.Any(r => r.InvitationId == g.Invitation!.Id && r.Status == rsvp));
+        }
 
         var guests = await query
             .Include(g => g.Sessions).Include(g => g.Invitation).AsSplitQuery()
             .OrderBy(g => g.Name).ThenBy(g => g.CreatedAt)
             .Take(2_000)
             .ToListAsync(ct);
-        return new GuestListDto([.. guests.Select(ToDto)], total, people, ev.PackageSnapshot?.Features.MaxGuests);
+        var invitationIds = guests.Select(g => g.Invitation!.Id).ToList();
+        var answers = await db.Rsvps.AsNoTracking()
+            .Where(r => invitationIds.Contains(r.InvitationId))
+            .ToDictionaryAsync(r => r.InvitationId, r => r.Status, ct);
+        return new GuestListDto(
+            [.. guests.Select(g => ToDto(g, answers.GetValueOrDefault(g.Invitation!.Id, RsvpStatus.Pending),
+                EventLifecycle.IsPublic(ev.Status)))],
+            total, people, ev.PackageSnapshot?.Features.MaxGuests);
     }
 
-    public async Task<GuestDto> GetAsync(Guid eventId, Guid guestId, CancellationToken ct) =>
-        ToDto(await LoadGuestAsync(eventId, guestId, db.Guests.AsNoTracking(), ct));
+    public async Task<GuestDto> GetAsync(Guid eventId, Guid guestId, CancellationToken ct)
+    {
+        var guest = await LoadGuestAsync(eventId, guestId, db.Guests.AsNoTracking(), ct);
+        var status = await db.Events.Where(e => e.Id == eventId).Select(e => e.Status).SingleAsync(ct);
+        return ToDto(guest, await RsvpOfAsync(guest, ct), EventLifecycle.IsPublic(status));
+    }
 
     public Task<GuestDto> CreateAsync(Guid eventId, CreateGuestRequest request, CancellationToken ct) =>
         InLockedEventAsync(eventId, async ev =>
@@ -127,7 +145,7 @@ public sealed class GuestService(
             var guest = await change(ev);
             await db.SaveChangesAsync(ct);
             await transaction.CommitAsync(ct);
-            return ToDto(guest);
+            return ToDto(guest, await RsvpOfAsync(guest, ct), EventLifecycle.IsPublic(ev.Status));
         });
     }
 
@@ -198,14 +216,20 @@ public sealed class GuestService(
             .SingleOrDefaultAsync(g => g.Id == guestId && g.EventId == eventId, ct)
         ?? throw new NotFoundException("guest.not_found", "Guest not found.");
 
-    private GuestDto ToDto(Guest g)
+    private async Task<RsvpStatus> RsvpOfAsync(Guest guest, CancellationToken ct) =>
+        await db.Rsvps.AsNoTracking().Where(r => r.InvitationId == guest.Invitation!.Id)
+            .Select(r => (RsvpStatus?)r.Status).SingleOrDefaultAsync(ct) ?? RsvpStatus.Pending;
+
+    /// <summary><paramref name="sendable"/>: the event is paid, so the link may be shown and sent (Q-48).</summary>
+    private GuestDto ToDto(Guest g, RsvpStatus rsvp, bool sendable)
     {
         var invitation = g.Invitation!;
         return new GuestDto(
             g.Id, g.EventId, g.Name, g.Phone, g.Email, g.Type, g.NumberOfPeople,
             [.. g.Sessions.Select(s => s.SessionId)],
-            new InvitationSummaryDto(invitation.Id, invitation.Code, links.Url(invitation.Code), invitation.Status,
+            new InvitationSummaryDto(invitation.Id, invitation.Code, sendable ? links.Url(invitation.Code) : null, invitation.Status,
                 invitation.OpenedAt),
+            rsvp,
             g.CreatedAt);
     }
 

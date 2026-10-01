@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using EventLy.Api.Dtos.Events;
+using EventLy.Api.Dtos.Guests;
 using EventLy.Api.Dtos.Organizations;
 using EventLy.Api.Dtos.Users;
 using EventLy.Api.Entities;
@@ -192,5 +193,28 @@ public sealed class TenantIsolationTests(PostgresFixture postgres) : IClassFixtu
 
         var stillThere = await GuestRequests.ListAsync(_client, _a.Owner, ev.Id);
         stillThere.Guests.ShouldHaveSingleItem().Invitation.Code.ShouldBe(guest.Invitation.Code);
+    }
+
+    [Fact]
+    public async Task Another_tenants_rsvps_wishes_and_gifts_are_invisible()
+    {
+        var ev = await CreateAsync(_client, _a.Owner);
+
+        var reads = new[]
+        {
+            $"/api/v1/events/{ev.Id}/rsvps",
+            $"/api/v1/events/{ev.Id}/rsvps/summary",
+            $"/api/v1/events/{ev.Id}/wishes",
+            $"/api/v1/events/{ev.Id}/gifts",
+            $"/api/v1/events/{ev.Id}/gift-confirmations",
+        };
+        foreach (var path in reads)
+        {
+            (await SendAsync(_client, HttpMethod.Get, path, _b.Owner.AccessToken)).StatusCode.ShouldBe(HttpStatusCode.NotFound, path);
+        }
+        (await SendAsync(_client, HttpMethod.Put, $"/api/v1/events/{ev.Id}/gifts", _b.Owner.AccessToken,
+            new UpdateEventGiftsRequest([], "Bukan milik B"))).StatusCode.ShouldBe(HttpStatusCode.NotFound);
+        (await SendAsync(_client, HttpMethod.Post, $"/api/v1/events/{ev.Id}/wishes/{Guid.NewGuid()}/hide", _b.Owner.AccessToken))
+            .StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }
 }

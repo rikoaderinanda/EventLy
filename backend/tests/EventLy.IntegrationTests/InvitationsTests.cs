@@ -41,10 +41,19 @@ public sealed class InvitationsTests(PostgresFixture postgres) : IClassFixture<P
     private Task<HttpResponseMessage> Send(HttpMethod method, string path, Member? member = null, object? body = null) =>
         SendAsync(_client, method, path, (member ?? _tenant.Owner).AccessToken, body);
 
-    private async Task<(Guid EventId, GuestDto Guest)> GuestAsync(CreateGuestRequest? request = null)
+    /// <summary>A paid (Active) event: invitations can only be sent once the event is paid (Q-48).</summary>
+    private async Task<Guid> PaidEventAsync()
     {
         var ev = await Events.CreateAsync(_client, _tenant.Owner, Events.Wedding("Pernikahan Rina & Budi"));
-        return (ev.Id, await CreateAsync(_client, _tenant.Owner, ev.Id, request));
+        var basic = await PackageAsync(_client, _tenant.Owner, "BASIC");
+        await PayAsync(_factory, _client, await StartCheckoutAsync(_client, _tenant.Owner, ev.Id, basic.Id));
+        return ev.Id;
+    }
+
+    private async Task<(Guid EventId, GuestDto Guest)> GuestAsync(CreateGuestRequest? request = null)
+    {
+        var eventId = await PaidEventAsync();
+        return (eventId, await CreateAsync(_client, _tenant.Owner, eventId, request));
     }
 
     [Fact]
@@ -58,7 +67,35 @@ public sealed class InvitationsTests(PostgresFixture postgres) : IClassFixture<P
         link.Url.ShouldStartWith("https://wa.me/6281234567890?text=");
         link.Message.ShouldStartWith("Halo Sari,");
         link.Message.ShouldContain("Pernikahan Rina & Budi");
-        link.Message.ShouldContain(guest.Invitation.Url);
+        link.Message.ShouldContain(guest.Invitation.Url.ShouldNotBeNull());
+    }
+
+    [Fact]
+    public async Task An_unpaid_event_prepares_invitations_but_cant_send_them()
+    {
+        var ev = await Events.CreateAsync(_client, _tenant.Owner);
+        var guest = await CreateAsync(_client, _tenant.Owner, ev.Id);
+        var id = guest.Invitation.Id;
+
+        guest.Invitation.Url.ShouldBeNull();
+        (await ReadAsync<InvitationDto>(await Send(HttpMethod.Get, $"/api/v1/invitations/{id}"))).Url.ShouldBeNull();
+        foreach (var path in new[]
+                 {
+                     $"/api/v1/invitations/{id}/whatsapp-link",
+                     $"/api/v1/invitations/{id}/qr",
+                     $"/api/v1/events/{ev.Id}/invitations/qr-sheet",
+                 })
+        {
+            var response = await Send(HttpMethod.Get, path);
+            response.StatusCode.ShouldBe(HttpStatusCode.Conflict, path);
+            (await ProblemCodeAsync(response)).ShouldBe("invitation.event_not_paid");
+        }
+
+        await PayAsync(_factory, _client, await StartCheckoutAsync(_client, _tenant.Owner, ev.Id,
+            (await PackageAsync(_client, _tenant.Owner, "BASIC")).Id));
+
+        (await ListAsync(_client, _tenant.Owner, ev.Id)).Guests.Single().Invitation.Url.ShouldEndWith(guest.Invitation.Code);
+        (await Send(HttpMethod.Get, $"/api/v1/invitations/{id}/whatsapp-link")).StatusCode.ShouldBe(HttpStatusCode.OK);
     }
 
     [Fact]
@@ -129,13 +166,13 @@ public sealed class InvitationsTests(PostgresFixture postgres) : IClassFixture<P
     [Fact]
     public async Task The_qr_sheet_lists_active_invitations_by_name()
     {
-        var ev = await Events.CreateAsync(_client, _tenant.Owner);
-        await CreateAsync(_client, _tenant.Owner, ev.Id, Individual("Wati"));
-        await CreateAsync(_client, _tenant.Owner, ev.Id, Family("Keluarga Adi", 3));
-        var revoked = await CreateAsync(_client, _tenant.Owner, ev.Id, Individual("Budi"));
+        var eventId = await PaidEventAsync();
+        await CreateAsync(_client, _tenant.Owner, eventId, Individual("Wati"));
+        await CreateAsync(_client, _tenant.Owner, eventId, Family("Keluarga Adi", 3));
+        var revoked = await CreateAsync(_client, _tenant.Owner, eventId, Individual("Budi"));
         (await Send(HttpMethod.Post, $"/api/v1/invitations/{revoked.Invitation.Id}/revoke")).EnsureSuccessStatusCode();
 
-        var sheet = await ReadAsync<List<QrSheetItemDto>>(await Send(HttpMethod.Get, $"/api/v1/events/{ev.Id}/invitations/qr-sheet"));
+        var sheet = await ReadAsync<List<QrSheetItemDto>>(await Send(HttpMethod.Get, $"/api/v1/events/{eventId}/invitations/qr-sheet"));
 
         sheet.Select(s => s.GuestName).ShouldBe(["Keluarga Adi", "Wati"]);
         sheet[0].NumberOfPeople.ShouldBe(3);

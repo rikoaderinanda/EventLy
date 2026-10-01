@@ -57,6 +57,9 @@ public sealed class Event : ITenantOwned, ISoftDeletable, IHasTimestamps
     /// <summary>Message for "Kirim via WhatsApp" with {nama}, {acara} and {link}; null uses the default.</summary>
     public string? WhatsappTemplate { get; set; }
 
+    /// <summary>Amplop digital: optional address for sending a gift (Q-41).</summary>
+    public string? GiftAddress { get; set; }
+
     /// <summary>Object key of the cover photo in storage (upload arrives with storage in Phase 9).</summary>
     public string? CoverImageKey { get; set; }
 
@@ -74,6 +77,9 @@ public sealed class Event : ITenantOwned, ISoftDeletable, IHasTimestamps
     public DateTimeOffset UpdatedAt { get; set; }
 
     public EventSession CheckInSession => Sessions.Single(s => s.IsCheckInSession);
+
+    /// <summary>When the last session ends: the event is over.</summary>
+    public DateTimeOffset EndsAt => Sessions.Max(s => s.EndsAt);
 
     /// <summary>Copies the check-in session's start and venue into <see cref="Date"/> and <see cref="Venue"/>.</summary>
     public void SyncFromCheckInSession()
@@ -129,6 +135,12 @@ public sealed class EventStaffAssignment : ITenantOwned
 /// </summary>
 public static class EventLifecycle
 {
+    /// <summary>Guests can still write wishes this long after the event (decision Q-42).</summary>
+    public static readonly TimeSpan WishesOpenAfterEvent = TimeSpan.FromDays(7);
+
+    /// <summary>The guest's invitation page works for an Active event, and stays readable once Completed.</summary>
+    public static bool IsPublic(EventStatus status) => status is EventStatus.Active or EventStatus.Completed;
+
     /// <summary>Completed and cancelled events are read-only.</summary>
     public static bool IsEditable(EventStatus status) =>
         status is EventStatus.Draft or EventStatus.PendingPayment or EventStatus.Active;

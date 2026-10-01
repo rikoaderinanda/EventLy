@@ -25,8 +25,10 @@ public sealed class EventConfiguration : IEntityTypeConfiguration<Event>
         builder.Property(e => e.Status).HasConversion<string>().HasMaxLength(20);
         builder.Property(e => e.CoverImageKey).HasMaxLength(512);
         builder.Property(e => e.WhatsappTemplate).HasMaxLength(1000);
+        builder.Property(e => e.GiftAddress).HasMaxLength(500);
         builder.Property(e => e.Version).IsRowVersion();
         builder.Ignore(e => e.CheckInSession);
+        builder.Ignore(e => e.EndsAt);
         builder.OwnsOne(e => e.PackageSnapshot, s =>
         {
             s.ToJson("package_snapshot");

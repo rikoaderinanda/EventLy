@@ -2,7 +2,6 @@ import type { RouteObject } from 'react-router'
 import { LoginPage } from '@/features/auth/LoginPage'
 import { ProtectedRoute } from '@/features/auth/ProtectedRoute'
 import { HomePage } from '@/features/home/HomePage'
-import { ComingSoon } from '@/shared/components/ComingSoon'
 import { AuthLayout, GuestLayout, OrganizerLayout, PlatformLayout, StaffLayout } from './layouts'
 import { RouteError } from './RouteError'
 
@@ -90,6 +89,24 @@ export const routes: RouteObject[] = [
                 path: 'events/:id/guests/:guestId',
                 lazy: async () => ({
                   Component: (await import('@/features/guests/GuestFormPage')).EditGuestPage,
+                }),
+              },
+              {
+                path: 'events/:id/rsvps',
+                lazy: async () => ({
+                  Component: (await import('@/features/responses/RsvpPage')).RsvpPage,
+                }),
+              },
+              {
+                path: 'events/:id/wishes',
+                lazy: async () => ({
+                  Component: (await import('@/features/responses/WishesPage')).WishesPage,
+                }),
+              },
+              {
+                path: 'events/:id/gifts',
+                lazy: async () => ({
+                  Component: (await import('@/features/responses/GiftsPage')).GiftsPage,
                 }),
               },
               {
@@ -185,7 +202,14 @@ export const routes: RouteObject[] = [
       {
         path: 'i/:code',
         element: <GuestLayout />,
-        children: [{ index: true, element: <ComingSoon title="Undangan" phase="Phase 7" /> }],
+        children: [
+          {
+            index: true,
+            lazy: async () => ({
+              Component: (await import('@/features/invitation/InvitationPage')).InvitationPage,
+            }),
+          },
+        ],
       },
     ],
   },

@@ -53,6 +53,7 @@ const guest: Guest = {
     status: 'Active',
     openedAt: null,
   },
+  rsvp: 'Pending',
   createdAt: '',
 }
 
@@ -129,6 +130,24 @@ describe('guests and invitations', () => {
     await userEvent.click(within(row).getByRole('button', { name: 'Kirim via WhatsApp' }))
 
     await vi.waitFor(() => expect(tab.location.href).toBe('https://wa.me/6281234567890?text=Halo'))
+  })
+
+  it('prepares invitations before payment but offers no way to send them yet', async () => {
+    const unpaid = { ...guest, invitation: { ...guest.invitation, url: null } }
+    stubApi([
+      { path: '/events/e1', response: () => jsonResponse({ ...event, status: 'Draft' }) },
+      { path: '/events/e1/guests', response: () => jsonResponse({ ...list, guests: [unpaid], limit: null }) },
+      {
+        path: '/events/e1/whatsapp-template',
+        response: () => jsonResponse({ template: 'Halo {nama} {link}', isDefault: true }),
+      },
+    ])
+    renderRoute('/app/events/e1/guests')
+
+    const row = (await screen.findByRole('link', { name: 'Keluarga Wijaya' })).closest('li')!
+    expect(within(row).getByText('Bisa dikirim setelah acara dibayar')).toBeInTheDocument()
+    expect(within(row).queryByRole('button', { name: 'Kirim via WhatsApp' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Tambah tamu' })).toBeInTheDocument()
   })
 
   it('revokes an invitation after confirmation', async () => {

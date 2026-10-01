@@ -11,6 +11,8 @@ import {
   type GuestType,
   type InvitationStatus,
 } from './api'
+import type { RsvpStatus } from '@/features/invitation/api'
+import { RsvpBadge } from '@/features/responses/RsvpBadge'
 import { InvitationActions } from './InvitationActions'
 
 /** The event's WhatsApp message, with {nama}, {acara} and {link}. */
@@ -74,7 +76,7 @@ export function GuestListPage() {
   const { t } = useTranslation()
   const { id = '' } = useParams()
   const event = useEvent(id)
-  const [filter, setFilter] = useState<GuestFilter>({ search: '', type: '', status: '' })
+  const [filter, setFilter] = useState<GuestFilter>({ search: '', type: '', status: '', rsvp: '' })
   const guests = useGuests(id, filter)
   const editable = event.data ? isEditable(event.data.status) : false
   const list = guests.data
@@ -150,6 +152,19 @@ export function GuestListPage() {
           <option value="Active">{t('guests.status.Active')}</option>
           <option value="Revoked">{t('guests.status.Revoked')}</option>
         </select>
+        <select
+          aria-label={t('responses.filter')}
+          value={filter.rsvp}
+          onChange={(e) => setFilter({ ...filter, rsvp: e.target.value as RsvpStatus | '' })}
+          className="rounded-md border border-stone-300 bg-white px-3 py-2"
+        >
+          <option value="">{t('responses.allAnswers')}</option>
+          {(['Attending', 'NotAttending', 'Pending'] as const).map((s) => (
+            <option key={s} value={s}>
+              {t(`responses.status.${s}`)}
+            </option>
+          ))}
+        </select>
       </div>
 
       {guests.isError && <p className="text-red-700">{errorMessage(t, guests.error)}</p>}
@@ -175,6 +190,7 @@ export function GuestListPage() {
                 {guest.phone && ` · ${guest.phone}`}
               </p>
             </div>
+            <RsvpBadge status={guest.rsvp} />
             <InvitationActions invitation={guest.invitation} />
           </li>
         ))}

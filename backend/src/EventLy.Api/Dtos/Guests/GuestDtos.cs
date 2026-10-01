@@ -36,7 +36,8 @@ public sealed record UpdateGuestRequest(
     int NumberOfPeople,
     IReadOnlyList<Guid>? SessionIds) : IGuestInput;
 
-public sealed record InvitationSummaryDto(Guid Id, string Code, string Url, InvitationStatus Status, DateTimeOffset? OpenedAt);
+/// <summary><see cref="Url"/> is null until the event is paid (Active): links can't be sent before that (Q-48).</summary>
+public sealed record InvitationSummaryDto(Guid Id, string Code, string? Url, InvitationStatus Status, DateTimeOffset? OpenedAt);
 
 public sealed record GuestDto(
     Guid Id,
@@ -48,6 +49,7 @@ public sealed record GuestDto(
     int NumberOfPeople,
     IReadOnlyList<Guid> SessionIds,
     InvitationSummaryDto Invitation,
+    RsvpStatus Rsvp,
     DateTimeOffset CreatedAt);
 
 /// <summary>
@@ -57,7 +59,7 @@ public sealed record GuestDto(
 /// </summary>
 public sealed record GuestListDto(IReadOnlyList<GuestDto> Guests, int Total, int TotalPeople, int? Limit);
 
-public sealed record GuestListQuery(string? Search, GuestType? Type, InvitationStatus? Status);
+public sealed record GuestListQuery(string? Search, GuestType? Type, InvitationStatus? Status, RsvpStatus? Rsvp);
 
 public sealed record InvitationGuestDto(Guid Id, string Name, string? Phone, GuestType GuestType, int NumberOfPeople);
 
@@ -65,7 +67,7 @@ public sealed record InvitationDto(
     Guid Id,
     Guid EventId,
     string Code,
-    string Url,
+    string? Url,
     GuestType Type,
     InvitationStatus Status,
     DateTimeOffset? OpenedAt,

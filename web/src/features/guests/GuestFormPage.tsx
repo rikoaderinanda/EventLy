@@ -158,7 +158,9 @@ function InvitationPanel({ event, guest }: { event: EventDetail; guest: Guest })
   const navigate = useNavigate()
   const invitation = guest.invitation
   const active = invitation.status === 'Active'
-  const qr = useQrImage(invitation.id, invitation.code, active)
+  // No URL until the event is paid: the invitation is prepared but can't be sent yet (Q-48).
+  const sendable = active && invitation.url !== null
+  const qr = useQrImage(invitation.id, invitation.code, sendable)
   const action = useInvitationAction(event.id, invitation.id)
   const remove = useDeleteGuest(event.id, guest.id)
   const editable = isEditable(event.status)
@@ -174,7 +176,8 @@ function InvitationPanel({ event, guest }: { event: EventDetail; guest: Guest })
           {t(`guests.status.${invitation.status}`)}
         </span>
       </div>
-      {active && (
+      {active && !sendable && <p className="text-sm text-stone-600">{t('guests.sendAfterPaymentHint')}</p>}
+      {sendable && (
         <>
           <p className="text-sm break-all text-stone-600">{invitation.url}</p>
           <InvitationActions invitation={invitation} />

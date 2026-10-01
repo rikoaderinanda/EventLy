@@ -16,6 +16,10 @@ public sealed partial class TenantFilterBypassTests
         ["Services/PaymentService.cs"] =
             "the webhook and reconciliation carry no user; Root's manual activation (Root has no organization)",
         ["Services/PlatformOwnerService.cs"] = "Root's Owner list and details (Root has no organization)",
+        ["Services/PublicInvitationService.cs"] =
+            "a guest has no sign-in: the invitation found by its code names the organization",
+        ["Services/GuestResponseService.cs"] =
+            "soft delete only: wishes and gift confirmations of deleted guests stay visible to the organizer",
     };
 
     [Fact]

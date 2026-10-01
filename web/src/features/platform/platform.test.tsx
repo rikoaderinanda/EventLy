@@ -124,7 +124,8 @@ describe('Root platform pages', () => {
 
     await userEvent.click(await screen.findByRole('link', { name: 'Paket' }))
 
-    expect(await screen.findByRole('heading', { name: 'Paket' })).toBeInTheDocument()
+    // The packages page is lazy-loaded; give it more than the default 1 s on a busy machine.
+    expect(await screen.findByRole('heading', { name: 'Paket' }, { timeout: 5000 })).toBeInTheDocument()
     expect(screen.getByText('Basic')).toBeInTheDocument()
   })
 })

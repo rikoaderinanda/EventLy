@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiFetch, apiFetchBlob } from '@/api/client'
+import type { RsvpStatus } from '@/features/invitation/api'
 
 export type GuestType = 'Individual' | 'Group'
 export type InvitationStatus = 'Active' | 'Revoked'
@@ -7,7 +8,8 @@ export type InvitationStatus = 'Active' | 'Revoked'
 export type InvitationSummary = {
   id: string
   code: string
-  url: string
+  /** Null until the event is paid: invitations can't be sent before that (Q-48). */
+  url: string | null
   status: InvitationStatus
   openedAt: string | null
 }
@@ -22,6 +24,7 @@ export type Guest = {
   numberOfPeople: number
   sessionIds: string[]
   invitation: InvitationSummary
+  rsvp: RsvpStatus
   createdAt: string
 }
 
@@ -36,7 +39,12 @@ export type GuestInput = {
   sessionIds: string[]
 }
 
-export type GuestFilter = { search: string; type: GuestType | ''; status: InvitationStatus | '' }
+export type GuestFilter = {
+  search: string
+  type: GuestType | ''
+  status: InvitationStatus | ''
+  rsvp: RsvpStatus | ''
+}
 
 export type Invitation = InvitationSummary & {
   eventId: string
@@ -70,6 +78,7 @@ function query(filter: GuestFilter): string {
   if (filter.search.trim()) params.set('search', filter.search.trim())
   if (filter.type) params.set('type', filter.type)
   if (filter.status) params.set('status', filter.status)
+  if (filter.rsvp) params.set('rsvp', filter.rsvp)
   const text = params.toString()
   return text ? `?${text}` : ''
 }

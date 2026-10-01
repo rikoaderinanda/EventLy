@@ -19,8 +19,9 @@ public sealed class GuestsController(GuestService guests) : ControllerBase
         [FromQuery] string? search,
         [FromQuery] GuestType? type,
         [FromQuery] InvitationStatus? status,
+        [FromQuery] RsvpStatus? rsvp,
         CancellationToken ct) =>
-        guests.ListAsync(eventId, new GuestListQuery(search, type, status), ct);
+        guests.ListAsync(eventId, new GuestListQuery(search, type, status, rsvp), ct);
 
     /// <summary>422 <c>guest.quota_exceeded</c> when the package's guest limit is reached.</summary>
     [HttpPost]

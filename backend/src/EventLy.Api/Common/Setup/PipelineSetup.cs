@@ -15,6 +15,7 @@ public static class PipelineSetup
         // instead of a 500 for every business exception. Real 500s are logged by AppExceptionHandler.
         app.UseSerilogRequestLogging();
         app.UseExceptionHandler();
+        app.UseGuestReferrerPolicy();
 
         // The built PWA is served from wwwroot by this same service (one Cloud Run service, one domain).
         app.UseDefaultFiles();

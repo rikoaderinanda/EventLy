@@ -32,7 +32,12 @@ The invitation URL is `{origin}/i/{code}` and is also the QR payload (Q-8). What
   - Before payment the cap is the largest offered package. The checkout then refuses a package with fewer places than the guest list has people (409 `payment.guest_limit_exceeded`), like the Staff limit.
   - A group of 4 takes 4 places. The list shows both the number of people (compared with the limit) and the number of invitations.
   - Adding or editing a guest takes a row lock on the event (`SELECT … FOR UPDATE` inside a transaction), so guests added at the same moment never exceed the limit. The lock doesn't change the event's version, so editing the event at the same time is not affected.
-- **Event status:** guests and invitations can be prepared while the event is Draft or PendingPayment (Q-4). The guest can only open the link once the event is Active (Phase 7). Completed and Cancelled events are read-only (409 `event.not_editable`).
+- **Event status:** guests and invitations can be prepared while the event is Draft or PendingPayment (Q-4), but **not sent** until it is paid (Q-48):
+  - The invitation `url` is null in every DTO.
+  - The WhatsApp link, the QR and the QR sheet give 409 `invitation.event_not_paid`.
+  - The PWA shows "Bisa dikirim setelah acara dibayar" instead of the buttons.
+  - Once the event is Active the links appear. The guest's page also only works from then on.
+  - Completed and Cancelled events are read-only (409 `event.not_editable`).
 - **Delete guest:** soft delete, and the invitation is revoked. Phase 8 will refuse it (409) once the guest has checked in.
 - **New code** (`regenerate-code`): the old link and QR stop working. On a revoked invitation it also makes it active again. Phase 8 will block it after check-in.
 - **Revoke:** the link and QR stop working. The WhatsApp link and the QR image then give 409 `invitation.revoked`. Revoking twice changes nothing.

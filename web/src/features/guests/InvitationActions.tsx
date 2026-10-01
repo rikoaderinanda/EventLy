@@ -15,6 +15,10 @@ export function InvitationActions({ invitation }: { invitation: InvitationSummar
   if (invitation.status === 'Revoked') {
     return <span className="text-sm text-stone-500">{t('guests.revoked')}</span>
   }
+  const url = invitation.url
+  if (!url) {
+    return <span className="text-sm text-stone-500">{t('guests.sendAfterPayment')}</span>
+  }
 
   async function sendWhatsApp() {
     setError(null)
@@ -29,8 +33,8 @@ export function InvitationActions({ invitation }: { invitation: InvitationSummar
     }
   }
 
-  async function copy() {
-    await navigator.clipboard.writeText(invitation.url)
+  async function copy(text: string) {
+    await navigator.clipboard.writeText(text)
     setCopied(true)
     window.setTimeout(() => setCopied(false), 2000)
   }
@@ -46,7 +50,7 @@ export function InvitationActions({ invitation }: { invitation: InvitationSummar
       </button>
       <button
         type="button"
-        onClick={() => void copy()}
+        onClick={() => void copy(url)}
         className="rounded-md border border-stone-300 px-3 py-1.5 text-sm text-stone-700"
       >
         {copied ? t('guests.copied') : t('guests.copyLink')}

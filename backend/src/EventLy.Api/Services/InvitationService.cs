@@ -23,7 +23,7 @@ public sealed class InvitationService(AppDbContext db, ICurrentUser currentUser,
     public async Task<InvitationDto> GetAsync(Guid id, CancellationToken ct)
     {
         var (invitation, guest) = await LoadAsync(id, tracking: false, ct);
-        return ToDto(invitation, guest);
+        return ToDto(invitation, guest, await IsSendableAsync(invitation.EventId, ct));
     }
 
     /// <summary>A new code: the old link and QR stop working, and a revoked invitation becomes active again.</summary>
@@ -38,7 +38,7 @@ public sealed class InvitationService(AppDbContext db, ICurrentUser currentUser,
         audit.Add(AuditActions.InvitationCodeRegenerated, currentUser.UserId, invitation.OrganizationId,
             nameof(Invitation), invitation.Id);
         await db.SaveChangesAsync(ct);
-        return ToDto(invitation, guest);
+        return ToDto(invitation, guest, await IsSendableAsync(invitation.EventId, ct));
     }
 
     public async Task<InvitationDto> RevokeAsync(Guid id, CancellationToken ct)
@@ -52,14 +52,14 @@ public sealed class InvitationService(AppDbContext db, ICurrentUser currentUser,
                 nameof(Invitation), invitation.Id);
             await db.SaveChangesAsync(ct);
         }
-        return ToDto(invitation, guest);
+        return ToDto(invitation, guest, await IsSendableAsync(invitation.EventId, ct));
     }
 
     public async Task<WhatsAppLinkDto> GetWhatsAppLinkAsync(Guid id, CancellationToken ct)
     {
         var (invitation, guest) = await LoadAsync(id, tracking: false, ct);
         RequireActive(invitation);
-        var ev = await db.Events.AsNoTracking().SingleAsync(e => e.Id == invitation.EventId, ct);
+        var ev = await RequireSendableEventAsync(invitation.EventId, ct);
 
         var message = WhatsAppMessage.Render(ev.WhatsappTemplate, guest.Name, ev.Name, links.Url(invitation.Code));
         return new WhatsAppLinkDto(WhatsAppMessage.Link(guest.Phone, message), message,
@@ -70,6 +70,7 @@ public sealed class InvitationService(AppDbContext db, ICurrentUser currentUser,
     {
         var (invitation, _) = await LoadAsync(id, tracking: false, ct);
         RequireActive(invitation);
+        await RequireSendableEventAsync(invitation.EventId, ct);
         var url = links.Url(invitation.Code);
         return format == QrFormat.Svg
             ? (System.Text.Encoding.UTF8.GetBytes(Svg(url)), "image/svg+xml")
@@ -79,10 +80,7 @@ public sealed class InvitationService(AppDbContext db, ICurrentUser currentUser,
     /// <summary>Every active invitation of the event with its QR, sorted by guest name, for printing.</summary>
     public async Task<IReadOnlyList<QrSheetItemDto>> GetQrSheetAsync(Guid eventId, CancellationToken ct)
     {
-        if (!await db.Events.AnyAsync(e => e.Id == eventId, ct))
-        {
-            throw new NotFoundException("event.not_found", "Event not found.");
-        }
+        await RequireSendableEventAsync(eventId, ct);
 
         var rows = await (
                 from i in db.Invitations.AsNoTracking()
@@ -156,6 +154,26 @@ public sealed class InvitationService(AppDbContext db, ICurrentUser currentUser,
         return ev;
     }
 
+    /// <summary>
+    /// Invitations can be prepared before payment, but sent (link, WhatsApp, QR) only once the event is paid
+    /// and the guest's page works (decision Q-48). Otherwise 409 <c>invitation.event_not_paid</c>.
+    /// </summary>
+    private async Task<Event> RequireSendableEventAsync(Guid eventId, CancellationToken ct)
+    {
+        var ev = await db.Events.AsNoTracking().SingleOrDefaultAsync(e => e.Id == eventId, ct)
+            ?? throw new NotFoundException("event.not_found", "Event not found.");
+        if (!EventLifecycle.IsPublic(ev.Status))
+        {
+            throw new ConflictException("invitation.event_not_paid",
+                "Invitations can be sent once the event is paid and active.");
+        }
+        return ev;
+    }
+
+    private async Task<bool> IsSendableAsync(Guid eventId, CancellationToken ct) =>
+        await db.Events.AnyAsync(e => e.Id == eventId
+            && (e.Status == EventStatus.Active || e.Status == EventStatus.Completed), ct);
+
     private static void RequireActive(Invitation invitation)
     {
         if (invitation.Status == InvitationStatus.Revoked)
@@ -167,7 +185,7 @@ public sealed class InvitationService(AppDbContext db, ICurrentUser currentUser,
     private static WhatsAppTemplateDto ToTemplateDto(string? template) =>
         new(template ?? WhatsAppMessage.DefaultTemplate, template is null);
 
-    private InvitationDto ToDto(Invitation i, Guest g) => new(
-        i.Id, i.EventId, i.Code, links.Url(i.Code), i.Type, i.Status, i.OpenedAt,
+    private InvitationDto ToDto(Invitation i, Guest g, bool sendable) => new(
+        i.Id, i.EventId, i.Code, sendable ? links.Url(i.Code) : null, i.Type, i.Status, i.OpenedAt,
         new InvitationGuestDto(g.Id, g.Name, g.Phone, g.Type, g.NumberOfPeople), i.CreatedAt);
 }

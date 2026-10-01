@@ -59,6 +59,10 @@ public static class AuditActions
     public const string InvitationCodeRegenerated = "invitation.code_regenerated";
     public const string InvitationRevoked = "invitation.revoked";
     public const string EventWhatsappTemplateUpdated = "event.whatsapp_template_updated";
+    public const string WishHidden = "wish.hidden";
+    public const string WishShown = "wish.shown";
+    public const string WishDeleted = "wish.deleted";
+    public const string GiftsUpdated = "event.gifts_updated";
 
     public const string PackageCreated = "package.created";
     public const string PackageUpdated = "package.updated";

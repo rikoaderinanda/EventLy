@@ -88,10 +88,14 @@ export function PlatformLayout() {
   )
 }
 
-/** Guest invitation pages: no app navigation, the event's own look. */
+/**
+ * Guest invitation pages: no app navigation, the event's own look. The page sends no referrer, so the
+ * invitation code in the URL never reaches Google Maps or other sites (the server sets the same header).
+ */
 export function GuestLayout() {
   return (
     <div className="min-h-dvh bg-brand-50">
+      <meta name="referrer" content="no-referrer" />
       <Outlet />
     </div>
   )

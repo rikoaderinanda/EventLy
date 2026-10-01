@@ -53,6 +53,9 @@ public static class ServiceSetup
         services.AddScoped<InvitationLinks>();
         services.AddScoped<GuestService>();
         services.AddScoped<InvitationService>();
+        services.AddScoped<PublicInvitationService>();
+        services.AddScoped<GuestResponseService>();
+        services.AddPublicRateLimits(configuration);
         return services;
     }
 

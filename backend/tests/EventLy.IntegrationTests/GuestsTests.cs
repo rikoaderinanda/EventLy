@@ -74,7 +74,7 @@ public sealed class GuestsTests(PostgresFixture postgres) : IClassFixture<Postgr
         guest.NumberOfPeople.ShouldBe(1);
         guest.Invitation.Status.ShouldBe(InvitationStatus.Active);
         guest.Invitation.Code.Length.ShouldBe(22);
-        guest.Invitation.Url.ShouldEndWith($"/i/{guest.Invitation.Code}");
+        guest.Invitation.Url.ShouldBeNull(); // not sendable before the event is paid (Q-48)
         await using var db = postgres.CreateDbContext(_tenant.OrganizationId);
         (await db.Invitations.CountAsync(i => i.GuestId == guest.Id, Ct)).ShouldBe(1);
     }

@@ -42,7 +42,14 @@
 | Q-43 | Musik latar | Owner uploads one own audio file (MP3/M4A, max 10 MB); copyright is the Owner's responsibility. No built-in library, no YouTube. "Buka Undangan" cover starts the music; mute button | 2026-09-29 |
 | Q-44 | Hitung mundur | Counts down to the first session; then "Acara sedang berlangsung" / "Acara telah selesai" | 2026-09-29 |
 | Q-45 | Per-package flags | Root can switch wishes, gift, music and countdown on/off per package; all **on** in the initial seed | 2026-09-29 |
+| Q-47 | RSVP cut-off | Guests can answer and change their RSVP **until the event is over** (the last session ends) | 2026-10-01 |
+| Q-48 | Invitations before payment | Guests can be **added** while the event is unpaid, but invitations **can't be sent** (no link, QR, QR sheet or WhatsApp) until the event is paid (Active) | 2026-10-01 |
 | Q-46 | Guest limit unit | The package's `maxGuests` counts **people**, not invitations: a group invitation of 4 takes 4 places. Checked when adding a guest, when a group grows, and at checkout | 2026-10-01 |
+| Q-49 | Check-in and RSVP | A guest who answered "not attending" **may still come**: they can change their RSVP to attending, and a check-in scan **sets the RSVP to Attending** automatically. Only a valid invitation (its QR or code) can check in; anyone without one is refused (no walk-ins, Q-31) | 2026-10-01 |
+| Q-50 | Admins per package | `maxAdmins` is a per-package limit that Root sets in the package settings, like the other limits | 2026-10-01 |
+| Q-51 | Money for a closed checkout | A payment that settles after its checkout was closed (replaced, expired, event cancelled) doesn't activate anything. It is recorded in the audit log (`payment.late_settlement`) and Root settles it with the Owner (no refunds in the MVP, Q-32) | 2026-10-01 |
+| Q-52 | Payment provider timing | Keep the **simulated gateway** for now; the Xendit adapter comes later (before production) | 2026-10-01 |
+| Q-12 | Extras (confirmed) | **CSV guest import: yes (MVP).** Printable QR sheet: yes. Custom invitation design: no, one standard template | 2026-10-01 |
 | Q-9 | Offline | **Online only** for the MVP. Upload retries automatically. Photo step can be skipped. Offline mode is a future phase | 2026-09-29 |
 
 ## Accepted recommendations ("sisanya sesuai saran", 2026-09-29)

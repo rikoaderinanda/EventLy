@@ -84,8 +84,8 @@ The route is singular because a user belongs to exactly one organization.
 | POST | `/events/{id}/complete` | O A | Mark the event completed |
 | GET | `/events/{id}/wishes` | O A | All wishes, including hidden ones |
 | POST | `/events/{id}/wishes/{wishId}/hide` · `/unhide` · DELETE `/events/{id}/wishes/{wishId}` | O A | Moderation |
-| GET / PUT | `/events/{id}/gift-accounts` | O A | List / replace the bank and e-wallet accounts |
-| PUT | `/events/{id}/gift-qris` · `/events/{id}/music` | O A | Upload the QRIS image / music file (`multipart/form-data`; music MP3/M4A max 10 MB) |
+| GET / PUT | `/events/{id}/gifts` | O A | `{accounts, address}`: list / replace the bank and e-wallet accounts (max 5) and the gift address |
+| PUT | `/events/{id}/gift-qris` · `/events/{id}/music` | O A | Upload the QRIS image / music file (`multipart/form-data`; music MP3/M4A max 10 MB). **Phase 9** (needs storage) |
 | GET | `/events/{id}/gift-confirmations` | O A | Gift confirmations from guests (Q-41) |
 | GET | `/events/{id}/staff` | O | Staff assigned to the event |
 | PUT | `/events/{id}/staff` | O | Replace assignments `{userIds: [...]}` (checked against the package's `maxStaff`) |
@@ -150,6 +150,7 @@ Because the invitation is the identity unit and the relationship is 1:1, **creat
 | Method | Path | Roles | Description |
 |---|---|---|---|
 | GET | `/invitations/{id}` | O A | Details `{code, url, type, status, guest, rsvp, checkIn}` |
+| — | — | — | Before the event is paid, the invitation `url` is null and the WhatsApp link, QR and QR sheet give 409 `invitation.event_not_paid` (Q-48) |
 | GET | `/invitations/{id}/whatsapp-link` | O A | `{url}` = `https://wa.me/628…?text=…` built from the event's message template. The PWA opens it |
 | GET | `/invitations/{id}/qr?format=png\|svg&size=` | O A | QR image, rendered on demand (`Cache-Control: private, no-store`) |
 | POST | `/invitations/{id}/regenerate-code` | O A | Rotates the code (old link stops working) and reactivates a revoked invitation. Blocked after check-in (Phase 8) |
@@ -163,26 +164,28 @@ The guest list carries each invitation, so there is no separate invitation list 
 
 | Method | Path | Roles | Description |
 |---|---|---|---|
-| GET | `/events/{eventId}/rsvps?status=` | O A | RSVP list for monitoring |
-| GET | `/events/{eventId}/rsvps/summary` | O A | `{pending, attending, notAttending, expectedPeople}` |
+| GET | `/events/{eventId}/rsvps?status=` | O A | RSVP list for monitoring (one row per invitation; no answer = `Pending`) |
+| GET | `/events/{eventId}/rsvps/summary` | O A | `{invitations, opened, pending, attending, notAttending, expectedPeople}` over active invitations |
+
+Details of the guest side (2.9) and these endpoints: [docs/modules/guest-portal.md](../modules/guest-portal.md).
 
 ### 2.9 Public guest API — `/api/v1/public/invitations/{code}`
 
-Anonymous, keyed by the 128-bit code. Rate-limited per IP. `Referrer-Policy: no-referrer`. Every response is **404 for unknown, revoked or cancelled-event codes**.
+Anonymous, keyed by the 128-bit code. Rate-limited per IP (reads 60/min, writes 10/min). `Referrer-Policy: no-referrer`. Every response is **404 `invitation.not_found` for unknown, revoked, deleted-guest, unpaid (Draft/PendingPayment) or cancelled-event codes**. A feature switched off in the package gives 404 `feature.not_available`.
 
 | Method | Path | Description |
 |---|---|---|
 | GET | `/public/invitations/{code}` | `{guestName, numberOfPeople, type, event: {name, category, description, coverUrl, sessions: [{name, startsAt, endsAt, venue, mapsUrl}]}, rsvp: {status, respondedAt}, checkedIn: bool}`. Sets `opened_at` on first view |
-| PUT | `/public/invitations/{code}/rsvp` | `{status: "Attending" \| "NotAttending"}`. Allowed until the event date |
+| PUT | `/public/invitations/{code}/rsvp` | `{status: "Attending" \| "NotAttending"}`. Allowed until the event is over (last session ends, Q-47), then 409 `rsvp.closed` |
 | GET | `/public/invitations/{code}/qr` | QR image, so the guest can show it at the entrance |
 | GET | `/public/invitations/{code}/gallery` | **403 `gallery.locked` until checked in**. Then `[{photoId, thumbnailUrl, createdAt}]` (pre-signed URLs, 10 min) |
 | POST | `/public/invitations/{code}/photos` | **Guest camera capture (spec change 2026-09-29).** Receives the JPEG taken with the in-app camera (the UI has no file picker). Only after check-in and within the time window, only if the package and event allow it, up to `maxGuestPhotosPerInvitation`. Same file checks as staff uploads. Rate-limited |
 | DELETE | `/public/invitations/{code}/photos/{photoId}` | Guest deletes a photo **they took** (not staff photos) |
 | GET | `/public/invitations/{code}/wishes?page=` | Wishes of this event (visible ones only): `[{guestName, message, createdAt}]` |
 | PUT | `/public/invitations/{code}/wish` | Create or edit this invitation's wish `{message}` (max 500, rate-limited) |
-| GET | `/public/invitations/{code}/gifts` | Bank/e-wallet accounts, QRIS image URL, gift address |
+| GET | `/public/invitations/{code}/gifts` | Bank/e-wallet accounts, gift address, QRIS image URL (null until Phase 9) |
 | POST | `/public/invitations/{code}/gift-confirmations` | Optional "konfirmasi hadiah" `{senderName, amount?, note?}` (Q-41) |
-| GET | `/public/invitations/{code}/music` | 302 to a short-lived URL of the event's music file |
+| GET | `/public/invitations/{code}/music` | 302 to a short-lived URL of the event's music file **(Phase 9)** |
 | GET | `/public/invitations/{code}/gallery/{photoId}/download` | 302 to a pre-signed URL with `Content-Disposition: attachment` |
 
 ### 2.10 Check-in — Staff
