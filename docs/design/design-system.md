@@ -105,6 +105,14 @@ Status is never shown by colour alone: badges always have a word and an icon.
 - **Blocks** (rounded-3xl cards on the theme surface, fading in as they scroll into view with `Reveal`, not at all with reduced motion): hero, story (the description, Q-63), countdown, schedule (names and times), location (each place once with its sessions and a Google Maps button), RSVP (two large choices), QR (always on white, so any scanner reads it), the guest's photos after check-in, wishes, digital gift (accounts with copy, QRIS, address, optional confirmation). A floating music button.
 - **Headings** inside a theme set their colour on the element: the global `h1–h3` colour would otherwise win over the inherited theme ink.
 
+## Public, sign-in and Root pages (UI-6)
+
+- **Landing** (`/`): hero with the promise, two calls to action and a live miniature invitation, four feature cards, legal links; the server status stays as a small pill.
+- **Sign in:** a brand panel (desktop) beside the sign-in card with Google and, in development, the test form.
+- **Onboarding** and **legal** pages on the same cards and inputs.
+- **Root** (enterprise minimal): neutral stone borders, dense rows with column headers on the Owner list, plain package cards with the feature checklist, switches for the package flags, manual activation inline.
+- Legacy components (`StatusBadge`, `PaymentStatusBadge`, `RsvpBadge`, `Field`, `ComingSoon`) are gone: every page uses `components/`.
+
 ## Motion
 
 - **Motion** (`motion/react`, MIT) for the modal, sheet and invitation opening; CSS transitions for hover and press.

@@ -3,25 +3,35 @@
     "tagline": "Invitations, RSVP, QR check-in and photo gallery in one app."
   },
   "home": {
-    "title": "Welcome to EventLy",
-    "subtitle": "Event management, starting with weddings.",
+    "title": "Memorable events, from invitation to keepsake.",
+    "subtitle": "Digital invitations, RSVP, QR check-in and photo galleries in one place. For weddings, birthdays and company events.",
     "apiStatus": "Server status",
     "apiOnline": "Connected",
     "apiOffline": "Not connected",
     "apiChecking": "Checking…",
-    "areas": "App areas"
-  },
-  "areas": {
-    "login": "Sign in",
-    "organizer": "Organizer dashboard",
-    "staff": "Staff (QR scan)",
-    "guest": "Sample invitation page",
-    "platform": "Root (packages & owners)"
-  },
-  "comingSoon": {
-    "title": "Coming soon",
-    "body": "This page is built in {{phase}}.",
-    "back": "Back to home"
+    "eyebrow": "Premium event platform",
+    "start": "Get started",
+    "signIn": "Sign in",
+    "featuresTitle": "Everything your event needs",
+    "feature": {
+      "invite": {
+        "title": "Digital invitations",
+        "body": "Three elegant themes, a cover photo, music and a personal link for every guest via WhatsApp."
+      },
+      "rsvp": {
+        "title": "RSVP & wishes",
+        "body": "Guests answer and leave their wishes; you see the numbers live."
+      },
+      "checkin": {
+        "title": "QR check-in",
+        "body": "Staff scan the QR at the entrance in seconds, even in a dark venue."
+      },
+      "photos": {
+        "title": "Photo gallery",
+        "body": "Guest photos from staff and the guest camera, stored safely and downloadable in one go."
+      }
+    },
+    "extras": "Plus digital gifts, a countdown and event statistics."
   },
   "error": {
     "notFoundTitle": "Page not found",
@@ -51,6 +61,13 @@
       "auth_email_not_verified": "This Google account's email isn't verified.",
       "rate_limit_exceeded": "Too many attempts. Please wait a moment and try again.",
       "network_unreachable": "Can't reach the server."
+    },
+    "brandTitle": "Every event deserves to feel special.",
+    "brandFoot": "Trusted for weddings, birthdays and company events in Indonesia.",
+    "point": {
+      "invite": "Digital invitations with premium themes",
+      "checkin": "Fast QR check-in at the entrance",
+      "secure": "Guest data kept safe, separate per organization"
     }
   },
   "common": {
@@ -95,7 +112,8 @@
     "subtitle": "Hi {{name}}! One more step before your first event.",
     "acceptPrefix": "I have read and agree to the",
     "and": "and the",
-    "submit": "Create organization"
+    "submit": "Create organization",
+    "step": "Last step"
   },
   "organization": {
     "title": "Organization profile",
@@ -173,7 +191,14 @@
       "digitalGiftEnabled": "Digital gift",
       "backgroundMusicEnabled": "Background music",
       "countdownEnabled": "Countdown"
-    }
+    },
+    "ownersSubtitle": "Owner accounts, organizations and package purchases.",
+    "column": {
+      "owner": "Owner",
+      "organization": "Organization",
+      "status": "Status"
+    },
+    "offeredShort": "Offered"
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",

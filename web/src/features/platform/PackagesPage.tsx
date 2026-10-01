@@ -1,8 +1,14 @@
+import { Pencil, Plus, X } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FeatureList } from '@/features/payments/EventPaymentSection'
 import { formatMoney, type Package, type PackageFeatures } from '@/features/payments/api'
-import { Field } from '@/shared/components/Field'
+import { Badge } from '@/components/ui/Badge'
+import { Button } from '@/components/ui/Button'
+import { PageHeader, SectionHeader } from '@/components/ui/Card'
+import { Notice } from '@/components/ui/Feedback'
+import { Switch, TextField } from '@/components/ui/Input'
+import { Skeleton } from '@/components/ui/Spinner'
 import { errorMessage, fieldErrors } from '@/shared/lib/errors'
 import { useAllPackages, useSavePackage } from './api'
 
@@ -68,10 +74,15 @@ function PackageForm({ initial, onDone }: { initial: Package | null; onDone: () 
     <form
       onSubmit={submit}
       aria-label={initial ? t('platform.editPackage', { name: initial.name }) : t('platform.newPackage')}
-      className="space-y-4 rounded-lg border border-brand-100 bg-white p-4"
+      className="space-y-6 rounded-2xl border border-stone-200 bg-white p-5 sm:p-6"
     >
+      <SectionHeader
+        title={initial ? t('platform.editPackage', { name: initial.name }) : t('platform.newPackage')}
+        level={2}
+        className="mb-0"
+      />
       <div className="grid gap-3 sm:grid-cols-3">
-        <Field
+        <TextField
           id="code"
           label={t('platform.packageCode')}
           hint={initial ? t('platform.codeFixed') : t('platform.codeHint')}
@@ -81,7 +92,7 @@ function PackageForm({ initial, onDone }: { initial: Package | null; onDone: () 
           onChange={(e) => setCode(e.target.value)}
           error={errors.code}
         />
-        <Field
+        <TextField
           id="name"
           label={t('platform.packageName')}
           required
@@ -89,7 +100,7 @@ function PackageForm({ initial, onDone }: { initial: Package | null; onDone: () 
           onChange={(e) => setName(e.target.value)}
           error={errors.name}
         />
-        <Field
+        <TextField
           id="price"
           label={t('platform.price')}
           type="number"
@@ -103,9 +114,9 @@ function PackageForm({ initial, onDone }: { initial: Package | null; onDone: () 
       </div>
 
       <fieldset className="grid gap-3 sm:grid-cols-3">
-        <legend className="mb-2 text-sm font-medium text-stone-700">{t('platform.limits')}</legend>
+        <legend className="mb-3 text-sm font-semibold text-stone-800">{t('platform.limits')}</legend>
         {numberFeatures.map((key) => (
-          <Field
+          <TextField
             key={key}
             id={key}
             label={t(`platform.featureLabel.${key}`)}
@@ -120,45 +131,34 @@ function PackageForm({ initial, onDone }: { initial: Package | null; onDone: () 
         ))}
       </fieldset>
 
-      <fieldset className="grid gap-2 sm:grid-cols-2">
-        <legend className="mb-2 text-sm font-medium text-stone-700">{t('platform.flags')}</legend>
+      <fieldset className="grid gap-x-8 gap-y-1 sm:grid-cols-2">
+        <legend className="mb-3 text-sm font-semibold text-stone-800">{t('platform.flags')}</legend>
         {flagFeatures.map((key) => (
-          <label key={key} className="flex items-center gap-2 text-sm text-stone-700">
-            <input
-              type="checkbox"
-              checked={features[key]}
-              onChange={(e) => setFeatures({ ...features, [key]: e.target.checked })}
-            />
-            {t(`platform.featureLabel.${key}`)}
-          </label>
+          <Switch
+            key={key}
+            label={t(`platform.featureLabel.${key}`)}
+            checked={features[key]}
+            onChange={(e) => setFeatures({ ...features, [key]: e.target.checked })}
+            className="border-b border-stone-100 py-2.5"
+          />
         ))}
       </fieldset>
 
-      <label className="flex items-center gap-2 text-sm text-stone-700">
-        <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
-        {t('platform.offered')}
-      </label>
+      <Switch
+        label={t('platform.offered')}
+        checked={isActive}
+        onChange={(e) => setIsActive(e.target.checked)}
+        className="rounded-xl bg-stone-50 px-4 py-3"
+      />
 
-      {save.isError && (
-        <p role="alert" className="text-sm text-red-700">
-          {errorMessage(t, save.error)}
-        </p>
-      )}
+      {save.isError && <Notice tone="danger">{errorMessage(t, save.error)}</Notice>}
       <div className="flex gap-2">
-        <button
-          type="submit"
-          disabled={save.isPending}
-          className="rounded-md bg-brand-700 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
-        >
+        <Button type="submit" loading={save.isPending}>
           {t('common.save')}
-        </button>
-        <button
-          type="button"
-          onClick={onDone}
-          className="rounded-md px-4 py-2 text-sm text-stone-600 underline"
-        >
+        </Button>
+        <Button variant="ghost" icon={X} onClick={onDone}>
           {t('platform.close')}
-        </button>
+        </Button>
       </div>
     </form>
   )
@@ -171,20 +171,19 @@ export function PackagesPage() {
   const [editing, setEditing] = useState<Package | 'new' | null>(null)
 
   return (
-    <section className="mx-auto max-w-4xl space-y-4 py-8">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-2xl font-semibold text-brand-900">{t('platform.packagesTitle')}</h1>
-        {editing === null && (
-          <button
-            type="button"
-            onClick={() => setEditing('new')}
-            className="rounded-md bg-brand-700 px-4 py-2 text-sm font-medium text-white"
-          >
-            {t('platform.newPackage')}
-          </button>
-        )}
-      </div>
-      <p className="text-sm text-stone-600">{t('platform.packagesHint')}</p>
+    <section className="mx-auto max-w-5xl space-y-5 py-6 sm:py-10">
+      <PageHeader
+        title={t('platform.packagesTitle')}
+        subtitle={t('platform.packagesHint')}
+        className="mb-0 sm:mb-0"
+        actions={
+          editing === null && (
+            <Button icon={Plus} onClick={() => setEditing('new')} block="mobile">
+              {t('platform.newPackage')}
+            </Button>
+          )
+        }
+      />
 
       {editing !== null && (
         <PackageForm
@@ -194,32 +193,38 @@ export function PackagesPage() {
         />
       )}
 
-      {packages.isError && <p className="text-red-700">{errorMessage(t, packages.error)}</p>}
-      <ul className="grid gap-3 sm:grid-cols-2">
+      {packages.isError && <Notice tone="danger">{errorMessage(t, packages.error)}</Notice>}
+      {packages.isPending && <Skeleton className="h-64 rounded-2xl" />}
+      <ul className="grid gap-4 md:grid-cols-3">
         {packages.data?.map((pkg) => (
-          <li key={pkg.id} className="space-y-2 rounded-lg border border-brand-100 bg-white p-4">
-            <div className="flex items-center justify-between gap-2">
-              <p className="font-semibold text-brand-900">
-                {pkg.name} <span className="text-xs font-normal text-stone-500">{pkg.code}</span>
-              </p>
-              {!pkg.isActive && (
-                <span className="rounded-full bg-stone-100 px-2 py-0.5 text-xs text-stone-600">
-                  {t('platform.inactive')}
-                </span>
+          <li key={pkg.id} className="flex flex-col rounded-2xl border border-stone-200 bg-white p-5">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="font-semibold text-stone-900">{pkg.name}</p>
+                <p className="font-mono text-xs text-stone-500">{pkg.code}</p>
+              </div>
+              {pkg.isActive ? (
+                <Badge tone="success">{t('platform.offeredShort')}</Badge>
+              ) : (
+                <Badge>{t('platform.inactive')}</Badge>
               )}
             </div>
-            <p className="text-lg font-medium text-stone-800">
+            <p className="mt-3 mb-4 text-2xl font-semibold tracking-tight text-stone-900 tabular-nums">
               {formatMoney(pkg.price, pkg.currency, i18n.language)}
             </p>
-            <FeatureList features={pkg.features} />
-            <button
-              type="button"
+            <div className="flex-1">
+              <FeatureList features={pkg.features} />
+            </div>
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={Pencil}
               onClick={() => setEditing(pkg)}
               aria-label={t('platform.editPackage', { name: pkg.name })}
-              className="text-sm text-brand-700 underline"
+              className="mt-5 self-start"
             >
               {t('events.edit')}
-            </button>
+            </Button>
           </li>
         ))}
       </ul>

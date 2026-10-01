@@ -3,25 +3,35 @@
     "tagline": "Undangan, RSVP, check-in QR, dan galeri foto dalam satu aplikasi."
   },
   "home": {
-    "title": "Selamat datang di EventLy",
-    "subtitle": "Platform pengelolaan acara, dimulai dari pernikahan.",
+    "title": "Acara berkesan, dari undangan hingga kenangan.",
+    "subtitle": "Undangan digital, RSVP, check-in QR dan galeri foto dalam satu tempat. Untuk pernikahan, ulang tahun dan acara kantor.",
     "apiStatus": "Status server",
     "apiOnline": "Terhubung",
     "apiOffline": "Tidak terhubung",
     "apiChecking": "Memeriksa…",
-    "areas": "Area aplikasi"
-  },
-  "areas": {
-    "login": "Masuk",
-    "organizer": "Dashboard penyelenggara",
-    "staff": "Staff (scan QR)",
-    "guest": "Contoh halaman undangan",
-    "platform": "Root (paket & owner)"
-  },
-  "comingSoon": {
-    "title": "Segera hadir",
-    "body": "Halaman ini dibangun pada {{phase}}.",
-    "back": "Kembali ke beranda"
+    "eyebrow": "Platform acara premium",
+    "start": "Mulai sekarang",
+    "signIn": "Masuk",
+    "featuresTitle": "Semua yang dibutuhkan acara Anda",
+    "feature": {
+      "invite": {
+        "title": "Undangan digital",
+        "body": "Tiga tema elegan, sampul foto, musik, dan link pribadi untuk setiap tamu lewat WhatsApp."
+      },
+      "rsvp": {
+        "title": "RSVP & ucapan",
+        "body": "Tamu menjawab kehadiran dan menulis doa; Anda melihat angkanya secara langsung."
+      },
+      "checkin": {
+        "title": "Check-in QR",
+        "body": "Staff memindai QR di pintu masuk dalam hitungan detik, bahkan di gedung yang gelap."
+      },
+      "photos": {
+        "title": "Galeri foto",
+        "body": "Foto tamu dari Staff dan kamera tamu, aman tersimpan dan bisa diunduh semua."
+      }
+    },
+    "extras": "Plus amplop digital, hitung mundur dan statistik acara."
   },
   "error": {
     "notFoundTitle": "Halaman tidak ditemukan",
@@ -51,6 +61,13 @@
       "auth_email_not_verified": "Email akun Google ini belum terverifikasi.",
       "rate_limit_exceeded": "Terlalu banyak percobaan. Tunggu sebentar lalu coba lagi.",
       "network_unreachable": "Tidak dapat terhubung ke server."
+    },
+    "brandTitle": "Setiap acara layak terasa istimewa.",
+    "brandFoot": "Dipercaya untuk pernikahan, ulang tahun dan acara kantor di Indonesia.",
+    "point": {
+      "invite": "Undangan digital dengan tema premium",
+      "checkin": "Check-in QR cepat di pintu masuk",
+      "secure": "Data tamu aman, terpisah per organisasi"
     }
   },
   "common": {
@@ -95,7 +112,8 @@
     "subtitle": "Halo {{name}}! Satu langkah lagi sebelum membuat acara pertama.",
     "acceptPrefix": "Saya telah membaca dan menyetujui",
     "and": "serta",
-    "submit": "Buat organisasi"
+    "submit": "Buat organisasi",
+    "step": "Langkah terakhir"
   },
   "organization": {
     "title": "Profil organisasi",
@@ -173,7 +191,14 @@
       "digitalGiftEnabled": "Amplop digital",
       "backgroundMusicEnabled": "Musik latar",
       "countdownEnabled": "Hitung mundur"
-    }
+    },
+    "ownersSubtitle": "Akun Owner, organisasi dan pembelian paket.",
+    "column": {
+      "owner": "Owner",
+      "organization": "Organisasi",
+      "status": "Status"
+    },
+    "offeredShort": "Ditawarkan"
   },
   "errors": {
     "generic": "Terjadi kesalahan. Silakan coba lagi.",

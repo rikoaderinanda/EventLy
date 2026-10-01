@@ -1,7 +1,13 @@
+import { FlaskConical, Mail, ScanLine, ShieldCheck, Sparkles, User } from 'lucide-react'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Navigate, useNavigate, useSearchParams } from 'react-router'
 import { ApiError } from '@/api/problem'
+import { Button } from '@/components/ui/Button'
+import { Notice } from '@/components/ui/Feedback'
+import { TextField } from '@/components/ui/Input'
+import { Loading } from '@/components/ui/Spinner'
+import '@/features/invitation/fonts'
 import { devSignIn, signInWithGoogle, useAuthConfig } from './api'
 import { loadGoogleIdentity } from './google'
 import { useSession } from './session-store'
@@ -52,7 +58,7 @@ function GoogleButton({
   }, [clientId, i18n.resolvedLanguage])
 
   return failed ? (
-    <p className="text-sm text-red-600">{t('auth.googleUnavailable')}</p>
+    <Notice tone="warning">{t('auth.googleUnavailable')}</Notice>
   ) : (
     <div ref={container} className="flex min-h-11 justify-center" />
   )
@@ -77,36 +83,67 @@ function DevSignInForm({ onSignIn }: { onSignIn: (email: string, name: string) =
   return (
     <form
       onSubmit={submit}
-      className="mt-8 space-y-3 rounded-lg border border-dashed border-amber-400 bg-amber-50 p-4"
+      className="space-y-3 rounded-2xl border border-dashed border-warning-500/50 bg-warning-50/70 p-4 text-left"
     >
-      <p className="text-xs font-semibold tracking-wide text-amber-800 uppercase">{t('auth.devTitle')}</p>
-      <p className="text-xs text-amber-800">{t('auth.devHint')}</p>
-      <label className="block text-sm">
-        {t('auth.email')}
-        <input
-          type="email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="mt-1 w-full rounded-md border border-stone-300 bg-white px-3 py-2"
-        />
-      </label>
-      <label className="block text-sm">
-        {t('auth.name')}
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="mt-1 w-full rounded-md border border-stone-300 bg-white px-3 py-2"
-        />
-      </label>
-      <button
-        type="submit"
-        disabled={busy}
-        className="w-full rounded-md bg-amber-600 px-4 py-2 font-medium text-white disabled:opacity-60"
-      >
+      <p className="flex items-center gap-2 text-xs font-semibold tracking-wide text-warning-700 uppercase">
+        <FlaskConical aria-hidden className="size-4" />
+        {t('auth.devTitle')}
+      </p>
+      <p className="text-xs text-warning-700">{t('auth.devHint')}</p>
+      <TextField
+        id="dev-email"
+        label={t('auth.email')}
+        type="email"
+        icon={Mail}
+        required
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+      <TextField
+        id="dev-name"
+        label={t('auth.name')}
+        icon={User}
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+      <Button type="submit" block loading={busy}>
         {t('auth.devSubmit')}
-      </button>
+      </Button>
     </form>
+  )
+}
+
+/** The brand side of the sign-in page (desktop): what the app does, in three lines. */
+function BrandPanel() {
+  const { t } = useTranslation()
+  const points = [
+    { icon: Sparkles, text: t('auth.point.invite') },
+    { icon: ScanLine, text: t('auth.point.checkin') },
+    { icon: ShieldCheck, text: t('auth.point.secure') },
+  ]
+  return (
+    <div className="relative hidden overflow-hidden rounded-[2rem] bg-linear-to-br from-brand-700 via-brand-800 to-brand-950 p-10 text-white lg:flex lg:flex-col lg:justify-between">
+      <div aria-hidden className="absolute -top-24 -right-24 size-72 rounded-full bg-gold-300/20 blur-3xl" />
+      <div
+        aria-hidden
+        className="absolute -bottom-32 -left-16 size-80 rounded-full bg-brand-400/30 blur-3xl"
+      />
+      <p className="relative text-xs tracking-[0.35em] text-white/70 uppercase">EventLy</p>
+      <div className="relative">
+        <p className="font-serif text-5xl leading-tight font-medium text-white">{t('auth.brandTitle')}</p>
+        <ul className="mt-8 space-y-4">
+          {points.map(({ icon: Icon, text }) => (
+            <li key={text} className="flex items-center gap-3 text-white/90">
+              <span className="flex size-9 items-center justify-center rounded-full bg-white/10">
+                <Icon aria-hidden className="size-4" />
+              </span>
+              {text}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <p className="relative text-sm text-white/60">{t('auth.brandFoot')}</p>
+    </div>
   )
 }
 
@@ -139,37 +176,45 @@ export function LoginPage() {
   }
 
   return (
-    <section className="mx-auto max-w-sm py-12 text-center">
-      <h1 className="text-2xl font-semibold text-brand-900">{t('auth.title')}</h1>
-      <p className="mt-2 text-stone-600">{t('auth.subtitle')}</p>
+    <section className="mx-auto grid max-w-5xl gap-8 py-6 sm:py-10 lg:min-h-[calc(100dvh-8rem)] lg:grid-cols-2">
+      <BrandPanel />
+      <div className="flex flex-col justify-center">
+        <div className="mx-auto w-full max-w-sm rounded-[2rem] border border-brand-100 bg-white p-6 text-center shadow-lift sm:p-8">
+          <img src="/icon.svg" alt="" className="mx-auto size-12 rounded-2xl shadow-primary" />
+          <h1 className="mt-5 text-section">{t('auth.title')}</h1>
+          <p className="mt-2 text-sm text-stone-600">{t('auth.subtitle')}</p>
 
-      <div className="mt-8">
-        {config.isPending && <p className="text-sm text-stone-500">{t('auth.loading')}</p>}
-        {config.isError && <p className="text-sm text-red-600">{t('auth.errors.generic')}</p>}
-        {config.data?.googleClientId && (
-          <GoogleButton clientId={config.data.googleClientId} onCredential={onGoogleCredential} />
-        )}
-        {config.data && !config.data.googleClientId && !config.data.devSignInEnabled && (
-          <p className="text-sm text-stone-500">{t('auth.googleNotConfigured')}</p>
-        )}
+          <div className="mt-7">
+            {config.isPending && <Loading label={t('auth.loading')} className="py-4" />}
+            {config.isError && <Notice tone="danger">{t('auth.errors.generic')}</Notice>}
+            {config.data?.googleClientId && (
+              <GoogleButton clientId={config.data.googleClientId} onCredential={onGoogleCredential} />
+            )}
+            {config.data && !config.data.googleClientId && !config.data.devSignInEnabled && (
+              <Notice>{t('auth.googleNotConfigured')}</Notice>
+            )}
+          </div>
+
+          {error && (
+            <Notice tone="danger" className="mt-4 text-left">
+              {error}
+            </Notice>
+          )}
+
+          {config.data?.devSignInEnabled && (
+            <div className="mt-6">
+              <DevSignInForm
+                onSignIn={async (email, name) => {
+                  setError(null)
+                  await devSignIn(email, name).then(done, fail)
+                }}
+              />
+            </div>
+          )}
+
+          <p className="mt-6 text-xs text-stone-500">{t('auth.help')}</p>
+        </div>
       </div>
-
-      {error && (
-        <p role="alert" className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
-          {error}
-        </p>
-      )}
-
-      {config.data?.devSignInEnabled && (
-        <DevSignInForm
-          onSignIn={async (email, name) => {
-            setError(null)
-            await devSignIn(email, name).then(done, fail)
-          }}
-        />
-      )}
-
-      <p className="mt-8 text-xs text-stone-500">{t('auth.help')}</p>
     </section>
   )
 }

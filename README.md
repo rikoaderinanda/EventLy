@@ -22,7 +22,8 @@ The architecture, decisions and roadmap are in [docs/architecture](docs/architec
 | 7 | Guest portal: invitation page with cover and countdown, RSVP with cut-off, wishes with moderation, digital gift with confirmations, RSVP monitor (music and QRIS image come with storage in Phase 9) | ✅ Done |
 | 8 | Check-in: QR scanner (BarcodeDetector, jsQR fallback), lookup then confirm, name search, idempotent per invitation, RSVP set to attending, warnings, event-day window, log and counter | ✅ Done |
 | 9 | Photos & gallery: object storage (R2 / SeaweedFS), staff photos after check-in, guest in-app camera, guest and organizer galleries, ZIP, EXIF-stripping re-encode; cover photo, background music and QRIS image | ✅ Done |
-| 10 | Dashboard & reports (CSV/Excel) | Next |
+| UI | Redesign (Q-58): design system, app frame with sidebar and bottom navigation, organizer dashboard and statistics, full-screen staff scanner, themed guest invitation (Elegant, Birthday, Corporate), landing, sign-in and Root pages. See [docs/design/design-system.md](docs/design/design-system.md) | ✅ Done |
+| 10 | Reports: CSV/Excel exports (the dashboard and statistics were built in the redesign, Q-60) | Next |
 
 ## Quick start (Docker)
 

@@ -19,7 +19,9 @@ describe('routes', () => {
 
     renderRoute('/')
 
-    expect(screen.getByRole('heading', { name: 'Selamat datang di EventLy' })).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Acara berkesan, dari undangan hingga kenangan.' }),
+    ).toBeInTheDocument()
     expect(await screen.findByText(/Terhubung · v0.1.0/)).toBeInTheDocument()
   })
 
