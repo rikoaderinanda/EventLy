@@ -52,6 +52,13 @@ public sealed class PaymentService(
                 $"This package allows {package.Features.MaxStaff} staff. Remove staff from the event or pick a bigger package.");
         }
 
+        // maxGuests counts people, so a group takes all its places.
+        if (await db.Guests.Where(g => g.EventId == ev.Id).SumAsync(g => g.NumberOfPeople, ct) > package.Features.MaxGuests)
+        {
+            throw new ConflictException("payment.guest_limit_exceeded",
+                $"This package allows {package.Features.MaxGuests} guests (people). Remove guests or pick a bigger package.");
+        }
+
         var now = timeProvider.GetUtcNow();
         var pending = await db.Payments
             .Where(p => p.EventId == ev.Id && p.Status == PaymentStatus.Pending)

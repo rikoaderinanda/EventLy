@@ -194,6 +194,19 @@ export function EventDetailPage() {
 
       <Actions event={event} />
 
+      <Link
+        to={`/app/events/${event.id}/guests`}
+        className="flex items-center justify-between rounded-lg border border-brand-100 bg-white p-4 hover:border-brand-300"
+      >
+        <span>
+          <span className="block font-semibold text-brand-900">{t('guests.title')}</span>
+          <span className="text-sm text-stone-600">{t('guests.entryHint')}</span>
+        </span>
+        <span aria-hidden="true" className="text-brand-700">
+          →
+        </span>
+      </Link>
+
       <div className="space-y-3">
         <h2 className="font-semibold text-brand-900">{t('events.sessions')}</h2>
         <Sessions event={event} />

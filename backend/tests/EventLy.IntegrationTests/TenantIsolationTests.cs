@@ -160,4 +160,37 @@ public sealed class TenantIsolationTests(PostgresFixture postgres) : IClassFixtu
 
         (await GetAsync(_client, _a.Owner, ev.Id)).Status.ShouldBe(EventStatus.PendingPayment);
     }
+
+    [Fact]
+    public async Task Another_tenants_guests_and_invitations_are_invisible_and_untouchable()
+    {
+        var ev = await CreateAsync(_client, _a.Owner);
+        var guest = await GuestRequests.CreateAsync(_client, _a.Owner, ev.Id);
+        var invitation = $"/api/v1/invitations/{guest.Invitation.Id}";
+
+        var reads = new[]
+        {
+            $"/api/v1/events/{ev.Id}/guests",
+            $"/api/v1/events/{ev.Id}/guests/{guest.Id}",
+            $"/api/v1/events/{ev.Id}/invitations/qr-sheet",
+            $"/api/v1/events/{ev.Id}/whatsapp-template",
+            invitation,
+            $"{invitation}/whatsapp-link",
+            $"{invitation}/qr",
+        };
+        foreach (var path in reads)
+        {
+            (await SendAsync(_client, HttpMethod.Get, path, _b.Owner.AccessToken)).StatusCode.ShouldBe(HttpStatusCode.NotFound, path);
+        }
+        (await GuestRequests.AddAsync(_client, _b.Admin, ev.Id)).StatusCode.ShouldBe(HttpStatusCode.NotFound);
+        (await SendAsync(_client, HttpMethod.Delete, $"/api/v1/events/{ev.Id}/guests/{guest.Id}", _b.Owner.AccessToken))
+            .StatusCode.ShouldBe(HttpStatusCode.NotFound);
+        (await SendAsync(_client, HttpMethod.Post, $"{invitation}/revoke", _b.Owner.AccessToken))
+            .StatusCode.ShouldBe(HttpStatusCode.NotFound);
+        (await SendAsync(_client, HttpMethod.Post, $"{invitation}/regenerate-code", _b.Owner.AccessToken))
+            .StatusCode.ShouldBe(HttpStatusCode.NotFound);
+
+        var stillThere = await GuestRequests.ListAsync(_client, _a.Owner, ev.Id);
+        stillThere.Guests.ShouldHaveSingleItem().Invitation.Code.ShouldBe(guest.Invitation.Code);
+    }
 }

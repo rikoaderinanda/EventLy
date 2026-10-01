@@ -53,6 +53,13 @@ public static class AuditActions
     public const string EventStatusChanged = "event.status_changed";
     public const string EventStaffAssigned = "event.staff_assigned";
 
+    public const string GuestCreated = "guest.created";
+    public const string GuestUpdated = "guest.updated";
+    public const string GuestDeleted = "guest.deleted";
+    public const string InvitationCodeRegenerated = "invitation.code_regenerated";
+    public const string InvitationRevoked = "invitation.revoked";
+    public const string EventWhatsappTemplateUpdated = "event.whatsapp_template_updated";
+
     public const string PackageCreated = "package.created";
     public const string PackageUpdated = "package.updated";
 

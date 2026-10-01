@@ -37,6 +37,12 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options, ICurren
 
     public DbSet<EventStaffAssignment> EventStaffAssignments => Set<EventStaffAssignment>();
 
+    public DbSet<Guest> Guests => Set<Guest>();
+
+    public DbSet<GuestSession> GuestSessions => Set<GuestSession>();
+
+    public DbSet<Invitation> Invitations => Set<Invitation>();
+
     public DbSet<Package> Packages => Set<Package>();
 
     public DbSet<Payment> Payments => Set<Payment>();

@@ -42,6 +42,7 @@
 | Q-43 | Musik latar | Owner uploads one own audio file (MP3/M4A, max 10 MB); copyright is the Owner's responsibility. No built-in library, no YouTube. "Buka Undangan" cover starts the music; mute button | 2026-09-29 |
 | Q-44 | Hitung mundur | Counts down to the first session; then "Acara sedang berlangsung" / "Acara telah selesai" | 2026-09-29 |
 | Q-45 | Per-package flags | Root can switch wishes, gift, music and countdown on/off per package; all **on** in the initial seed | 2026-09-29 |
+| Q-46 | Guest limit unit | The package's `maxGuests` counts **people**, not invitations: a group invitation of 4 takes 4 places. Checked when adding a guest, when a group grows, and at checkout | 2026-10-01 |
 | Q-9 | Offline | **Online only** for the MVP. Upload retries automatically. Photo step can be skipped. Offline mode is a future phase | 2026-09-29 |
 
 ## Accepted recommendations ("sisanya sesuai saran", 2026-09-29)

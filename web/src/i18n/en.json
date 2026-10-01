@@ -188,7 +188,14 @@
     "package_not_found": "Package not found or no longer offered.",
     "package_code_taken": "This package code is already used.",
     "event_staff_limit_exceeded": "More staff than this event's package allows.",
-    "owner_not_found": "Owner not found."
+    "owner_not_found": "Owner not found.",
+    "guest_quota_exceeded": "This event's package guest limit is reached.",
+    "guest_not_found": "Guest not found.",
+    "guest_unknown_session": "A chosen session doesn't belong to this event.",
+    "guest_no_session": "Choose at least one session.",
+    "invitation_not_found": "Invitation not found.",
+    "invitation_revoked": "This invitation is revoked. Generate a new code to use it again.",
+    "payment_guest_limit_exceeded": "More guests than this package allows. Remove guests or choose a bigger package."
   },
   "events": {
     "title": "Events",
@@ -308,5 +315,60 @@
       "Xendit": "Xendit",
       "Manual": "Transfer (confirmed by EventLy)"
     }
+  },
+  "guests": {
+    "title": "Guests & invitations",
+    "entryHint": "Guest list, invitation links, QR codes and Send via WhatsApp.",
+    "add": "Add guest",
+    "addSubmit": "Add guest",
+    "newTitle": "New guest",
+    "qrSheet": "Print QR codes",
+    "qrSheetTitle": "Invitation QR codes · {{event}}",
+    "qrSheetEmpty": "No active invitations yet.",
+    "count": "{{people}} guests · {{total}} invitations",
+    "countWithLimit": "{{people}} of {{limit}} guests · {{total}} invitations",
+    "full": "The package's guest limit is reached (it counts people; a group counts every member).",
+    "notActiveYet": "You can prepare guests now. Guests can open their invitation once the event is active (payment succeeded).",
+    "empty": "No guests yet. Add a guest to create their invitation link and QR code.",
+    "search": "Search name, phone or email",
+    "typeLabel": "Invitation type",
+    "statusLabel": "Invitation status",
+    "allTypes": "All types",
+    "allStatuses": "All statuses",
+    "type": {
+      "Individual": "Individual",
+      "Group": "Group"
+    },
+    "status": {
+      "Active": "Active",
+      "Revoked": "Revoked"
+    },
+    "groupOf": "Group of {{n}}",
+    "name": "Guest name",
+    "nameHint": "The name shown on the invitation, for example \"Mr & Mrs Andi\" or \"The Wijaya family\".",
+    "phone": "WhatsApp number (optional)",
+    "phoneHint": "For the Send via WhatsApp button. Example: 0812 3456 7890.",
+    "email": "Email (optional)",
+    "people": "Number of people",
+    "peopleHint": "Only the number, no member names (2–50).",
+    "sessions": "Invited to",
+    "sendWhatsApp": "Send via WhatsApp",
+    "copyLink": "Copy link",
+    "copied": "Copied",
+    "revoked": "Invitation revoked",
+    "revokedHint": "The old link and QR code no longer work. Generate a new code to activate it again.",
+    "invitationTitle": "Invitation",
+    "qrAlt": "Invitation QR code for {{name}}",
+    "downloadQr": "Download QR (PNG)",
+    "regenerate": "Generate a new code",
+    "restore": "Activate with a new code",
+    "revoke": "Revoke invitation",
+    "delete": "Delete guest",
+    "confirmRegenerate": "Generate a new code? Links and QR codes already sent will stop working.",
+    "confirmRevoke": "Revoke this invitation? Its link and QR code stop working at once.",
+    "confirmDelete": "Delete {{name}}? Their invitation is revoked too.",
+    "templateTitle": "WhatsApp message",
+    "templateHint": "Use {nama} (name), {acara} (event) and {link}. {link} is required: it's where the guest's invitation link goes.",
+    "templateReset": "Back to the default message"
   }
 }

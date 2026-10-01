@@ -306,7 +306,7 @@ An event has one or more **sessions** (`event_sessions`), each with a name, date
 - Guest URL: `https://{host}/i/{code}`.
 - QR payload: the same URL. Staff scan it, and the scanner extracts the code. One QR works both as a guest's "open my invitation" link and as the check-in token.
   - *Alternative:* a separate HMAC-signed check-in token. See Q-8.
-- `Invitation.QRCode` stores the **payload string**. The PNG/SVG image is rendered on demand (`GET /invitations/{id}/qr`) and cached, not stored as a blob.
+- The payload URL is **built from the code, not stored** (decided in Phase 6), so a domain change needs no data migration. The PNG/SVG image is rendered on demand (`GET /invitations/{id}/qr`, a few milliseconds) and is neither stored nor cached. Details: [docs/modules/guests.md](../modules/guests.md).
 - RSVP: the guest submits `Attending | NotAttending` (plus `Pending` as the initial state). It can be changed until a cut-off (event date). There is one RSVP row per invitation, updated in place.
 
 ### 6.3 Check-in (staff at the venue)

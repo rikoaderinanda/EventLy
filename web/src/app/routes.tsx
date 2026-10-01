@@ -75,6 +75,30 @@ export const routes: RouteObject[] = [
                 }),
               },
               {
+                path: 'events/:id/guests',
+                lazy: async () => ({
+                  Component: (await import('@/features/guests/GuestListPage')).GuestListPage,
+                }),
+              },
+              {
+                path: 'events/:id/guests/new',
+                lazy: async () => ({
+                  Component: (await import('@/features/guests/GuestFormPage')).NewGuestPage,
+                }),
+              },
+              {
+                path: 'events/:id/guests/:guestId',
+                lazy: async () => ({
+                  Component: (await import('@/features/guests/GuestFormPage')).EditGuestPage,
+                }),
+              },
+              {
+                path: 'events/:id/qr-sheet',
+                lazy: async () => ({
+                  Component: (await import('@/features/guests/QrSheetPage')).QrSheetPage,
+                }),
+              },
+              {
                 path: 'payments/:id',
                 element: <ProtectedRoute roles={['Owner']} />,
                 children: [

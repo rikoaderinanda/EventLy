@@ -134,14 +134,14 @@ Details and rules: [docs/modules/payments.md](../modules/payments.md).
 
 | Method | Path | Roles | Description |
 |---|---|---|---|
-| GET | `/events/{eventId}/guests?search=&type=&rsvp=&checkedIn=` | O A | Guest list joined with invitation, RSVP and check-in status |
-| POST | `/events/{eventId}/guests` | O A | Create a guest **and its invitation** in one step `{name, phone, email, guestType, numberOfPeople}` (see 2.7) |
-| POST | `/events/{eventId}/guests/import` | O A | CSV bulk import **[Q-12]** |
+| GET | `/events/{eventId}/guests?search=&type=&status=&rsvp=&checkedIn=` | O A | `{guests, total, totalPeople, limit}`: guests with their invitation (RSVP and check-in status from Phases 7 and 8) and the package quota |
+| POST | `/events/{eventId}/guests` | O A | Create a guest **and its invitation** in one step `{name, phone, email, guestType, numberOfPeople, sessionIds}` (see 2.7). `sessionIds` null = all sessions (Q-38) |
+| POST | `/events/{eventId}/guests/import` | O A | CSV bulk import **[Q-12, not built yet]** |
 | GET | `/events/{eventId}/guests/{guestId}` | O A | Details |
 | PUT | `/events/{eventId}/guests/{guestId}` | O A | Update |
 | DELETE | `/events/{eventId}/guests/{guestId}` | O A | Soft delete (409 if checked in) |
 
-Creating guests is checked against the package's `maxGuests` (422 when exceeded).
+Creating guests, and growing a group, is checked against the package's `maxGuests` (422 `guest.quota_exceeded`). It counts **people**: a group of 4 takes 4 places (Q-46). Details: [docs/modules/guests.md](../modules/guests.md).
 
 ### 2.7 Invitation — `/api/v1/invitations`
 
@@ -149,13 +149,15 @@ Because the invitation is the identity unit and the relationship is 1:1, **creat
 
 | Method | Path | Roles | Description |
 |---|---|---|---|
-| GET | `/events/{eventId}/invitations?status=` | O A | List (includes the invitation URL) |
 | GET | `/invitations/{id}` | O A | Details `{code, url, type, status, guest, rsvp, checkIn}` |
 | GET | `/invitations/{id}/whatsapp-link` | O A | `{url}` = `https://wa.me/628…?text=…` built from the event's message template. The PWA opens it |
-| GET | `/invitations/{id}/qr?format=png\|svg&size=` | O A | QR image (cached) |
-| POST | `/invitations/{id}/regenerate-code` | O A | Rotates the code (old link stops working). Blocked after check-in |
-| POST | `/invitations/{id}/revoke` | O A | Revoke |
-| GET | `/events/{eventId}/invitations/qr-sheet` | O A | ZIP/PDF of all QR codes for printing **[Q-12]** |
+| GET | `/invitations/{id}/qr?format=png\|svg&size=` | O A | QR image, rendered on demand (`Cache-Control: private, no-store`) |
+| POST | `/invitations/{id}/regenerate-code` | O A | Rotates the code (old link stops working) and reactivates a revoked invitation. Blocked after check-in (Phase 8) |
+| POST | `/invitations/{id}/revoke` | O A | Revoke. The WhatsApp link and QR then give 409 `invitation.revoked` |
+| GET | `/events/{eventId}/invitations/qr-sheet` | O A | All active invitations with their QR (SVG). The PWA prints the sheet from the browser (no ZIP/PDF) |
+| GET · PUT | `/events/{eventId}/whatsapp-template` | O A | The event's WhatsApp message `{template, isDefault}` with `{nama}`, `{acara}`, `{link}` (required). `null` resets it |
+
+The guest list carries each invitation, so there is no separate invitation list endpoint.
 
 ### 2.8 RSVP (organizer side)
 

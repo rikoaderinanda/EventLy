@@ -41,6 +41,7 @@ public static class ServiceSetup
     {
         services.Configure<LegalOptions>(configuration.GetSection(LegalOptions.SectionName));
         services.Configure<MaintenanceOptions>(configuration.GetSection(MaintenanceOptions.SectionName));
+        services.Configure<AppOptions>(configuration.GetSection(AppOptions.SectionName));
         services.AddScoped<AuditService>();
         services.AddScoped<AuthService>();
         services.AddScoped<OrganizationService>();
@@ -49,6 +50,9 @@ public static class ServiceSetup
         services.AddScoped<EventService>();
         services.AddScoped<PackageService>();
         services.AddScoped<PaymentService>();
+        services.AddScoped<InvitationLinks>();
+        services.AddScoped<GuestService>();
+        services.AddScoped<InvitationService>();
         return services;
     }
 

@@ -77,6 +77,7 @@ All settings can be overridden with environment variables. Use `__` as the secti
 | Terms version | `Legal__TermsVersion` | `2026-09-29` | Bump it when the Terms/Privacy text changes; Owners then accept the new version |
 | Payment gateway | `Payments__Provider` | `Fake` | `Fake` only starts in Development/Testing. The Xendit adapter comes later |
 | Checkout lifetime | `Payments__CheckoutMinutes` | `1440` | Minutes before an unpaid checkout expires |
+| Public app URL | `App__PublicBaseUrl` | – (request origin) | Origin used in invitation links and QR codes, for example `https://evently.id`. Set it in production |
 | Maintenance key | `Maintenance__Key` | – (off) | **Secret.** Scheduled jobs send it in `X-Maintenance-Key`. Development: `dev-only-maintenance-key-0123456789abcdef` |
 
 Frontend build variables (`web/.env.example`): `VITE_API_BASE_URL` (default `/api/v1`), `VITE_APP_NAME`, `VITE_DEFAULT_LOCALE` (`id` or `en`). They end up in public JavaScript, so never put secrets there.
@@ -114,6 +115,9 @@ Without Docker, the database integration tests are reported as **skipped**, not 
 | `GET /api/v1/platform/owners/{id}`, `POST /api/v1/platform/events/{id}/activate` | Root: Owner details, manual activation |
 | `POST` · `GET /api/v1/events/{id}/payments`, `GET /api/v1/payments/{id}` · `/receipt` | Owner pays for an event (see §6.1) |
 | `POST /api/v1/payments/webhooks/{provider}` | Payment provider callback (signed) |
+| `GET` · `POST /api/v1/events/{id}/guests`, `GET` · `PUT` · `DELETE …/guests/{guestId}` | Guests, each with their invitation |
+| `GET /api/v1/invitations/{id}` · `/whatsapp-link` · `/qr`, `POST …/regenerate-code` · `/revoke` | Invitations |
+| `GET /api/v1/events/{id}/invitations/qr-sheet`, `GET` · `PUT …/whatsapp-template` | QR sheet, WhatsApp message |
 | `POST /api/v1/maintenance/payments/reconcile` | Payment reconciliation (header `X-Maintenance-Key`) |
 | `/legal/terms`, `/legal/privacy` | Terms & Privacy Policy pages |
 | any other path | The PWA (`index.html`); unknown `/api/...` paths return a JSON 404 |
@@ -163,5 +167,6 @@ To use real Google sign-in:
 | `Auth:Jwt:SigningKey must be at least 32 bytes` | Set `Auth__Jwt__SigningKey` (Production), or run with `ASPNETCORE_ENVIRONMENT=Development` |
 | `docker` is not recognized (Windows) | Add `C:\Program Files\Docker\Docker\resources\bin` to your user `Path`, then restart the terminal (and VS Code) |
 | http://localhost:8080 doesn't answer but http://127.0.0.1:8080 does | Another program (often one inside WSL) listens on `::1:8080`. Use `127.0.0.1`, stop that program, or set `APP_PORT` |
+| The invitation link in WhatsApp can't be tapped | WhatsApp only links domain names, not `127.0.0.1` or `localhost`, and a phone can't reach your PC's localhost anyway. To test from a phone, expose the app with a tunnel (for example `cloudflared tunnel --url http://localhost:8080`), set `APP_PUBLIC_BASE_URL` (compose) or `App__PublicBaseUrl` to the tunnel's `https://` address, and restart. In production the real domain works as is |
 | `Payments:Provider 'Fake' is only allowed in Development and Testing` | Expected outside Development: the simulated gateway must not run in production |
 | Google button: "origin is not allowed" | Add the exact origin (scheme + host + port) to *Authorized JavaScript origins* in Google Cloud Console |

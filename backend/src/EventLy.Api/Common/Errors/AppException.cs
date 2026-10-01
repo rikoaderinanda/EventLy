@@ -28,3 +28,7 @@ public sealed class UnauthorizedException(string code, string title, string? det
 
 public sealed class ForbiddenException(string code, string title, string? detail = null)
     : AppException(StatusCodes.Status403Forbidden, code, title, detail);
+
+/// <summary>A package limit is reached (422), for example the number of guests.</summary>
+public sealed class QuotaExceededException(string code, string title, string? detail = null)
+    : AppException(StatusCodes.Status422UnprocessableEntity, code, title, detail);

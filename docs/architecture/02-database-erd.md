@@ -187,7 +187,6 @@ erDiagram
         uuid event_id FK
         uuid guest_id FK "UK - 1 invitation per guest"
         text code UK "128-bit base64url"
-        text qr_code "QR payload (URL)"
         text type "Individual|Group"
         text status "Active|Revoked"
         timestamptz opened_at "+ first view"

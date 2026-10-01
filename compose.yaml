@@ -58,6 +58,8 @@ services:
       # Optional: real Google sign-in (docs/setup-guide.md §7). Without it, use the test sign-in.
       Auth__GoogleClientId: ${AUTH_GOOGLE_CLIENT_ID:-}
       Auth__RootEmail: ${AUTH_ROOT_EMAIL:-root@evently.test}
+      # Origin in invitation links and QR codes. Empty = the browser's origin (fine on this PC only).
+      App__PublicBaseUrl: ${APP_PUBLIC_BASE_URL:-}
     depends_on:
       migrate:
         condition: service_completed_successfully

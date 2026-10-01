@@ -18,7 +18,8 @@ The architecture, decisions and roadmap are in [docs/architecture](docs/architec
 | 3 | Organization: onboarding with Terms acceptance, profile, Admin/Staff invitations, tenant isolation, Root suspend/reactivate | ✅ Done |
 | 4 | Events: CRUD, sessions (akad/resepsi) in venue time, lifecycle, staff assignment, Staff see assigned events | ✅ Done |
 | 5 | Packages (Root-managed), checkout with signed idempotent webhooks, reconciliation, receipt, Root manual activation (simulated gateway, Xendit later) | ✅ Done |
-| 6 | Invitations: guests, codes, QR, WhatsApp link | Next |
+| 6 | Guests & invitations: 1:1 invitation with a 128-bit code, sessions per guest, package guest limit, QR (PNG/SVG + printable sheet), Kirim via WhatsApp with a per-event message | ✅ Done |
+| 7 | Guest portal & RSVP: public invitation page, RSVP, wishes, digital gift | Next |
 
 ## Quick start (Docker)
 

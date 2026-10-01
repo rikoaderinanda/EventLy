@@ -188,7 +188,14 @@
     "package_not_found": "Paket tidak ditemukan atau tidak ditawarkan lagi.",
     "package_code_taken": "Kode paket ini sudah dipakai.",
     "event_staff_limit_exceeded": "Jumlah Staff melebihi batas paket acara ini.",
-    "owner_not_found": "Owner tidak ditemukan."
+    "owner_not_found": "Owner tidak ditemukan.",
+    "guest_quota_exceeded": "Batas jumlah tamu paket acara ini sudah tercapai.",
+    "guest_not_found": "Tamu tidak ditemukan.",
+    "guest_unknown_session": "Sesi yang dipilih bukan milik acara ini.",
+    "guest_no_session": "Pilih minimal satu sesi.",
+    "invitation_not_found": "Undangan tidak ditemukan.",
+    "invitation_revoked": "Undangan ini sudah dicabut. Buat kode baru untuk memakainya lagi.",
+    "payment_guest_limit_exceeded": "Jumlah tamu melebihi batas paket ini. Kurangi tamu atau pilih paket yang lebih besar."
   },
   "events": {
     "title": "Acara",
@@ -308,5 +315,60 @@
       "Xendit": "Xendit",
       "Manual": "Transfer (dikonfirmasi admin EventLy)"
     }
+  },
+  "guests": {
+    "title": "Tamu & undangan",
+    "entryHint": "Daftar tamu, link undangan, QR dan Kirim via WhatsApp.",
+    "add": "Tambah tamu",
+    "addSubmit": "Tambah tamu",
+    "newTitle": "Tamu baru",
+    "qrSheet": "Cetak QR",
+    "qrSheetTitle": "QR undangan · {{event}}",
+    "qrSheetEmpty": "Belum ada undangan aktif.",
+    "count": "{{people}} tamu · {{total}} undangan",
+    "countWithLimit": "{{people}} dari {{limit}} tamu · {{total}} undangan",
+    "full": "Batas tamu paket sudah tercapai (dihitung per orang, rombongan dihitung semua anggotanya).",
+    "notActiveYet": "Anda bisa menyiapkan tamu sekarang. Tamu baru bisa membuka undangan setelah acara aktif (pembayaran berhasil).",
+    "empty": "Belum ada tamu. Tambahkan tamu untuk membuat link undangan dan QR-nya.",
+    "search": "Cari nama, telepon atau email",
+    "typeLabel": "Jenis undangan",
+    "statusLabel": "Status undangan",
+    "allTypes": "Semua jenis",
+    "allStatuses": "Semua status",
+    "type": {
+      "Individual": "Perorangan",
+      "Group": "Rombongan"
+    },
+    "status": {
+      "Active": "Aktif",
+      "Revoked": "Dicabut"
+    },
+    "groupOf": "Rombongan {{n}} orang",
+    "name": "Nama tamu",
+    "nameHint": "Nama yang tampil di undangan, misalnya \"Bapak Andi & Ibu\" atau \"Keluarga Wijaya\".",
+    "phone": "Nomor WhatsApp (opsional)",
+    "phoneHint": "Untuk tombol Kirim via WhatsApp. Contoh: 0812 3456 7890.",
+    "email": "Email (opsional)",
+    "people": "Jumlah orang",
+    "peopleHint": "Hanya jumlahnya, tanpa nama anggota (2–50).",
+    "sessions": "Diundang ke sesi",
+    "sendWhatsApp": "Kirim via WhatsApp",
+    "copyLink": "Salin link",
+    "copied": "Tersalin",
+    "revoked": "Undangan dicabut",
+    "revokedHint": "Link dan QR lama tidak berlaku. Buat kode baru untuk mengaktifkannya lagi.",
+    "invitationTitle": "Undangan",
+    "qrAlt": "QR undangan {{name}}",
+    "downloadQr": "Unduh QR (PNG)",
+    "regenerate": "Buat kode baru",
+    "restore": "Aktifkan dengan kode baru",
+    "revoke": "Cabut undangan",
+    "delete": "Hapus tamu",
+    "confirmRegenerate": "Buat kode baru? Link dan QR yang sudah dikirim tidak akan berlaku lagi.",
+    "confirmRevoke": "Cabut undangan ini? Link dan QR-nya langsung tidak berlaku.",
+    "confirmDelete": "Hapus {{name}}? Undangannya ikut dicabut.",
+    "templateTitle": "Pesan WhatsApp",
+    "templateHint": "Gunakan {nama}, {acara} dan {link}. {link} wajib ada: di situ link undangan tamu dimasukkan.",
+    "templateReset": "Kembalikan ke pesan bawaan"
   }
 }

@@ -54,6 +54,9 @@ public sealed class Event : ITenantOwned, ISoftDeletable, IHasTimestamps
 
     public DateTimeOffset? ActivatedAt { get; set; }
 
+    /// <summary>Message for "Kirim via WhatsApp" with {nama}, {acara} and {link}; null uses the default.</summary>
+    public string? WhatsappTemplate { get; set; }
+
     /// <summary>Object key of the cover photo in storage (upload arrives with storage in Phase 9).</summary>
     public string? CoverImageKey { get; set; }
 
