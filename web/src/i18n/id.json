@@ -203,7 +203,8 @@
     "gift_confirmation_limit": "Batas konfirmasi hadiah untuk undangan ini sudah tercapai.",
     "rate_limit_exceeded": "Terlalu banyak permintaan. Tunggu sebentar lalu coba lagi.",
     "invitation_event_not_paid": "Undangan baru bisa dikirim setelah acara dibayar.",
-    "guest_import_invalid_file": "File tidak bisa dibaca. Pastikan CSV dengan baris judul berisi kolom \"nama\"."
+    "guest_import_invalid_file": "File tidak bisa dibaca. Pastikan CSV dengan baris judul berisi kolom \"nama\".",
+    "user_admin_limit_exceeded": "Batas Admin paket sudah tercapai. Nonaktifkan Admin lain atau gunakan paket yang lebih besar."
   },
   "events": {
     "title": "Acara",

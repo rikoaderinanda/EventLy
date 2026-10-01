@@ -203,7 +203,8 @@
     "gift_confirmation_limit": "This invitation has reached its gift confirmation limit.",
     "rate_limit_exceeded": "Too many requests. Please wait a moment and try again.",
     "invitation_event_not_paid": "Invitations can be sent once the event is paid.",
-    "guest_import_invalid_file": "The file can't be read. Use a CSV with a header line that has a \"nama\" (name) column."
+    "guest_import_invalid_file": "The file can't be read. Use a CSV with a header line that has a \"nama\" (name) column.",
+    "user_admin_limit_exceeded": "Your package's Admin limit is reached. Disable another Admin or choose a bigger package."
   },
   "events": {
     "title": "Events",

@@ -50,6 +50,8 @@
 | Q-51 | Money for a closed checkout | A payment that settles after its checkout was closed (replaced, expired, event cancelled) doesn't activate anything. It is recorded in the audit log (`payment.late_settlement`) and Root settles it with the Owner (no refunds in the MVP, Q-32) | 2026-10-01 |
 | Q-52 | Payment provider timing | Keep the **simulated gateway** for now; the Xendit adapter comes later (before production) | 2026-10-01 |
 | Q-12 | Extras (confirmed) | **CSV guest import: yes (MVP).** Printable QR sheet: yes. Custom invitation design: no, one standard template | 2026-10-01 |
+| Q-53 | Check-in outside the guest's sessions | A guest invited only to other sessions (for example the akad) **may still check in** at the check-in session; Staff see a warning | 2026-10-01 |
+| Q-54 | Enforcing `maxAdmins` | An organization can have at most the largest `maxAdmins` among its **Active** events' packages (invited and active Admins count, disabled don't). With no Active event, the largest offered package applies, so the Owner can get help before the first payment. Checked when inviting an Admin, promoting Staff to Admin, or re-enabling an Admin (422 `user.admin_limit_exceeded`); existing Admins are never removed | 2026-10-01 |
 | Q-9 | Offline | **Online only** for the MVP. Upload retries automatically. Photo step can be skipped. Offline mode is a future phase | 2026-09-29 |
 
 ## Accepted recommendations ("sisanya sesuai saran", 2026-09-29)

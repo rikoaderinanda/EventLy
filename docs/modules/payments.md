@@ -59,6 +59,7 @@ The `migrate` command seeds the initial catalog after the migrations: Basic Rp 1
   - `GET /payments/{id}` also reconciles an overdue checkout on the spot, so the Owner never waits for the scheduler.
 - **Cancelling an event** closes its open checkout.
 - **Staff limit:** after payment, assigning more Staff than the package's `maxStaff` gives 409 `event.staff_limit_exceeded`.
+- **Admin limit (Q-54):** an organization can have at most the largest `maxAdmins` among its Active events' packages, or, with no Active event, the largest offered package. Invited and active Admins count, disabled ones don't. Inviting an Admin, promoting Staff, or re-enabling an Admin past the limit gives 422 `user.admin_limit_exceeded`, checked under a row lock on the organization. Existing Admins are never removed.
 - **Q-20:** Root's edits to a package apply to new checkouts only. A paid event keeps its snapshot (name, price, limits), and a payment keeps its amount.
 - **Manual activation** (`POST /platform/events/{id}/activate {packageId, amount, note}`, Root):
   - Allowed for a Draft or PendingPayment event.
@@ -105,4 +106,5 @@ The `migrate` command seeds the initial catalog after the migrations: Basic Rp 1
   - `PackagesTests`: catalog, Root management, cache eviction, 403 for the other roles.
   - `PaymentsTests`: amount from the server, reused and replaced checkouts, webhook replay and concurrent duplicates, tampered signature, wrong amount, failed payment back to Draft, lost webhook and expiry by reconciliation, maintenance key, receipt, staff limits, the Q-20 snapshot, Admin and Staff 403.
   - `PlatformPaymentsTests`: manual activation, Owner details.
+  - `AdminLimitTests`: the limit before and after payment, disabled Admins, promotion, invitations at the same moment.
   - `TenantIsolationTests`: payments.
