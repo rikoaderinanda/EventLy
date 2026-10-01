@@ -2,6 +2,7 @@ using System.Globalization;
 using EventLy.Api.Auth;
 using EventLy.Api.Common.Setup;
 using EventLy.Api.Data;
+using EventLy.Api.Payments;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -19,6 +20,7 @@ try
         .AddCaching(builder.Configuration)
         .AddHealth(builder.Configuration)
         .AddAuth(builder.Configuration, builder.Environment)
+        .AddPayments(builder.Configuration, builder.Environment)
         .AddAppServices(builder.Configuration);
 
     var app = builder.Build();

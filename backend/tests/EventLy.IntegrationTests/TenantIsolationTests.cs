@@ -135,4 +135,29 @@ public sealed class TenantIsolationTests(PostgresFixture postgres) : IClassFixtu
         await using var asNobody = postgres.CreateDbContext();
         (await asNobody.Events.AnyAsync(e => e.Id == ev.Id, Ct)).ShouldBeFalse();
     }
+
+    [Fact]
+    public async Task Another_tenants_payments_are_invisible_and_their_events_cant_be_paid_for()
+    {
+        var ev = await CreateAsync(_client, _a.Owner);
+        var basic = await PaymentRequests.PackageAsync(_client, _a.Owner, "BASIC");
+        var payment = await PaymentRequests.StartCheckoutAsync(_client, _a.Owner, ev.Id, basic.Id);
+
+        var paths = new[]
+        {
+            $"/api/v1/payments/{payment.Id}",
+            $"/api/v1/payments/{payment.Id}/receipt",
+            $"/api/v1/events/{ev.Id}/payments",
+        };
+        foreach (var path in paths)
+        {
+            (await SendAsync(_client, HttpMethod.Get, path, _b.Owner.AccessToken)).StatusCode.ShouldBe(HttpStatusCode.NotFound);
+        }
+        (await PaymentRequests.CheckoutAsync(_client, _b.Owner, ev.Id, basic.Id)).StatusCode.ShouldBe(HttpStatusCode.NotFound);
+        (await SendAsync(_client, HttpMethod.Post, $"/api/v1/payments/{payment.Id}/simulate", _b.Owner.AccessToken,
+            new EventLy.Api.Dtos.Payments.SimulatePaymentRequest(EventLy.Api.Dtos.Payments.SimulatedOutcome.Paid)))
+            .StatusCode.ShouldBe(HttpStatusCode.NotFound);
+
+        (await GetAsync(_client, _a.Owner, ev.Id)).Status.ShouldBe(EventStatus.PendingPayment);
+    }
 }

@@ -52,4 +52,17 @@ public static class AuditActions
     public const string EventDeleted = "event.deleted";
     public const string EventStatusChanged = "event.status_changed";
     public const string EventStaffAssigned = "event.staff_assigned";
+
+    public const string PackageCreated = "package.created";
+    public const string PackageUpdated = "package.updated";
+
+    public const string PaymentCreated = "payment.created";
+    public const string PaymentStatusChanged = "payment.status_changed";
+    public const string PaymentManualActivation = "payment.manual_activation";
+
+    /// <summary>The provider reported an amount that differs from ours; the payment stays pending for Root.</summary>
+    public const string PaymentAmountMismatch = "payment.amount_mismatch";
+
+    /// <summary>A "paid" arrived for a payment that was already closed (replaced, expired, event cancelled).</summary>
+    public const string PaymentLateSettlement = "payment.late_settlement";
 }

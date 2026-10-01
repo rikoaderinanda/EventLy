@@ -63,7 +63,9 @@
     "dashboard": "Dashboard",
     "organization": "Organisasi",
     "users": "Pengguna",
-    "events": "Acara"
+    "events": "Acara",
+    "owners": "Owner",
+    "packages": "Paket"
   },
   "roles": {
     "Root": "Root",
@@ -117,7 +119,46 @@
     "suspend": "Nonaktifkan",
     "reactivate": "Aktifkan kembali",
     "confirmSuspend": "Nonaktifkan {{name}}? Owner dan seluruh anggota organisasinya tidak akan bisa masuk.",
-    "empty": "Tidak ada Owner."
+    "empty": "Tidak ada Owner.",
+    "purchases": "{{events}} acara · {{paidEvents}} lunas · {{pendingPayments}} menunggu",
+    "eventsTitle": "Acara",
+    "noEvents": "Belum ada acara.",
+    "noPayments": "Belum ada pembayaran.",
+    "activateManually": "Aktifkan manual",
+    "activateHint": "Gunakan jika Owner sudah membayar di luar gateway, misalnya transfer bank. Tercatat sebagai pembayaran manual dan masuk log audit.",
+    "amountReceived": "Jumlah diterima (Rp)",
+    "paymentNote": "Catatan pembayaran",
+    "paymentNoteHint": "Misalnya bank dan nomor referensi transfer.",
+    "activate": "Aktifkan acara",
+    "inactive": "Tidak ditawarkan",
+    "packagesTitle": "Paket",
+    "packagesHint": "Perubahan harga dan batas hanya berlaku untuk pembayaran baru. Acara yang sudah dibayar tetap memakai paket saat dibayar.",
+    "newPackage": "Paket baru",
+    "editPackage": "Ubah paket {{name}}",
+    "packageCode": "Kode",
+    "codeHint": "Huruf, angka atau garis bawah. Tidak bisa diubah nanti.",
+    "codeFixed": "Kode tidak bisa diubah.",
+    "packageName": "Nama paket",
+    "price": "Harga (Rp)",
+    "limits": "Batas",
+    "flags": "Fitur",
+    "offered": "Ditawarkan ke Owner",
+    "close": "Tutup",
+    "featureLabel": {
+      "maxGuests": "Maks. tamu",
+      "maxPhotos": "Maks. foto",
+      "maxStaff": "Maks. Staff per acara",
+      "maxAdmins": "Maks. Admin",
+      "galleryRetentionDays": "Galeri disimpan (hari)",
+      "maxGuestPhotosPerInvitation": "Foto tamu per undangan",
+      "guestUploadEnabled": "Tamu bisa memotret",
+      "zipDownload": "Unduh ZIP",
+      "excelExport": "Ekspor Excel",
+      "wishesEnabled": "Ucapan & doa",
+      "digitalGiftEnabled": "Amplop digital",
+      "backgroundMusicEnabled": "Musik latar",
+      "countdownEnabled": "Hitung mundur"
+    }
   },
   "errors": {
     "generic": "Terjadi kesalahan. Silakan coba lagi.",
@@ -136,7 +177,18 @@
     "event_not_deletable": "Hanya acara draf atau yang dibatalkan yang bisa dihapus.",
     "event_modified_elsewhere": "Acara ini baru saja diubah orang lain. Muat ulang lalu ulangi perubahan Anda.",
     "event_invalid_status_change": "Status acara tidak bisa diubah dengan cara ini.",
-    "event_invalid_staff": "Hanya Staff aktif di organisasi Anda yang bisa ditugaskan."
+    "event_invalid_staff": "Hanya Staff aktif di organisasi Anda yang bisa ditugaskan.",
+    "payment_event_not_payable": "Hanya acara draf atau yang menunggu pembayaran yang bisa dibayar.",
+    "payment_staff_limit_exceeded": "Jumlah Staff acara ini melebihi batas paket. Kurangi Staff atau pilih paket yang lebih besar.",
+    "payment_checkout_in_progress": "Pembayaran untuk acara ini baru saja dibuat. Muat ulang lalu coba lagi.",
+    "payment_not_found": "Pembayaran tidak ditemukan.",
+    "payment_not_paid": "Kuitansi hanya tersedia untuk pembayaran yang lunas.",
+    "payment_not_pending": "Pembayaran ini sudah tidak menunggu pembayaran.",
+    "payment_simulation_unavailable": "Simulasi pembayaran tidak tersedia di server ini.",
+    "package_not_found": "Paket tidak ditemukan atau tidak ditawarkan lagi.",
+    "package_code_taken": "Kode paket ini sudah dipakai.",
+    "event_staff_limit_exceeded": "Jumlah Staff melebihi batas paket acara ini.",
+    "owner_not_found": "Owner tidak ditemukan."
   },
   "events": {
     "title": "Acara",
@@ -194,5 +246,67 @@
     "title": "Acara saya",
     "empty": "Anda belum ditugaskan ke acara mana pun.",
     "scannerSoon": "Scan QR tamu tersedia di tahap berikutnya."
+  },
+  "packages": {
+    "sectionTitle": "Paket & pembayaran",
+    "choose": "Pilih paket",
+    "chooseHint": "Pilih paket untuk mengaktifkan acara. Undangan, RSVP dan check-in berjalan setelah pembayaran berhasil.",
+    "changeHint": "Ingin paket lain? Pilih di bawah; pembayaran yang belum selesai akan diganti.",
+    "payFor": "Bayar {{name}} · {{price}}",
+    "current": "Paket {{name}}",
+    "ownerPays": "Owner memilih paket dan membayar untuk mengaktifkan acara ini.",
+    "feature": {
+      "guests": "Hingga {{n}} tamu",
+      "photos": "Hingga {{n}} foto",
+      "staff": "{{n}} Staff check-in",
+      "retention": "Galeri disimpan {{n}} hari",
+      "guestPhotos": "Tamu bisa memotret ({{n}} foto per undangan)",
+      "zip": "Unduh semua foto (ZIP)",
+      "excel": "Ekspor Excel & CSV",
+      "csvOnly": "Ekspor CSV"
+    }
+  },
+  "payments": {
+    "title": "Pembayaran",
+    "history": "Riwayat pembayaran",
+    "receipt": "Lihat kuitansi",
+    "receiptTitle": "Kuitansi pembayaran",
+    "pendingNotice": "Pembayaran paket {{name}} belum selesai.",
+    "continue": "Lanjutkan pembayaran",
+    "backToEvent": "Kembali ke acara",
+    "packageLine": "Paket {{name}}",
+    "expiresAt": "Bayar sebelum {{date}}",
+    "waiting": "Menunggu konfirmasi pembayaran. Halaman ini diperbarui otomatis.",
+    "paidMessage": "Pembayaran berhasil. Acara Anda sudah aktif.",
+    "closed": {
+      "Failed": "Pembayaran gagal. Kembali ke acara untuk mencoba lagi.",
+      "Expired": "Batas waktu pembayaran sudah lewat. Kembali ke acara untuk membuat pembayaran baru.",
+      "Cancelled": "Pembayaran ini dibatalkan karena diganti pembayaran lain atau acaranya dibatalkan."
+    },
+    "simulateTitle": "Simulasi pembayaran (khusus development)",
+    "simulateHint": "Gateway pembayaran belum terhubung. Pilih hasil pembayaran untuk mencoba alurnya.",
+    "simulatePaid": "Bayar berhasil",
+    "simulateFailed": "Bayar gagal",
+    "print": "Cetak / simpan PDF",
+    "reference": "Nomor referensi",
+    "paidAt": "Tanggal bayar",
+    "billedTo": "Dibayar oleh",
+    "event": "Acara",
+    "package": "Paket",
+    "method": "Metode",
+    "total": "Total",
+    "receiptFootnote": "Kuitansi ini bukti pembayaran, bukan faktur pajak.",
+    "status": {
+      "Pending": "Menunggu",
+      "Paid": "Lunas",
+      "Failed": "Gagal",
+      "Expired": "Kedaluwarsa",
+      "Cancelled": "Dibatalkan"
+    },
+    "provider": {
+      "Fake": "Simulasi",
+      "Xendit": "Xendit",
+      "Manual": "Transfer (dikonfirmasi admin EventLy)"
+    }
   }
 }

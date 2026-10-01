@@ -1,6 +1,7 @@
 using EventLy.Api.Auth;
 using EventLy.Api.Data;
 using EventLy.Api.Data.Interceptors;
+using EventLy.Api.Data.Seed;
 using EventLy.Api.Entities;
 using Microsoft.EntityFrameworkCore;
 using Testcontainers.PostgreSql;
@@ -8,7 +9,7 @@ using Testcontainers.PostgreSql;
 namespace EventLy.IntegrationTests.Infrastructure;
 
 /// <summary>
-/// Starts one throwaway PostgreSQL container per test class and applies all migrations.
+/// Starts one throwaway PostgreSQL container per test class, applies all migrations and seeds the packages.
 /// When Docker isn't available (a laptop without Docker Desktop), <see cref="SkipReason"/> is set and
 /// database tests skip instead of failing. In CI (<c>CI</c> env var set, as on GitHub Actions) a missing
 /// Docker is a failure.
@@ -38,8 +39,10 @@ public sealed class PostgresFixture : IAsyncLifetime
             return;
         }
 
+        // Same as the `migrate` command: migrations, then the initial package catalog.
         await using var db = CreateDbContext();
         await db.Database.MigrateAsync();
+        await PackageSeed.SeedAsync(db);
     }
 
     /// <summary>

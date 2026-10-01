@@ -35,7 +35,7 @@ function UserMenu() {
 export function AppShell({ area, children }: { area?: string; children?: ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col">
-      <header className="flex items-center justify-between gap-3 border-b border-brand-100 bg-white/80 px-4 py-3 backdrop-blur">
+      <header className="flex items-center justify-between gap-3 border-b border-brand-100 bg-white/80 px-4 py-3 backdrop-blur print:hidden">
         <Link to="/" className="flex items-center gap-2 font-semibold text-brand-900">
           <img src="/icon.svg" alt="" className="size-7" />
           {env.appName}

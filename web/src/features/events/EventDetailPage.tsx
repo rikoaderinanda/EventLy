@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useParams } from 'react-router'
 import { useSession } from '@/features/auth/session-store'
+import { EventPaymentSection } from '@/features/payments/EventPaymentSection'
 import { useUsers } from '@/features/users/api'
 import { errorMessage } from '@/shared/lib/errors'
 import {
@@ -197,6 +198,8 @@ export function EventDetailPage() {
         <h2 className="font-semibold text-brand-900">{t('events.sessions')}</h2>
         <Sessions event={event} />
       </div>
+
+      {event.status !== 'Cancelled' && <EventPaymentSection event={event} />}
 
       {role === 'Owner' && <StaffAssignment event={event} />}
     </section>

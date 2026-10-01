@@ -37,11 +37,25 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options, ICurren
 
     public DbSet<EventStaffAssignment> EventStaffAssignments => Set<EventStaffAssignment>();
 
+    public DbSet<Package> Packages => Set<Package>();
+
+    public DbSet<Payment> Payments => Set<Payment>();
+
+    private Guid? _actingOrganizationId;
+
     /// <summary>
     /// The organization tenant-owned queries are limited to. <see cref="Guid.Empty"/> when there is none
     /// (anonymous, Root, Owner before onboarding), which matches no rows.
     /// </summary>
-    public Guid CurrentOrganizationId => currentUser?.OrganizationId ?? Guid.Empty;
+    public Guid CurrentOrganizationId => _actingOrganizationId ?? currentUser?.OrganizationId ?? Guid.Empty;
+
+    /// <summary>
+    /// Work done for an organization without one of its members signed in: the payment webhook,
+    /// payment reconciliation and Root's manual activation. From here on, the tenant filter and the
+    /// tenant interceptor use <paramref name="organizationId"/>, so the work still can't touch another
+    /// organization's rows. Call it only after looking up the row that names the organization.
+    /// </summary>
+    public void ActAsOrganization(Guid organizationId) => _actingOrganizationId = organizationId;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

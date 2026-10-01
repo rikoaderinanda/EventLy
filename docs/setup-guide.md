@@ -75,6 +75,9 @@ All settings can be overridden with environment variables. Use `__` as the secti
 | Test sign-in | `Auth__DevSignInEnabled` | `false` | Sign in without Google. Only works in Development/Testing, even if switched on elsewhere |
 | Sign-in rate limit | `RateLimiting__AuthPermitPerMinute` | `10` | Per client IP, for sign-in/refresh/logout |
 | Terms version | `Legal__TermsVersion` | `2026-09-29` | Bump it when the Terms/Privacy text changes; Owners then accept the new version |
+| Payment gateway | `Payments__Provider` | `Fake` | `Fake` only starts in Development/Testing. The Xendit adapter comes later |
+| Checkout lifetime | `Payments__CheckoutMinutes` | `1440` | Minutes before an unpaid checkout expires |
+| Maintenance key | `Maintenance__Key` | – (off) | **Secret.** Scheduled jobs send it in `X-Maintenance-Key`. Development: `dev-only-maintenance-key-0123456789abcdef` |
 
 Frontend build variables (`web/.env.example`): `VITE_API_BASE_URL` (default `/api/v1`), `VITE_APP_NAME`, `VITE_DEFAULT_LOCALE` (`id` or `en`). They end up in public JavaScript, so never put secrets there.
 
@@ -106,8 +109,30 @@ Without Docker, the database integration tests are reported as **skipped**, not 
 | `GET` · `POST /api/v1/events`, `GET` · `PUT` · `DELETE /api/v1/events/{id}` | Events (Staff: only assigned ones) |
 | `POST /api/v1/events/{id}/cancel` · `/complete` | Status changes (cancel: Owner; complete: from Active) |
 | `GET` · `PUT /api/v1/events/{id}/staff` | Owner assigns Staff to the event |
+| `GET /api/v1/packages` | Package catalog (Owner, Admin) |
+| `GET` · `POST /api/v1/platform/packages`, `PUT …/{id}` | Root manages packages |
+| `GET /api/v1/platform/owners/{id}`, `POST /api/v1/platform/events/{id}/activate` | Root: Owner details, manual activation |
+| `POST` · `GET /api/v1/events/{id}/payments`, `GET /api/v1/payments/{id}` · `/receipt` | Owner pays for an event (see §6.1) |
+| `POST /api/v1/payments/webhooks/{provider}` | Payment provider callback (signed) |
+| `POST /api/v1/maintenance/payments/reconcile` | Payment reconciliation (header `X-Maintenance-Key`) |
 | `/legal/terms`, `/legal/privacy` | Terms & Privacy Policy pages |
 | any other path | The PWA (`index.html`); unknown `/api/...` paths return a JSON 404 |
+
+### 6.1 Try a payment locally
+
+No payment gateway is needed: Development uses the simulated gateway.
+
+1. Sign in as an Owner, create an event and open it.
+2. Under **Paket & pembayaran**, pick a package and pay. You land on the payment page.
+3. Click **Bayar berhasil** (or **Bayar gagal**). The event becomes Active (or goes back to Draft). The receipt is linked from the payment page and the event.
+4. Root (`root@evently.test`) sees the purchase under **Owner → name**, and can activate another event by hand (**Aktifkan manual**).
+
+Reconciliation runs when a scheduler calls it (Cloud Scheduler in production). Locally:
+
+```bash
+curl -X POST http://localhost:8080/api/v1/maintenance/payments/reconcile \
+  -H "X-Maintenance-Key: dev-only-maintenance-key-0123456789abcdef"
+```
 
 ## 7. Google sign-in (OAuth client id)
 
@@ -136,4 +161,7 @@ To use real Google sign-in:
 | Port 5432 / 6379 / 8080 already in use | Change `POSTGRES_PORT`, `REDIS_PORT` or `APP_PORT` in `.env` |
 | Integration tests "skipped" | Docker isn't running. Start Docker Desktop and run the tests again |
 | `Auth:Jwt:SigningKey must be at least 32 bytes` | Set `Auth__Jwt__SigningKey` (Production), or run with `ASPNETCORE_ENVIRONMENT=Development` |
+| `docker` is not recognized (Windows) | Add `C:\Program Files\Docker\Docker\resources\bin` to your user `Path`, then restart the terminal (and VS Code) |
+| http://localhost:8080 doesn't answer but http://127.0.0.1:8080 does | Another program (often one inside WSL) listens on `::1:8080`. Use `127.0.0.1`, stop that program, or set `APP_PORT` |
+| `Payments:Provider 'Fake' is only allowed in Development and Testing` | Expected outside Development: the simulated gateway must not run in production |
 | Google button: "origin is not allowed" | Add the exact origin (scheme + host + port) to *Authorized JavaScript origins* in Google Cloud Console |

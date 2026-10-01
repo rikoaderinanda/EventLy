@@ -41,6 +41,8 @@ const detail: EventDetail = {
     },
   ],
   staffCount: 0,
+  package: null,
+  activatedAt: null,
   createdAt: '',
   updatedAt: '',
   version: 7,

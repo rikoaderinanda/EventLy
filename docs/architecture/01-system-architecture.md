@@ -214,6 +214,7 @@ stateDiagram-v2
     Draft --> PendingPayment : select package + create payment
     PendingPayment --> Draft : payment failed / expired
     PendingPayment --> Active : payment settled (webhook)
+    Draft --> Active : Root manual activation (paid outside the gateway)
     Active --> Completed : owner closes / auto after event date + N days
     Draft --> Cancelled
     PendingPayment --> Cancelled
@@ -252,7 +253,7 @@ stateDiagram-v2
 3. `AppDbContext` applies `HasQueryFilter(e => e.OrganizationId == _currentUser.OrganizationId)` to every `ITenantOwned` entity.
 4. A `SaveChanges` interceptor stamps `OrganizationId` on insert and **rejects** any update where a row's `OrganizationId` differs from the caller's.
 5. **Guest (public) requests** carry no JWT. They are resolved by invitation code, from which the tenant is derived. `PublicInvitationService` looks up the invitation by code (the one allowed filter bypass), then sets the tenant for the rest of the request from that invitation.
-6. `IgnoreQueryFilters()` is allowed only in a short, reviewed allow-list (login lookup by email, public invitation lookup by code, payment webhook). Code review checks it, and a test searches the source for any other use of `IgnoreQueryFilters`.
+6. `IgnoreQueryFilters()` is allowed only in a short, reviewed allow-list (login lookup by email, public invitation lookup by code, payment webhook and reconciliation, Root's platform pages). It names the filter it turns off (`[AppDbContext.TenantFilter]`), so soft-deleted rows stay hidden. Work done for an organization without one of its members signed in (webhook, reconciliation, Root's manual activation) reads the row that names the organization and then calls `AppDbContext.ActAsOrganization`, so the filter and the interceptor apply to everything it changes. `TenantFilterBypassTests` fails on any use of `IgnoreQueryFilters` outside the allow-list.
 7. Cross-tenant IDs return **404, not 403**, so the API does not reveal that a resource exists.
 8. **Tenant isolation integration tests** (Phase 11) seed two organizations and assert that every endpoint returns 404 for the other tenant's IDs.
 
@@ -286,7 +287,8 @@ sequenceDiagram
 
 - The amount is always taken **from the server-side Package**, never from the client.
 - The webhook is the source of truth. It is idempotent: the provider's transaction ID is unique and duplicate calls are ignored. A reconciliation job re-checks `Pending` payments with the provider.
-- The provider is chosen by configuration through `IPaymentGateway`. A `FakePaymentGateway` (with a "simulate pay" endpoint, enabled only in Development) lets the whole flow run locally.
+- The provider is chosen by configuration through `IPaymentGateway`. A `FakePaymentGateway` (with a "simulate pay" endpoint, enabled only in Development) lets the whole flow run locally. The app refuses to start with the fake gateway outside Development/Testing.
+- Built in Phase 5: [docs/modules/payments.md](../modules/payments.md).
 
 ### 6.2a Sending an invitation (decided 2026-09-29)
 

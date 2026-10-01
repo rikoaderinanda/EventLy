@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '@/api/client'
+import type { PackageFeatures } from '@/features/payments/api'
 
 export type EventCategory = 'Wedding' | 'Corporate' | 'Birthday' | 'Community' | 'Other'
 export type EventStatus = 'Draft' | 'PendingPayment' | 'Active' | 'Completed' | 'Cancelled'
@@ -34,6 +35,9 @@ export type EventDetail = {
   status: EventStatus
   sessions: EventSession[]
   staffCount: number
+  /** The package the event paid for (snapshot). Null before payment, and always for Staff. */
+  package: { id: string; code: string; name: string; features: PackageFeatures } | null
+  activatedAt: string | null
   createdAt: string
   updatedAt: string
   version: number

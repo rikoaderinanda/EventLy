@@ -17,7 +17,8 @@ The architecture, decisions and roadmap are in [docs/architecture](docs/architec
 | 2 | Identity: Google sign-in, JWT + refresh rotation, roles/permissions, audit | ✅ Done (real Google login needs a client id, see setup guide §7) |
 | 3 | Organization: onboarding with Terms acceptance, profile, Admin/Staff invitations, tenant isolation, Root suspend/reactivate | ✅ Done |
 | 4 | Events: CRUD, sessions (akad/resepsi) in venue time, lifecycle, staff assignment, Staff see assigned events | ✅ Done |
-| 5 | Packages (Root-managed) and payment (simulated gateway, Xendit later) | Next |
+| 5 | Packages (Root-managed), checkout with signed idempotent webhooks, reconciliation, receipt, Root manual activation (simulated gateway, Xendit later) | ✅ Done |
+| 6 | Invitations: guests, codes, QR, WhatsApp link | Next |
 
 ## Quick start (Docker)
 

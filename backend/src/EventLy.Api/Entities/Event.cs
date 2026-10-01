@@ -11,7 +11,7 @@ public enum EventCategory
 
 /// <summary>
 /// Lifecycle (decision Q-4): Draft → PendingPayment → Active → Completed, or Cancelled.
-/// PendingPayment and Active are reached through payment (Phase 5).
+/// PendingPayment and Active are reached through payment, or Active directly by Root's manual activation.
 /// </summary>
 public enum EventStatus
 {
@@ -44,8 +44,11 @@ public sealed class Event : ITenantOwned, ISoftDeletable, IHasTimestamps
     /// <summary>Venue of the check-in session (the spec's Event.Venue), kept in sync.</summary>
     public string Venue { get; set; } = "";
 
-    /// <summary>Chosen package; set when paying (Phase 5).</summary>
+    /// <summary>Package of the current checkout or of the settled payment; null while Draft.</summary>
     public Guid? PackageId { get; set; }
+
+    /// <summary>Price and limits the event paid for (decision Q-20). Set when the payment settles.</summary>
+    public PackageSnapshot? PackageSnapshot { get; set; }
 
     public EventStatus Status { get; set; } = EventStatus.Draft;
 
@@ -135,7 +138,8 @@ public static class EventLifecycle
     {
         (EventStatus.Draft, EventStatus.PendingPayment) => true,
         (EventStatus.PendingPayment, EventStatus.Draft) => true, // payment failed or expired
-        (EventStatus.PendingPayment, EventStatus.Active) => true, // payment settled (Phase 5)
+        (EventStatus.PendingPayment, EventStatus.Active) => true, // payment settled
+        (EventStatus.Draft, EventStatus.Active) => true, // Root's manual activation (paid outside the gateway)
         (EventStatus.Active, EventStatus.Completed) => true,
         // Cancel is possible until the event is completed; there is no refund in the MVP (Q-32).
         (EventStatus.Draft or EventStatus.PendingPayment or EventStatus.Active, EventStatus.Cancelled) => true,

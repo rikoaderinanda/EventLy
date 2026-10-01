@@ -110,7 +110,7 @@ Root also manages Owner accounts:
 | Method | Path | Roles | Description |
 |---|---|---|---|
 | GET | `/platform/owners?search=&status=` | Root | Owners with organization, events, packages bought and payment status |
-| GET | `/platform/owners/{id}` | Root | Owner details and purchase history |
+| GET | `/platform/owners/{id}` | Root | Owner details: events (name, date, status, package) and payments. The list (`GET /platform/owners`) carries counts `{events, paidEvents, pendingPayments}` |
 | POST | `/platform/owners/{id}/suspend` · `/reactivate` | Root | Suspend or reactivate (blocks the whole organization from logging in) |
 | POST | `/platform/events/{eventId}/activate` | Root | Manual activation for a payment made outside Xendit `{packageId, amount, note}`. Creates a `Manual` payment (status Paid), activates the event, writes an audit log |
 
@@ -120,12 +120,15 @@ The Root account is the Google email set in the environment variable `Root__Emai
 
 | Method | Path | Roles | Description |
 |---|---|---|---|
-| POST | `/events/{eventId}/payments` | O | `{packageId}` → sets the event package, creates a Pending payment and returns `{paymentId, status, amount, currency, checkoutUrl, expiresAt}`. Event → `PendingPayment` |
-| GET | `/events/{eventId}/payments` | O | Payment history for the event |
-| GET | `/payments/{id}/receipt` | O | Receipt data for the printable receipt page (paid payments only) |
-| GET | `/payments/{id}` | O | Payment status (the frontend polls this after checkout) |
-| POST | `/payments/webhooks/{provider}` | — (signature) | Provider callback. Signature is verified. Idempotent. On `Paid` → event becomes `Active` |
-| POST | `/payments/{id}/simulate` | O (**Development only**) | Fake gateway: mark the payment Paid or Failed |
+| POST | `/events/{eventId}/payments` | O | `{packageId}` → sets the event package, creates a Pending payment and returns the payment `{id, status, amount, currency, packageName, checkoutUrl, expiresAt, ...}` (201). Event → `PendingPayment`. The same package again returns the open checkout (200); another package cancels it. 409 `payment.event_not_payable` unless Draft/PendingPayment, 409 `payment.staff_limit_exceeded` when the event has more Staff than the package allows |
+| GET | `/events/{eventId}/payments` | O | Payment history for the event, newest first |
+| GET | `/payments/{id}/receipt` | O | Receipt data for the printable receipt page (paid payments only, otherwise 409 `payment.not_paid`) |
+| GET | `/payments/{id}` | O | Payment status (the frontend polls this after checkout). An overdue checkout is reconciled on the spot |
+| POST | `/payments/webhooks/{provider}` | — (signature) | Provider callback. Signature is verified (401 `payment.invalid_signature`). Idempotent; unknown payments are acknowledged with 200. On `Paid` → event becomes `Active`. A different amount leaves the payment pending for Root |
+| POST | `/payments/{id}/simulate` | O (**Development/Testing only**) | Fake gateway: `{outcome: "Paid" \| "Failed"}`, delivered through the webhook path |
+| POST | `/maintenance/payments/reconcile` | — (`X-Maintenance-Key`) | Scheduled job: settles payments whose webhook was lost and expires overdue checkouts. Returns `{checked, paid, failed, expired}`. 404 when no key is configured |
+
+Details and rules: [docs/modules/payments.md](../modules/payments.md).
 
 ### 2.6 Guest — `/api/v1/events/{eventId}/guests`
 

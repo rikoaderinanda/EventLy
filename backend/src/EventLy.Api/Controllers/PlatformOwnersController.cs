@@ -16,6 +16,10 @@ public sealed class PlatformOwnersController(PlatformOwnerService owners) : Cont
     public Task<IReadOnlyList<PlatformOwnerDto>> List([FromQuery] string? search, CancellationToken ct) =>
         owners.ListAsync(search, ct);
 
+    /// <summary>The Owner with their events and purchase history.</summary>
+    [HttpGet("{id:guid}")]
+    public Task<PlatformOwnerDetailDto> Get(Guid id, CancellationToken ct) => owners.GetAsync(id, ct);
+
     [HttpPost("{id:guid}/suspend")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Suspend(Guid id, CancellationToken ct)

@@ -26,8 +26,14 @@ public sealed class EventConfiguration : IEntityTypeConfiguration<Event>
         builder.Property(e => e.CoverImageKey).HasMaxLength(512);
         builder.Property(e => e.Version).IsRowVersion();
         builder.Ignore(e => e.CheckInSession);
+        builder.OwnsOne(e => e.PackageSnapshot, s =>
+        {
+            s.ToJson("package_snapshot");
+            s.OwnsOne(x => x.Features);
+        });
 
         builder.HasOne<Organization>().WithMany().HasForeignKey(e => e.OrganizationId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<Package>().WithMany().HasForeignKey(e => e.PackageId).OnDelete(DeleteBehavior.Restrict);
         builder.HasMany(e => e.Sessions).WithOne().HasForeignKey(s => s.EventId).OnDelete(DeleteBehavior.Cascade);
         builder.HasMany(e => e.StaffAssignments).WithOne().HasForeignKey(a => a.EventId).OnDelete(DeleteBehavior.Cascade);
 

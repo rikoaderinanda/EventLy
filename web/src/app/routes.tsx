@@ -75,6 +75,24 @@ export const routes: RouteObject[] = [
                 }),
               },
               {
+                path: 'payments/:id',
+                element: <ProtectedRoute roles={['Owner']} />,
+                children: [
+                  {
+                    index: true,
+                    lazy: async () => ({
+                      Component: (await import('@/features/payments/PaymentPage')).PaymentPage,
+                    }),
+                  },
+                  {
+                    path: 'receipt',
+                    lazy: async () => ({
+                      Component: (await import('@/features/payments/ReceiptPage')).ReceiptPage,
+                    }),
+                  },
+                ],
+              },
+              {
                 path: 'organization',
                 lazy: async () => ({
                   Component: (await import('@/features/organization/OrganizationPage')).OrganizationPage,
@@ -122,6 +140,18 @@ export const routes: RouteObject[] = [
                 index: true,
                 lazy: async () => ({
                   Component: (await import('@/features/platform/OwnersPage')).OwnersPage,
+                }),
+              },
+              {
+                path: 'owners/:id',
+                lazy: async () => ({
+                  Component: (await import('@/features/platform/OwnerDetailPage')).OwnerDetailPage,
+                }),
+              },
+              {
+                path: 'packages',
+                lazy: async () => ({
+                  Component: (await import('@/features/platform/PackagesPage')).PackagesPage,
                 }),
               },
             ],

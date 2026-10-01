@@ -28,11 +28,12 @@ Every table has the tenant query filter. `events` also has the soft-delete filte
 
   | From | To | How |
   |---|---|---|
-  | Draft | PendingPayment | Payment created (Phase 5) |
-  | PendingPayment | Draft | Payment failed or expired (Phase 5) |
-  | PendingPayment | Active | Payment settled (Phase 5) |
+  | Draft | PendingPayment | Checkout started ([payments](payments.md)) |
+  | PendingPayment | Draft | Payment failed or expired, and no other checkout is open |
+  | PendingPayment | Active | Payment settled (webhook or reconciliation) |
+  | Draft | Active | Root's manual activation (paid outside the gateway) |
   | Active | Completed | `POST /events/{id}/complete`. Automatic completion 7 days after the event is part of the scheduled job (Phase 12) |
-  | Draft, PendingPayment, Active | Cancelled | `POST /events/{id}/cancel`, Owner only. No refund in the MVP (Q-32) |
+  | Draft, PendingPayment, Active | Cancelled | `POST /events/{id}/cancel`, Owner only. An open checkout is closed. No refund in the MVP (Q-32) |
 
   Any other change gives **409** `event.invalid_status_change`.
 - **Edit** only while Draft, PendingPayment or Active. Completed and Cancelled events are read-only (409 `event.not_editable`).
@@ -41,7 +42,7 @@ Every table has the tenant query filter. `events` also has the soft-delete filte
 - **Time zone**: `Asia/Jakarta` (WIB), `Asia/Makassar` (WITA) or `Asia/Jayapura` (WIT). The organizer enters local times at the venue with no offset (`startsAtLocal`, `endsAtLocal`). The server converts them to UTC with the event time zone and returns both.
 - **Editing sessions**: sessions sent with an `id` are updated in place, sessions without an `id` are added and missing ones are removed. An `id` from another event gives 400 `event.unknown_session`. Keeping ids stable lets guest invitations per session (Phase 6) survive an edit.
 - **Optimistic concurrency**: `PUT` sends the `version` read with the event. If someone else saved first, the answer is 409 `event.modified_elsewhere`.
-- **Staff assignment** replaces the whole list. Only active or invited Staff of the same organization qualify (400 `event.invalid_staff`). The package's `maxStaff` limit is checked from Phase 5.
+- **Staff assignment** replaces the whole list. Only active or invited Staff of the same organization qualify (400 `event.invalid_staff`). A paid event allows at most its package's `maxStaff` (409 `event.staff_limit_exceeded`); the checkout checks the same limit.
 - **Tenant isolation**: an event of another organization, or an event a Staff member isn't assigned to, gives **404**, never 403.
 - **Audit**: `event.created`, `event.updated`, `event.deleted`, `event.status_changed` (from and to), `event.staff_assigned`.
 

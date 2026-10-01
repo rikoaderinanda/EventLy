@@ -12,6 +12,7 @@ const owners = [
     email: 'rina@x.test',
     status: 'Active',
     organization: { id: 'org1', name: 'Santoso WO', status: 'Active' },
+    purchases: { events: 2, paidEvents: 1, pendingPayments: 0 },
     createdAt: '',
     lastSignInAt: null,
   },

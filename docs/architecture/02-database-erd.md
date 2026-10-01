@@ -151,6 +151,7 @@ erDiagram
         uuid organization_id FK "+"
         uuid event_id FK
         uuid package_id FK "+ price snapshot source"
+        jsonb package_snapshot "+ package at checkout, copied to the event when paid"
         numeric amount
         char currency "+"
         text status "Pending|Paid|Failed|Expired|Cancelled"
@@ -161,6 +162,7 @@ erDiagram
         timestamptz expires_at "+"
         uuid confirmed_by "+ Root user, for Manual payments"
         text note "+ e.g. bank transfer reference"
+        xid xmin "+ concurrency token (two webhooks can't both settle)"
     }
     EVENT_STAFF_ASSIGNMENTS {
         uuid id PK "+ table"
@@ -245,6 +247,7 @@ erDiagram
 | `events.activated_at` | Records when payment activated the event |
 | `events.package_snapshot` | Root can edit packages from the UI at any time. The snapshot keeps an already-paid event on the price and limits it paid for **[Q-20]** |
 | `payments.package_id`, `currency`, `provider`, `provider_reference`, `checkout_url`, `expires_at` | A real payment integration needs these. `provider_reference` being unique makes webhooks idempotent |
+| `payments.package_snapshot` | The package at checkout. If Root edits the package before the webhook arrives, the event still gets what the Owner was charged for |
 | `payments.confirmed_by`, `note`, provider `Manual` | Root can activate an event paid outside Xendit. It is still recorded as a payment, so reports and history stay complete |
 | `event_sessions` (+ `guest_sessions` link) | Akad + resepsi decision: several sessions per event, one of them is the check-in session. `guest_sessions` records which sessions each guest is invited to (Q-38) |
 | `users.google_subject`, `avatar_url`; **no `password_hash`** | Every role signs in with Google (decided 2026-09-29), so the spec's `PasswordHash` column is dropped. EventLy holds no passwords |

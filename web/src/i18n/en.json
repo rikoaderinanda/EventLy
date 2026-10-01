@@ -63,7 +63,9 @@
     "dashboard": "Dashboard",
     "organization": "Organization",
     "users": "Users",
-    "events": "Events"
+    "events": "Events",
+    "owners": "Owners",
+    "packages": "Packages"
   },
   "roles": {
     "Root": "Root",
@@ -117,7 +119,46 @@
     "suspend": "Suspend",
     "reactivate": "Reactivate",
     "confirmSuspend": "Suspend {{name}}? The Owner and every member of their organization will be unable to sign in.",
-    "empty": "No Owners."
+    "empty": "No Owners.",
+    "purchases": "{{events}} events · {{paidEvents}} paid · {{pendingPayments}} pending",
+    "eventsTitle": "Events",
+    "noEvents": "No events yet.",
+    "noPayments": "No payments yet.",
+    "activateManually": "Activate manually",
+    "activateHint": "Use this when the Owner paid outside the gateway, for example by bank transfer. It is recorded as a manual payment and in the audit log.",
+    "amountReceived": "Amount received (IDR)",
+    "paymentNote": "Payment note",
+    "paymentNoteHint": "For example the bank and the transfer reference.",
+    "activate": "Activate event",
+    "inactive": "Not offered",
+    "packagesTitle": "Packages",
+    "packagesHint": "Price and limit changes apply to new payments only. Events already paid keep the package they paid for.",
+    "newPackage": "New package",
+    "editPackage": "Edit package {{name}}",
+    "packageCode": "Code",
+    "codeHint": "Letters, digits or underscores. Can't be changed later.",
+    "codeFixed": "The code can't be changed.",
+    "packageName": "Package name",
+    "price": "Price (IDR)",
+    "limits": "Limits",
+    "flags": "Features",
+    "offered": "Offered to Owners",
+    "close": "Close",
+    "featureLabel": {
+      "maxGuests": "Max. guests",
+      "maxPhotos": "Max. photos",
+      "maxStaff": "Max. staff per event",
+      "maxAdmins": "Max. admins",
+      "galleryRetentionDays": "Gallery kept (days)",
+      "maxGuestPhotosPerInvitation": "Guest photos per invitation",
+      "guestUploadEnabled": "Guests can take photos",
+      "zipDownload": "ZIP download",
+      "excelExport": "Excel export",
+      "wishesEnabled": "Wishes",
+      "digitalGiftEnabled": "Digital gift",
+      "backgroundMusicEnabled": "Background music",
+      "countdownEnabled": "Countdown"
+    }
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",
@@ -136,7 +177,18 @@
     "event_not_deletable": "Only a draft or a cancelled event can be deleted.",
     "event_modified_elsewhere": "Someone else just changed this event. Reload it and apply your changes again.",
     "event_invalid_status_change": "The event status can't be changed this way.",
-    "event_invalid_staff": "Only active Staff of your organization can be assigned."
+    "event_invalid_staff": "Only active Staff of your organization can be assigned.",
+    "payment_event_not_payable": "Only a draft event, or one waiting for payment, can be paid for.",
+    "payment_staff_limit_exceeded": "This event has more staff than the package allows. Remove staff or choose a bigger package.",
+    "payment_checkout_in_progress": "A payment for this event was just started. Reload and try again.",
+    "payment_not_found": "Payment not found.",
+    "payment_not_paid": "A receipt is only available for a paid payment.",
+    "payment_not_pending": "This payment is no longer waiting for payment.",
+    "payment_simulation_unavailable": "Simulated payments aren't available on this server.",
+    "package_not_found": "Package not found or no longer offered.",
+    "package_code_taken": "This package code is already used.",
+    "event_staff_limit_exceeded": "More staff than this event's package allows.",
+    "owner_not_found": "Owner not found."
   },
   "events": {
     "title": "Events",
@@ -194,5 +246,67 @@
     "title": "My events",
     "empty": "You aren't assigned to any event yet.",
     "scannerSoon": "Guest QR scanning comes in the next step."
+  },
+  "packages": {
+    "sectionTitle": "Package & payment",
+    "choose": "Choose a package",
+    "chooseHint": "Choose a package to activate the event. Invitations, RSVP and check-in work once the payment succeeds.",
+    "changeHint": "Want another package? Pick it below; the unfinished payment is replaced.",
+    "payFor": "Pay for {{name}} · {{price}}",
+    "current": "{{name}} package",
+    "ownerPays": "The Owner chooses a package and pays to activate this event.",
+    "feature": {
+      "guests": "Up to {{n}} guests",
+      "photos": "Up to {{n}} photos",
+      "staff": "{{n}} check-in staff",
+      "retention": "Gallery kept {{n}} days",
+      "guestPhotos": "Guests can take photos ({{n}} per invitation)",
+      "zip": "Download all photos (ZIP)",
+      "excel": "Excel & CSV export",
+      "csvOnly": "CSV export"
+    }
+  },
+  "payments": {
+    "title": "Payment",
+    "history": "Payment history",
+    "receipt": "View receipt",
+    "receiptTitle": "Payment receipt",
+    "pendingNotice": "The payment for the {{name}} package isn't finished yet.",
+    "continue": "Continue payment",
+    "backToEvent": "Back to the event",
+    "packageLine": "{{name}} package",
+    "expiresAt": "Pay before {{date}}",
+    "waiting": "Waiting for the payment to be confirmed. This page updates by itself.",
+    "paidMessage": "Payment received. Your event is now active.",
+    "closed": {
+      "Failed": "The payment failed. Go back to the event to try again.",
+      "Expired": "The time to pay has passed. Go back to the event to start a new payment.",
+      "Cancelled": "This payment was cancelled: another payment replaced it, or the event was cancelled."
+    },
+    "simulateTitle": "Simulated payment (development only)",
+    "simulateHint": "No payment gateway is connected. Choose an outcome to try the flow.",
+    "simulatePaid": "Payment succeeds",
+    "simulateFailed": "Payment fails",
+    "print": "Print / save as PDF",
+    "reference": "Reference",
+    "paidAt": "Paid on",
+    "billedTo": "Paid by",
+    "event": "Event",
+    "package": "Package",
+    "method": "Method",
+    "total": "Total",
+    "receiptFootnote": "This receipt is proof of payment, not a tax invoice.",
+    "status": {
+      "Pending": "Pending",
+      "Paid": "Paid",
+      "Failed": "Failed",
+      "Expired": "Expired",
+      "Cancelled": "Cancelled"
+    },
+    "provider": {
+      "Fake": "Simulated",
+      "Xendit": "Xendit",
+      "Manual": "Transfer (confirmed by EventLy)"
+    }
   }
 }

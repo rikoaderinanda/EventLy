@@ -11,6 +11,7 @@ public sealed class EventLifecycleTests
         { EventStatus.Draft, EventStatus.PendingPayment },
         { EventStatus.PendingPayment, EventStatus.Draft },
         { EventStatus.PendingPayment, EventStatus.Active },
+        { EventStatus.Draft, EventStatus.Active }, // Root's manual activation
         { EventStatus.Active, EventStatus.Completed },
         { EventStatus.Draft, EventStatus.Cancelled },
         { EventStatus.PendingPayment, EventStatus.Cancelled },

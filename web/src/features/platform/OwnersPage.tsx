@@ -1,36 +1,15 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { apiFetch } from '@/api/client'
+import { Link } from 'react-router'
 import { errorMessage } from '@/shared/lib/errors'
+import { useOwners, useSuspendOwner } from './api'
 
-type PlatformOwner = {
-  id: string
-  name: string
-  email: string
-  status: 'Invited' | 'Active' | 'Disabled'
-  organization: { id: string; name: string; status: 'Active' | 'Suspended' } | null
-  createdAt: string
-  lastSignInAt: string | null
-}
-
-const ownerKeys = { list: (search: string) => ['platform', 'owners', search] as const }
-
-/** Root: Owner accounts and their organization. Packages and purchases come in Phase 5. */
+/** Root: Owner accounts, their organization and what they bought. */
 export function OwnersPage() {
   const { t } = useTranslation()
-  const queryClient = useQueryClient()
   const [search, setSearch] = useState('')
-  const owners = useQuery({
-    queryKey: ownerKeys.list(search),
-    queryFn: () =>
-      apiFetch<PlatformOwner[]>(`/platform/owners${search ? `?search=${encodeURIComponent(search)}` : ''}`),
-  })
-  const toggle = useMutation({
-    mutationFn: ({ id, suspend }: { id: string; suspend: boolean }) =>
-      apiFetch<void>(`/platform/owners/${id}/${suspend ? 'suspend' : 'reactivate'}`, { method: 'POST' }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['platform', 'owners'] }),
-  })
+  const owners = useOwners(search)
+  const toggle = useSuspendOwner()
 
   return (
     <section className="mx-auto max-w-4xl space-y-4 py-8">
@@ -51,12 +30,18 @@ export function OwnersPage() {
           return (
             <li key={owner.id} className="flex flex-wrap items-center gap-3 py-3">
               <div className="min-w-0 flex-1">
-                <p className="truncate font-medium text-stone-800">{owner.name}</p>
+                <Link
+                  to={`/platform/owners/${owner.id}`}
+                  className="block truncate font-medium text-brand-800 underline"
+                >
+                  {owner.name}
+                </Link>
                 <p className="truncate text-sm text-stone-500">{owner.email}</p>
               </div>
-              <span className="text-sm text-stone-600">
-                {owner.organization?.name ?? t('platform.noOrganization')}
-              </span>
+              <div className="text-sm text-stone-600">
+                <p>{owner.organization?.name ?? t('platform.noOrganization')}</p>
+                <p className="text-xs text-stone-500">{t('platform.purchases', owner.purchases)}</p>
+              </div>
               <span
                 className={`rounded-full px-2 py-0.5 text-xs font-medium ${suspended ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'}`}
               >

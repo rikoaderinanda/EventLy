@@ -67,9 +67,14 @@ public sealed record EventDto(
     EventStatus Status,
     IReadOnlyList<EventSessionDto> Sessions,
     int StaffCount,
+    EventPackageDto? Package,
+    DateTimeOffset? ActivatedAt,
     DateTimeOffset CreatedAt,
     DateTimeOffset UpdatedAt,
     uint Version);
+
+/// <summary>The package the event paid for (its snapshot, Q-20). Null before payment, and for Staff.</summary>
+public sealed record EventPackageDto(Guid Id, string Code, string Name, PackageFeatures Features);
 
 public sealed record EventListItemDto(
     Guid Id,

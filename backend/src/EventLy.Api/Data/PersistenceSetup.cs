@@ -1,5 +1,6 @@
 using System.Data.Common;
 using EventLy.Api.Data.Interceptors;
+using EventLy.Api.Data.Seed;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
@@ -73,6 +74,7 @@ public static class PersistenceSetup
         var pending = (await db.Database.GetPendingMigrationsAsync()).ToList();
         logger.LogInformation("Applying {Count} pending migration(s): {Migrations}", pending.Count, pending);
         await db.Database.MigrateAsync();
-        logger.LogInformation("Database is up to date");
+        var seeded = await PackageSeed.SeedAsync(db);
+        logger.LogInformation("Database is up to date ({Count} package(s) seeded)", seeded);
     }
 }

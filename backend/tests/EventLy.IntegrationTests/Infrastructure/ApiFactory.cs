@@ -18,6 +18,7 @@ public sealed class ApiFactory(string connectionString, IReadOnlyDictionary<stri
 {
     public const string UnusedDatabase = "Host=127.0.0.1;Port=1;Database=unused;Username=unused;Password=unused";
     public const string RootEmail = "root@evently.test";
+    public const string MaintenanceKey = "integration-test-maintenance-key-0123456789";
 
     public FakeTimeProvider Time { get; } = new(DateTimeOffset.UtcNow);
 
@@ -32,6 +33,7 @@ public sealed class ApiFactory(string connectionString, IReadOnlyDictionary<stri
         builder.UseSetting("Auth:RootEmail", RootEmail);
         builder.UseSetting("Auth:DevSignInEnabled", "true");
         builder.UseSetting("RateLimiting:AuthPermitPerMinute", "1000");
+        builder.UseSetting("Maintenance:Key", MaintenanceKey);
         foreach (var (key, value) in settings ?? new Dictionary<string, string?>())
         {
             builder.UseSetting(key, value);

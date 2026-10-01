@@ -11,7 +11,8 @@ namespace EventLy.Api.Services;
 /// Events of the caller's organization. The tenant filter on <see cref="Event"/> limits every query to
 /// the caller's organization; Staff additionally see only events they are assigned to (others are 404).
 /// </summary>
-public sealed class EventService(AppDbContext db, ICurrentUser currentUser, AuditService audit, TimeProvider timeProvider)
+public sealed class EventService(
+    AppDbContext db, ICurrentUser currentUser, AuditService audit, PaymentService payments, TimeProvider timeProvider)
 {
     public async Task<IReadOnlyList<EventListItemDto>> ListAsync(EventListQuery filter, CancellationToken ct)
     {
@@ -100,12 +101,12 @@ public sealed class EventService(AppDbContext db, ICurrentUser currentUser, Audi
         await db.SaveChangesAsync(ct);
     }
 
-    /// <summary>Owner only. No refund in the MVP (decision Q-32).</summary>
+    /// <summary>Owner only. Open checkouts are closed. No refund in the MVP (decision Q-32).</summary>
     public Task<EventDto> CancelAsync(Guid id, CancellationToken ct) =>
-        ChangeStatusAsync(id, EventStatus.Cancelled, ct);
+        ChangeStatusAsync(id, EventStatus.Cancelled, ev => payments.CancelPendingAsync(ev, ct), ct);
 
     public Task<EventDto> CompleteAsync(Guid id, CancellationToken ct) =>
-        ChangeStatusAsync(id, EventStatus.Completed, ct);
+        ChangeStatusAsync(id, EventStatus.Completed, null, ct);
 
     public async Task<IReadOnlyList<EventStaffDto>> GetStaffAsync(Guid eventId, CancellationToken ct)
     {
@@ -119,7 +120,10 @@ public sealed class EventService(AppDbContext db, ICurrentUser currentUser, Audi
             .ToListAsync(ct);
     }
 
-    /// <summary>Replaces the Staff assigned to the event. Only Staff of the same organization qualify.</summary>
+    /// <summary>
+    /// Replaces the Staff assigned to the event. Only Staff of the same organization qualify, and a paid
+    /// event is limited to its package's <c>maxStaff</c> (checked against the package at checkout too).
+    /// </summary>
     public async Task<IReadOnlyList<EventStaffDto>> AssignStaffAsync(Guid eventId, AssignStaffRequest request, CancellationToken ct)
     {
         var ev = await LoadAsync(eventId, db.Events, ct);
@@ -136,6 +140,11 @@ public sealed class EventService(AppDbContext db, ICurrentUser currentUser, Audi
             throw new AppException(StatusCodes.Status400BadRequest, "event.invalid_staff",
                 "Only active Staff members of your organization can be assigned.");
         }
+        if (ev.PackageSnapshot is { } package && requested.Count > package.Features.MaxStaff)
+        {
+            throw new ConflictException("event.staff_limit_exceeded",
+                $"The {package.Name} package allows {package.Features.MaxStaff} staff for this event.");
+        }
 
         ev.StaffAssignments.RemoveAll(a => !requested.Contains(a.UserId));
         var now = timeProvider.GetUtcNow();
@@ -150,13 +159,18 @@ public sealed class EventService(AppDbContext db, ICurrentUser currentUser, Audi
         return await GetStaffAsync(eventId, ct);
     }
 
-    private async Task<EventDto> ChangeStatusAsync(Guid id, EventStatus target, CancellationToken ct)
+    private async Task<EventDto> ChangeStatusAsync(
+        Guid id, EventStatus target, Func<Event, Task>? beforeSave, CancellationToken ct)
     {
         var ev = await LoadAsync(id, db.Events, ct);
         if (!EventLifecycle.CanChange(ev.Status, target))
         {
             throw new ConflictException("event.invalid_status_change",
                 $"An event that is {ev.Status} can't become {target}.");
+        }
+        if (beforeSave is not null)
+        {
+            await beforeSave(ev);
         }
 
         var previous = ev.Status;
@@ -180,7 +194,8 @@ public sealed class EventService(AppDbContext db, ICurrentUser currentUser, Audi
     }
 
     private static async Task<Event> LoadAsync(Guid id, IQueryable<Event> source, CancellationToken ct) =>
-        await source.Include(e => e.Sessions).Include(e => e.StaffAssignments).SingleOrDefaultAsync(e => e.Id == id, ct)
+        await source.Include(e => e.Sessions).Include(e => e.StaffAssignments).AsSplitQuery()
+            .SingleOrDefaultAsync(e => e.Id == id, ct)
         ?? throw new NotFoundException("event.not_found", "Event not found.");
 
     /// <summary>
@@ -236,7 +251,7 @@ public sealed class EventService(AppDbContext db, ICurrentUser currentUser, Audi
     private static DateTime ToLocal(DateTimeOffset utc, TimeZoneInfo timeZone) =>
         TimeZoneInfo.ConvertTimeFromUtc(utc.UtcDateTime, timeZone);
 
-    private static EventDto ToDto(Event e)
+    private EventDto ToDto(Event e)
     {
         var timeZone = EventTimeZones.Find(e.TimeZone);
         return new EventDto(
@@ -244,8 +259,14 @@ public sealed class EventService(AppDbContext db, ICurrentUser currentUser, Audi
             [.. e.Sessions.OrderBy(s => s.SortOrder).Select(s => new EventSessionDto(
                 s.Id, s.Name, s.StartsAt, s.EndsAt, ToLocal(s.StartsAt, timeZone), ToLocal(s.EndsAt, timeZone),
                 s.Venue, s.MapsUrl, s.IsCheckInSession))],
-            e.StaffAssignments.Count, e.CreatedAt, e.UpdatedAt, e.Version);
+            e.StaffAssignments.Count, PackageOf(e), e.ActivatedAt, e.CreatedAt, e.UpdatedAt, e.Version);
     }
+
+    /// <summary>The package the event paid for (its snapshot). Staff get no package details.</summary>
+    private EventPackageDto? PackageOf(Event e) =>
+        currentUser.Role != UserRole.Staff && e.PackageSnapshot is { } paid
+            ? new EventPackageDto(paid.PackageId, paid.Code, paid.Name, paid.Features)
+            : null;
 
     private static string? Normalize(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 }

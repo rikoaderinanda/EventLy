@@ -3,19 +3,14 @@ import { NavLink, Outlet } from 'react-router'
 import { useSession } from '@/features/auth/session-store'
 import { AppShell } from './AppShell'
 
-function OrganizerNav() {
-  const { t } = useTranslation()
-  const role = useSession((s) => s.user?.role)
-  const links = [
-    { to: '/app', label: t('nav.events'), end: true },
-    { to: '/app/organization', label: t('nav.organization'), end: false },
-    ...(role === 'Owner' ? [{ to: '/app/users', label: t('nav.users'), end: false }] : []),
-  ]
+type NavItem = { to: string; label: string; end: boolean }
 
+function TabNav({ links }: { links: NavItem[] }) {
+  const { t } = useTranslation()
   return (
     <nav
       aria-label={t('nav.label')}
-      className="-mx-4 flex gap-1 overflow-x-auto border-b border-brand-100 bg-white px-4"
+      className="-mx-4 flex gap-1 overflow-x-auto border-b border-brand-100 bg-white px-4 print:hidden"
     >
       {links.map((link) => (
         <NavLink
@@ -38,6 +33,32 @@ function OrganizerNav() {
   )
 }
 
+function OrganizerNav() {
+  const { t } = useTranslation()
+  const role = useSession((s) => s.user?.role)
+  return (
+    <TabNav
+      links={[
+        { to: '/app', label: t('nav.events'), end: true },
+        { to: '/app/organization', label: t('nav.organization'), end: false },
+        ...(role === 'Owner' ? [{ to: '/app/users', label: t('nav.users'), end: false }] : []),
+      ]}
+    />
+  )
+}
+
+function PlatformNav() {
+  const { t } = useTranslation()
+  return (
+    <TabNav
+      links={[
+        { to: '/platform', label: t('nav.owners'), end: true },
+        { to: '/platform/packages', label: t('nav.packages'), end: false },
+      ]}
+    />
+  )
+}
+
 export function AuthLayout() {
   return <AppShell />
 }
@@ -57,9 +78,14 @@ export function StaffLayout() {
   return <AppShell area="Staff" />
 }
 
-/** Root platform administrator. */
+/** Root platform administrator: Owner accounts and the package catalog. */
 export function PlatformLayout() {
-  return <AppShell area="Root" />
+  return (
+    <AppShell area="Root">
+      <PlatformNav />
+      <Outlet />
+    </AppShell>
+  )
 }
 
 /** Guest invitation pages: no app navigation, the event's own look. */

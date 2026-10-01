@@ -40,12 +40,15 @@ public static class ServiceSetup
     public static IServiceCollection AddAppServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<LegalOptions>(configuration.GetSection(LegalOptions.SectionName));
+        services.Configure<MaintenanceOptions>(configuration.GetSection(MaintenanceOptions.SectionName));
         services.AddScoped<AuditService>();
         services.AddScoped<AuthService>();
         services.AddScoped<OrganizationService>();
         services.AddScoped<UserService>();
         services.AddScoped<PlatformOwnerService>();
         services.AddScoped<EventService>();
+        services.AddScoped<PackageService>();
+        services.AddScoped<PaymentService>();
         return services;
     }
 

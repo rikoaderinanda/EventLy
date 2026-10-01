@@ -174,6 +174,9 @@ namespace EventLy.Api.Data.Migrations
                     b.HasKey("Id")
                         .HasName("pk_events");
 
+                    b.HasIndex("PackageId")
+                        .HasDatabaseName("ix_events_package_id");
+
                     b.HasIndex("OrganizationId", "Date")
                         .IsDescending(false, true)
                         .HasDatabaseName("ix_events_organization_id_date")
@@ -334,6 +337,184 @@ namespace EventLy.Api.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("EventLy.Api.Entities.Package", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("code");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character(3)")
+                        .HasColumnName("currency")
+                        .IsFixedLength();
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("name");
+
+                    b.Property<decimal>("Price")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("numeric(12,2)")
+                        .HasColumnName("price");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_packages");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_packages_code");
+
+                    b.ToTable("packages", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_packages_price", "price >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("EventLy.Api.Entities.Payment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("numeric(12,2)")
+                        .HasColumnName("amount");
+
+                    b.Property<string>("CheckoutUrl")
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)")
+                        .HasColumnName("checkout_url");
+
+                    b.Property<Guid?>("ConfirmedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("confirmed_by");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character(3)")
+                        .HasColumnName("currency")
+                        .IsFixedLength();
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("event_id");
+
+                    b.Property<DateTimeOffset?>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("note");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<Guid>("PackageId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("package_id");
+
+                    b.Property<DateTimeOffset?>("PaidAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("paid_at");
+
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("provider");
+
+                    b.Property<string>("ProviderReference")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("provider_reference");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id")
+                        .HasName("pk_payments");
+
+                    b.HasIndex("ConfirmedBy")
+                        .HasDatabaseName("ix_payments_confirmed_by");
+
+                    b.HasIndex("EventId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_payments_one_paid")
+                        .HasFilter("status = 'Paid'");
+
+                    b.HasIndex("PackageId")
+                        .HasDatabaseName("ix_payments_package_id");
+
+                    b.HasIndex("EventId", "CreatedAt")
+                        .IsDescending(false, true)
+                        .HasDatabaseName("ix_payments_event_id_created_at");
+
+                    b.HasIndex("OrganizationId", "CreatedAt")
+                        .IsDescending(false, true)
+                        .HasDatabaseName("ix_payments_organization_id_created_at");
+
+                    b.HasIndex("Provider", "ProviderReference")
+                        .IsUnique()
+                        .HasDatabaseName("ux_payments_provider_ref");
+
+                    b.HasIndex("Status", "ExpiresAt")
+                        .HasDatabaseName("ix_payments_pending")
+                        .HasFilter("status = 'Pending'");
+
+                    b.ToTable("payments", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_payments_amount", "amount >= 0");
+
+                            t.HasCheckConstraint("ck_payments_provider", "provider IN ('Fake','Xendit','Manual')");
+
+                            t.HasCheckConstraint("ck_payments_status", "status IN ('Pending','Paid','Failed','Expired','Cancelled')");
+                        });
+                });
+
             modelBuilder.Entity("EventLy.Api.Entities.RefreshToken", b =>
                 {
                     b.Property<Guid>("Id")
@@ -490,6 +671,88 @@ namespace EventLy.Api.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_events_organizations_organization_id");
+
+                    b.HasOne("EventLy.Api.Entities.Package", null)
+                        .WithMany()
+                        .HasForeignKey("PackageId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_events_packages_package_id");
+
+                    b.OwnsOne("EventLy.Api.Entities.PackageSnapshot", "PackageSnapshot", b1 =>
+                        {
+                            b1.Property<Guid>("EventId");
+
+                            b1.Property<string>("Code")
+                                .IsRequired();
+
+                            b1.Property<string>("Currency")
+                                .IsRequired();
+
+                            b1.Property<string>("Name")
+                                .IsRequired();
+
+                            b1.Property<Guid>("PackageId");
+
+                            b1.Property<decimal>("Price");
+
+                            b1.HasKey("EventId")
+                                .HasName("pk_events");
+
+                            b1.ToTable("events");
+
+                            b1
+                                .ToJson("package_snapshot")
+                                .HasColumnType("jsonb");
+
+                            b1.WithOwner()
+                                .HasForeignKey("EventId")
+                                .HasConstraintName("fk_events_events_event_id");
+
+                            b1.OwnsOne("EventLy.Api.Entities.PackageFeatures", "Features", b2 =>
+                                {
+                                    b2.Property<Guid>("PackageSnapshotEventId");
+
+                                    b2.Property<bool>("BackgroundMusicEnabled");
+
+                                    b2.Property<bool>("CountdownEnabled");
+
+                                    b2.Property<bool>("DigitalGiftEnabled");
+
+                                    b2.Property<bool>("ExcelExport");
+
+                                    b2.Property<int>("GalleryRetentionDays");
+
+                                    b2.Property<bool>("GuestUploadEnabled");
+
+                                    b2.Property<int>("MaxAdmins");
+
+                                    b2.Property<int>("MaxGuestPhotosPerInvitation");
+
+                                    b2.Property<int>("MaxGuests");
+
+                                    b2.Property<int>("MaxPhotos");
+
+                                    b2.Property<int>("MaxStaff");
+
+                                    b2.Property<bool>("WishesEnabled");
+
+                                    b2.Property<bool>("ZipDownload");
+
+                                    b2.HasKey("PackageSnapshotEventId")
+                                        .HasName("pk_events");
+
+                                    b2.ToTable("events");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("PackageSnapshotEventId")
+                                        .HasConstraintName("fk_events_events_package_snapshot_event_id");
+                                });
+
+                            b1.Navigation("Features")
+                                .IsRequired();
+                        });
+
+                    b.Navigation("PackageSnapshot");
                 });
 
             modelBuilder.Entity("EventLy.Api.Entities.EventSession", b =>
@@ -527,6 +790,161 @@ namespace EventLy.Api.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_organizations_users_owner_user_id");
+                });
+
+            modelBuilder.Entity("EventLy.Api.Entities.Package", b =>
+                {
+                    b.OwnsOne("EventLy.Api.Entities.PackageFeatures", "Features", b1 =>
+                        {
+                            b1.Property<Guid>("PackageId");
+
+                            b1.Property<bool>("BackgroundMusicEnabled");
+
+                            b1.Property<bool>("CountdownEnabled");
+
+                            b1.Property<bool>("DigitalGiftEnabled");
+
+                            b1.Property<bool>("ExcelExport");
+
+                            b1.Property<int>("GalleryRetentionDays");
+
+                            b1.Property<bool>("GuestUploadEnabled");
+
+                            b1.Property<int>("MaxAdmins");
+
+                            b1.Property<int>("MaxGuestPhotosPerInvitation");
+
+                            b1.Property<int>("MaxGuests");
+
+                            b1.Property<int>("MaxPhotos");
+
+                            b1.Property<int>("MaxStaff");
+
+                            b1.Property<bool>("WishesEnabled");
+
+                            b1.Property<bool>("ZipDownload");
+
+                            b1.HasKey("PackageId");
+
+                            b1.ToTable("packages");
+
+                            b1
+                                .ToJson("feature")
+                                .HasColumnType("jsonb");
+
+                            b1.WithOwner()
+                                .HasForeignKey("PackageId")
+                                .HasConstraintName("fk_packages_packages_id");
+                        });
+
+                    b.Navigation("Features")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("EventLy.Api.Entities.Payment", b =>
+                {
+                    b.HasOne("EventLy.Api.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("ConfirmedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_payments_users_confirmed_by");
+
+                    b.HasOne("EventLy.Api.Entities.Event", null)
+                        .WithMany()
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_payments_events_event_id");
+
+                    b.HasOne("EventLy.Api.Entities.Organization", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_payments_organizations_organization_id");
+
+                    b.HasOne("EventLy.Api.Entities.Package", null)
+                        .WithMany()
+                        .HasForeignKey("PackageId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_payments_packages_package_id");
+
+                    b.OwnsOne("EventLy.Api.Entities.PackageSnapshot", "PackageSnapshot", b1 =>
+                        {
+                            b1.Property<Guid>("PaymentId");
+
+                            b1.Property<string>("Code")
+                                .IsRequired();
+
+                            b1.Property<string>("Currency")
+                                .IsRequired();
+
+                            b1.Property<string>("Name")
+                                .IsRequired();
+
+                            b1.Property<Guid>("PackageId");
+
+                            b1.Property<decimal>("Price");
+
+                            b1.HasKey("PaymentId");
+
+                            b1.ToTable("payments");
+
+                            b1
+                                .ToJson("package_snapshot")
+                                .HasColumnType("jsonb");
+
+                            b1.WithOwner()
+                                .HasForeignKey("PaymentId")
+                                .HasConstraintName("fk_payments_payments_id");
+
+                            b1.OwnsOne("EventLy.Api.Entities.PackageFeatures", "Features", b2 =>
+                                {
+                                    b2.Property<Guid>("PackageSnapshotPaymentId");
+
+                                    b2.Property<bool>("BackgroundMusicEnabled");
+
+                                    b2.Property<bool>("CountdownEnabled");
+
+                                    b2.Property<bool>("DigitalGiftEnabled");
+
+                                    b2.Property<bool>("ExcelExport");
+
+                                    b2.Property<int>("GalleryRetentionDays");
+
+                                    b2.Property<bool>("GuestUploadEnabled");
+
+                                    b2.Property<int>("MaxAdmins");
+
+                                    b2.Property<int>("MaxGuestPhotosPerInvitation");
+
+                                    b2.Property<int>("MaxGuests");
+
+                                    b2.Property<int>("MaxPhotos");
+
+                                    b2.Property<int>("MaxStaff");
+
+                                    b2.Property<bool>("WishesEnabled");
+
+                                    b2.Property<bool>("ZipDownload");
+
+                                    b2.HasKey("PackageSnapshotPaymentId")
+                                        .HasName("pk_payments");
+
+                                    b2.ToTable("payments");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("PackageSnapshotPaymentId")
+                                        .HasConstraintName("fk_payments_payments_package_snapshot_payment_id");
+                                });
+
+                            b1.Navigation("Features")
+                                .IsRequired();
+                        });
+
+                    b.Navigation("PackageSnapshot")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("EventLy.Api.Entities.RefreshToken", b =>
