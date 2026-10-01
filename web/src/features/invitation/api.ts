@@ -41,6 +41,7 @@ export type PublicInvitation = {
     backgroundMusic: boolean
   }
   myWish: string | null
+  checkedIn: boolean
 }
 
 export type PublicWish = { guestName: string; message: string; createdAt: string; isMine: boolean }

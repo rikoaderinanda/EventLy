@@ -50,6 +50,7 @@ public sealed record GuestDto(
     IReadOnlyList<Guid> SessionIds,
     InvitationSummaryDto Invitation,
     RsvpStatus Rsvp,
+    DateTimeOffset? CheckedInAt,
     DateTimeOffset CreatedAt);
 
 /// <summary>
@@ -59,7 +60,7 @@ public sealed record GuestDto(
 /// </summary>
 public sealed record GuestListDto(IReadOnlyList<GuestDto> Guests, int Total, int TotalPeople, int? Limit);
 
-public sealed record GuestListQuery(string? Search, GuestType? Type, InvitationStatus? Status, RsvpStatus? Rsvp);
+public sealed record GuestListQuery(string? Search, GuestType? Type, InvitationStatus? Status, RsvpStatus? Rsvp, bool? CheckedIn);
 
 public sealed record InvitationGuestDto(Guid Id, string Name, string? Phone, GuestType GuestType, int NumberOfPeople);
 

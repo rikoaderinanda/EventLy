@@ -25,6 +25,7 @@ export type Guest = {
   sessionIds: string[]
   invitation: InvitationSummary
   rsvp: RsvpStatus
+  checkedInAt: string | null
   createdAt: string
 }
 

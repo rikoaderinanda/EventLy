@@ -35,7 +35,8 @@ public sealed class PublicInvitationService(AppDbContext db, InvitationLinks lin
         var rsvp = await db.Rsvps.AsNoTracking().SingleOrDefaultAsync(r => r.InvitationId == context.Invitation.Id, ct);
         var wish = await db.Wishes.AsNoTracking().Where(w => w.InvitationId == context.Invitation.Id)
             .Select(w => w.Message).SingleOrDefaultAsync(ct);
-        return ToDto(context, rsvp, wish);
+        var checkedIn = await db.CheckIns.AnyAsync(c => c.InvitationId == context.Invitation.Id, ct);
+        return ToDto(context, rsvp, wish, checkedIn);
     }
 
     /// <summary>Attending or not, changeable until the event is over (then 409 <c>rsvp.closed</c>), decided 2026-10-01.</summary>
@@ -224,7 +225,7 @@ public sealed class PublicInvitationService(AppDbContext db, InvitationLinks lin
         }
     }
 
-    private PublicInvitationDto ToDto(Context context, Rsvp? rsvp, string? myWish)
+    private PublicInvitationDto ToDto(Context context, Rsvp? rsvp, string? myWish, bool checkedIn)
     {
         var (invitation, guest, ev) = context;
         var invitedTo = guest.Sessions.Select(s => s.SessionId).ToHashSet();
@@ -249,7 +250,8 @@ public sealed class PublicInvitationService(AppDbContext db, InvitationLinks lin
                 features.WishesEnabled && WishesOpen(ev),
                 features.DigitalGiftEnabled,
                 BackgroundMusic: false),
-            features.WishesEnabled ? myWish : null);
+            features.WishesEnabled ? myWish : null,
+            checkedIn);
     }
 
     private static NotFoundException NotFound() => new("invitation.not_found", "Invitation not found.");

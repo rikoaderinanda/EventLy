@@ -50,15 +50,24 @@ The invitation URL is `{origin}/i/{code}` and is also the QR payload (Q-8). What
 - **Tenant isolation:** another organization's guests and invitations give 404. A deleted guest's invitation gives 404 too.
 - **Audit:** `guest.created`, `guest.updated`, `guest.deleted`, `invitation.code_regenerated`, `invitation.revoked`, `event.whatsapp_template_updated`.
 
-- **CSV import (Q-12):**
-  - The file comes from Excel or Google Sheets saved as CSV, with a header line. Columns are found by name in Indonesian or English, in any order: `nama`/`name` (required), `telepon`/`no hp`/`whatsapp`/`phone`, `email`, `jumlah`/`pax`/`people` (empty = 1, more than 1 = group).
-  - Comma or semicolon separated (Excel with Indonesian settings uses `;`). Quoted fields and a UTF-8 BOM are fine.
-  - At most 1 MB and 2,000 guests per file.
-  - **All or nothing:** every line is checked like a single guest. If any line is wrong, nothing is imported, and the answer lists every problem with its line number.
+- **Unique names and numbers (Q-55):**
+  - In one event, a name and a WhatsApp number appear only once among guests still on the list.
+  - Names are stored with tidy spacing and compared without case (`citext`), so "budi  SANTOSO" = "Budi Santoso".
+  - Numbers are compared as `phone_key`, the normalised `628…` digits, so "0812-3456-7890" = "+62 812 3456 7890". Guests without a number are fine.
+  - A clash gives 409 `guest.name_taken` or `guest.phone_taken`.
+  - Two unique partial indexes (`ux_guests_event_name`, `ux_guests_event_phone`, `WHERE deleted_at IS NULL`) catch requests that arrive at the same moment.
+  - A deleted guest frees their name and number.
+  - The migration renames duplicates already in a database ("Budi (2)") and keeps the number key only on the first guest with that number.
+- **Excel import (Q-12, Q-56):**
+  - The file is an `.xlsx` workbook. The first sheet is read; row 1 is the header.
+  - Columns are found by name in Indonesian or English, in any order: `nama`/`name` (required), `telepon`/`no hp`/`whatsapp`/`phone`, `email`, `jumlah`/`pax`/`people` (empty = 1, more than 1 = group).
+  - A phone typed as a number in Excel loses its leading zero (`812…`); it gets the zero back.
+  - At most 5 MB and 2,000 guests per file. It is read with MiniExcel (Apache-2.0). ClosedXML was not used, because it pulls in SixLabors.Fonts, whose license isn't free for larger companies.
+  - **All or nothing:** every row is checked like a single guest, including unique names and numbers within the file and against the list. If any row is wrong, nothing is imported, and the answer lists every problem with its row number.
   - The guest limit (people) applies to the whole file under the same row lock: 422 `guest.quota_exceeded`.
   - Imported guests are invited to every session and each gets an invitation.
-  - An unreadable file gives 400 `guest.import_invalid_file`. The audit log records `guest.imported` with the counts.
-  - The PWA offers a sample file, `template-tamu.csv`.
+  - A file that isn't a usable workbook gives 400 `guest.import_invalid_file`. The audit log records `guest.imported`.
+  - `GET /events/{id}/guests/import-template` returns a sample workbook.
 
 ## Endpoints
 
@@ -66,7 +75,8 @@ The invitation URL is `{origin}/i/{code}` and is also the QR payload (Q-8). What
 |---|---|---|
 | GET | `/events/{eventId}/guests?search=&type=&status=` | `{guests, total, totalPeople, limit}`. `total` (invitations) and `totalPeople` cover all guests, not only the filtered ones; `limit` is compared with `totalPeople`. RSVP and check-in filters come with Phases 7 and 8 |
 | POST | `/events/{eventId}/guests` | `{name, phone, email, guestType, numberOfPeople, sessionIds}` returns 201 with the guest and invitation summary |
-| POST | `/events/{eventId}/guests/import` | `multipart/form-data` with `file`. Returns `{imported, people, errors: [{line, name, messages}]}`; with errors, `imported` is 0 |
+| POST | `/events/{eventId}/guests/import` | `multipart/form-data` with an `.xlsx` `file`. Returns `{imported, people, errors: [{line, name, messages}]}`; with errors, `imported` is 0 |
+| GET | `/events/{eventId}/guests/import-template` | Sample workbook `template-tamu.xlsx` |
 | GET, PUT, DELETE | `/events/{eventId}/guests/{guestId}` | In PUT, `sessionIds: null` keeps the current sessions |
 | GET | `/invitations/{id}` | Code, URL, type, status, guest |
 | GET | `/invitations/{id}/whatsapp-link` | `{url, message, phone}` |
@@ -91,9 +101,11 @@ The WhatsApp tab is opened before the request, so pop-up blockers allow it. The 
   - `InvitationCodeTests`: length, alphabet, 100,000 codes without a repeat, spread over every character position.
   - `WhatsAppMessageTests`: number normalisation, template, link encoding.
   - `GuestValidatorsTests`: individual and group sizes, phone, sessions, template needs `{link}`, QR renders.
-  - `GuestCsvTests`: comma and semicolon files, BOM and quotes, English headers, blank lines and line numbers, unusable files, the row limit.
+  - `GuestSpreadsheetTests`: columns in any order, the leading zero of numeric phones, English headers, blank rows, files that aren't workbooks, the template, name spacing.
 - **Integration:**
   - `GuestsTests`: 1:1 invitation, sessions, group size, edit keeps the code, delete revokes, list and quota, 422, a group takes a place per person, growing a group past the limit, concurrent adds never exceed the limit, checkout guest limit counts people, read-only cancelled event, Staff 403, session removal.
   - `InvitationsTests`: WhatsApp link and template, new code, revoke and restore, PNG and SVG, QR sheet, roles, unpaid events can't send (Q-48).
-  - `GuestImportTests`: individuals and groups with invitations, all or nothing with line errors, the guest limit for the whole file, unusable files, Staff 403, another tenant 404.
+  - `GuestImportTests`: individuals and groups with invitations, all or nothing with row errors, unique names and numbers in the file and against the list, the guest limit for the whole file, CSV and broken files, the template, Staff 403, another tenant 404.
+  - `GuestsTests` (Q-55): one name per event whatever the case or spacing, one number in any format, renaming to a taken name, the same guest added twice at once.
+  - `GuestUniquenessMigrationTests`: the migration tidies duplicates already in a database.
   - `TenantIsolationTests`: guests and invitations.

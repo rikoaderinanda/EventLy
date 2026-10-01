@@ -1,10 +1,13 @@
+using EventLy.Api.Common.Localization;
 using EventLy.Api.Auth;
 using EventLy.Api.Common.Errors;
 using EventLy.Api.Data;
+using EventLy.Api.Data.Configurations;
 using EventLy.Api.Dtos.Guests;
 using EventLy.Api.Entities;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace EventLy.Api.Services;
 
@@ -51,6 +54,10 @@ public sealed class GuestService(
                 ? query.Where(g => !db.Rsvps.Any(r => r.InvitationId == g.Invitation!.Id && r.Status != RsvpStatus.Pending))
                 : query.Where(g => db.Rsvps.Any(r => r.InvitationId == g.Invitation!.Id && r.Status == rsvp));
         }
+        if (filter.CheckedIn is { } checkedIn)
+        {
+            query = query.Where(g => db.CheckIns.Any(c => c.InvitationId == g.Invitation!.Id) == checkedIn);
+        }
 
         var guests = await query
             .Include(g => g.Sessions).Include(g => g.Invitation).AsSplitQuery()
@@ -61,9 +68,13 @@ public sealed class GuestService(
         var answers = await db.Rsvps.AsNoTracking()
             .Where(r => invitationIds.Contains(r.InvitationId))
             .ToDictionaryAsync(r => r.InvitationId, r => r.Status, ct);
+        var arrivals = await db.CheckIns.AsNoTracking()
+            .Where(c => invitationIds.Contains(c.InvitationId))
+            .ToDictionaryAsync(c => c.InvitationId, c => c.CheckedInAt, ct);
         return new GuestListDto(
             [.. guests.Select(g => ToDto(g, answers.GetValueOrDefault(g.Invitation!.Id, RsvpStatus.Pending),
-                EventLifecycle.IsPublic(ev.Status)))],
+                EventLifecycle.IsPublic(ev.Status),
+                arrivals.TryGetValue(g.Invitation!.Id, out var at) ? at : null))],
             total, people, ev.PackageSnapshot?.Features.MaxGuests);
     }
 
@@ -71,12 +82,13 @@ public sealed class GuestService(
     {
         var guest = await LoadGuestAsync(eventId, guestId, db.Guests.AsNoTracking(), ct);
         var status = await db.Events.Where(e => e.Id == eventId).Select(e => e.Status).SingleAsync(ct);
-        return ToDto(guest, await RsvpOfAsync(guest, ct), EventLifecycle.IsPublic(status));
+        return ToDto(guest, await RsvpOfAsync(guest, ct), EventLifecycle.IsPublic(status), await CheckedInAtAsync(guest, ct));
     }
 
     public Task<GuestDto> CreateAsync(Guid eventId, CreateGuestRequest request, CancellationToken ct) =>
         InLockedEventAsync(eventId, async ev =>
         {
+            await RequireUniqueAsync(ev.Id, request.Name, request.Phone, exceptGuestId: null, ct);
             await RequirePlacesAsync(ev, request.NumberOfPeople, ct);
             var guest = AddGuest(ev, request);
             audit.Add(AuditActions.GuestCreated, currentUser.UserId, ev.OrganizationId, nameof(Guest), guest.Id,
@@ -85,19 +97,27 @@ public sealed class GuestService(
         }, ct);
 
     /// <summary>
-    /// CSV import (decision Q-12): all or nothing. Every line is checked like a single guest; if any line
-    /// is wrong, nothing is imported and every problem is reported by line number. The guest limit applies
-    /// to the whole file. A group is a line with more than one person. Guests get all sessions.
+    /// Excel import (decisions Q-12, Q-55): all or nothing. Every row is checked like a single guest, and
+    /// names and WhatsApp numbers must be unique in the file and against the guest list. If any row is
+    /// wrong, nothing is imported and every problem is reported by row number. The guest limit applies to
+    /// the whole file. A group is a row with more than one person. Guests get all sessions.
     /// </summary>
-    public async Task<GuestImportResultDto> ImportAsync(Guid eventId, string csv, CancellationToken ct)
+    public async Task<GuestImportResultDto> ImportAsync(Guid eventId, Stream workbook, CancellationToken ct)
     {
         // The event first: another tenant's or a closed event answers 404/409 before the file is looked at.
         await LoadEditableEventAsync(eventId, ct);
-        var (rows, fileError) = GuestCsv.Parse(csv);
+        var (rows, fileError) = GuestSpreadsheet.Read(workbook);
         if (fileError is not null)
         {
             throw new AppException(StatusCodes.Status400BadRequest, "guest.import_invalid_file", fileError);
         }
+
+        var existing = await db.Guests.AsNoTracking().Where(g => g.EventId == eventId)
+            .Select(g => new { g.Name, g.PhoneKey }).ToListAsync(ct);
+        var takenNames = existing.Select(g => NameKey(g.Name)).ToHashSet();
+        var takenPhones = existing.Where(g => g.PhoneKey != null).Select(g => g.PhoneKey!).ToHashSet();
+        var namesInFile = new Dictionary<string, int>();
+        var phonesInFile = new Dictionary<string, int>();
 
         var requests = new List<CreateGuestRequest>();
         var errors = new List<GuestImportErrorDto>();
@@ -105,20 +125,43 @@ public sealed class GuestService(
         {
             if (row.People is not { } people)
             {
-                errors.Add(new GuestImportErrorDto(row.Line, row.Name, [$"\"{row.PeopleText}\" is not a number of people."]));
+                errors.Add(new GuestImportErrorDto(row.Line, row.Name, [Texts.T($"\"{row.PeopleText}\" bukan jumlah orang yang valid.", $"\"{row.PeopleText}\" is not a number of people.")]));
                 continue;
             }
 
             var request = new CreateGuestRequest(row.Name, row.Phone, row.Email,
                 people > 1 ? GuestType.Group : GuestType.Individual, people, null);
-            var result = await guestValidator.ValidateAsync(request, ct);
-            if (result.IsValid)
+            var messages = (await guestValidator.ValidateAsync(request, ct)).Errors.Select(e => e.ErrorMessage).ToList();
+
+            var name = NameKey(row.Name);
+            if (name.Length > 0 && !namesInFile.TryAdd(name, row.Line))
+            {
+                messages.Add(Texts.T($"Nama sama dengan baris {namesInFile[name]}.", $"Same name as row {namesInFile[name]}."));
+            }
+            else if (takenNames.Contains(name))
+            {
+                messages.Add(Texts.T("Nama ini sudah ada di daftar tamu.", "A guest with this name is already on the list."));
+            }
+
+            if (WhatsAppMessage.NormalizePhone(row.Phone) is { } phone)
+            {
+                if (!phonesInFile.TryAdd(phone, row.Line))
+                {
+                    messages.Add(Texts.T($"Nomor WhatsApp sama dengan baris {phonesInFile[phone]}.", $"Same WhatsApp number as row {phonesInFile[phone]}."));
+                }
+                else if (takenPhones.Contains(phone))
+                {
+                    messages.Add(Texts.T("Nomor WhatsApp ini sudah dipakai tamu lain.", "This WhatsApp number already belongs to another guest."));
+                }
+            }
+
+            if (messages.Count == 0)
             {
                 requests.Add(request);
             }
             else
             {
-                errors.Add(new GuestImportErrorDto(row.Line, row.Name, [.. result.Errors.Select(e => e.ErrorMessage)]));
+                errors.Add(new GuestImportErrorDto(row.Line, row.Name, messages));
             }
         }
         if (errors.Count > 0)
@@ -143,13 +186,15 @@ public sealed class GuestService(
         InLockedEventAsync(eventId, async ev =>
         {
             var guest = await LoadGuestAsync(eventId, guestId, db.Guests, ct);
+            await RequireUniqueAsync(ev.Id, request.Name, request.Phone, exceptGuestId: guest.Id, ct);
             if (request.NumberOfPeople > guest.NumberOfPeople)
             {
                 await RequirePlacesAsync(ev, request.NumberOfPeople - guest.NumberOfPeople, ct);
             }
 
-            guest.Name = request.Name.Trim();
+            guest.Name = GuestNames.Normalize(request.Name);
             guest.Phone = Normalize(request.Phone);
+            guest.PhoneKey = WhatsAppMessage.NormalizePhone(request.Phone);
             guest.Email = Normalize(request.Email);
             guest.Type = request.GuestType;
             guest.NumberOfPeople = request.NumberOfPeople;
@@ -168,7 +213,10 @@ public sealed class GuestService(
     {
         var ev = await LoadEditableEventAsync(eventId, ct);
         var guest = await LoadGuestAsync(eventId, guestId, db.Guests, ct);
-        // Phase 8: a checked-in guest can't be deleted (409).
+        if (await db.CheckIns.AnyAsync(c => c.InvitationId == guest.Invitation!.Id, ct))
+        {
+            throw new ConflictException("guest.checked_in", "A guest who has checked in can't be deleted.");
+        }
 
         guest.DeletedAt = timeProvider.GetUtcNow();
         guest.Invitation!.Status = InvitationStatus.Revoked;
@@ -192,17 +240,50 @@ public sealed class GuestService(
             await db.Database.ExecuteSqlAsync($"SELECT 1 FROM events WHERE id = {ev.Id} FOR UPDATE", ct);
 
             var result = await change(ev);
-            await db.SaveChangesAsync(ct);
+            try
+            {
+                await db.SaveChangesAsync(ct);
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation } pg
+                && pg.ConstraintName is GuestConfiguration.GuestNameIndex or GuestConfiguration.GuestPhoneIndex)
+            {
+                // Another request added the same name or number a moment earlier.
+                throw pg.ConstraintName == GuestConfiguration.GuestNameIndex ? NameTaken() : PhoneTaken();
+            }
             await transaction.CommitAsync(ct);
             return result;
         });
     }
 
+    /// <summary>One name and one WhatsApp number per event among guests still on the list (decision Q-55).</summary>
+    private async Task RequireUniqueAsync(Guid eventId, string name, string? phone, Guid? exceptGuestId, CancellationToken ct)
+    {
+        var normalized = GuestNames.Normalize(name);
+        // The name column is citext, so this comparison ignores case.
+        if (await db.Guests.AnyAsync(g => g.EventId == eventId && g.Name == normalized && g.Id != exceptGuestId, ct))
+        {
+            throw NameTaken();
+        }
+        if (WhatsAppMessage.NormalizePhone(phone) is { } key
+            && await db.Guests.AnyAsync(g => g.EventId == eventId && g.PhoneKey == key && g.Id != exceptGuestId, ct))
+        {
+            throw PhoneTaken();
+        }
+    }
+
+    private static string NameKey(string name) => GuestNames.Normalize(name).ToLowerInvariant();
+
+    private static ConflictException NameTaken() =>
+        new("guest.name_taken", "A guest with this name is already on the list of this event.");
+
+    private static ConflictException PhoneTaken() =>
+        new("guest.phone_taken", "This WhatsApp number already belongs to another guest of this event.");
+
     private async Task<GuestDto> InLockedEventAsync(Guid eventId, Func<Event, Task<Guest>> change, CancellationToken ct)
     {
         var (guest, sendable) = await LockedAsync(eventId,
             async ev => (Guest: await change(ev), Sendable: EventLifecycle.IsPublic(ev.Status)), ct);
-        return ToDto(guest, await RsvpOfAsync(guest, ct), sendable);
+        return ToDto(guest, await RsvpOfAsync(guest, ct), sendable, await CheckedInAtAsync(guest, ct));
     }
 
     /// <summary>A new guest with their invitation (1:1), invited to the chosen sessions or all of them.</summary>
@@ -211,8 +292,9 @@ public sealed class GuestService(
         var guest = new Guest
         {
             EventId = ev.Id,
-            Name = request.Name.Trim(),
+            Name = GuestNames.Normalize(request.Name),
             Phone = Normalize(request.Phone),
+            PhoneKey = WhatsAppMessage.NormalizePhone(request.Phone),
             Email = Normalize(request.Email),
             Type = request.GuestType,
             NumberOfPeople = request.NumberOfPeople,
@@ -295,7 +377,11 @@ public sealed class GuestService(
             .Select(r => (RsvpStatus?)r.Status).SingleOrDefaultAsync(ct) ?? RsvpStatus.Pending;
 
     /// <summary><paramref name="sendable"/>: the event is paid, so the link may be shown and sent (Q-48).</summary>
-    private GuestDto ToDto(Guest g, RsvpStatus rsvp, bool sendable)
+    private async Task<DateTimeOffset?> CheckedInAtAsync(Guest guest, CancellationToken ct) =>
+        await db.CheckIns.AsNoTracking().Where(c => c.InvitationId == guest.Invitation!.Id)
+            .Select(c => (DateTimeOffset?)c.CheckedInAt).SingleOrDefaultAsync(ct);
+
+    private GuestDto ToDto(Guest g, RsvpStatus rsvp, bool sendable, DateTimeOffset? checkedInAt)
     {
         var invitation = g.Invitation!;
         return new GuestDto(
@@ -304,6 +390,7 @@ public sealed class GuestService(
             new InvitationSummaryDto(invitation.Id, invitation.Code, sendable ? links.Url(invitation.Code) : null, invitation.Status,
                 invitation.OpenedAt),
             rsvp,
+            checkedInAt,
             g.CreatedAt);
     }
 

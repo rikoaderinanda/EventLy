@@ -41,4 +41,13 @@ public sealed class InvitationCodeTests
     [InlineData("aaaaaaaaaaaaaaaaaaaaaaa")]
     public void Malformed_codes_are_recognised(string? code) =>
         InvitationCode.IsWellFormed(code).ShouldBeFalse();
+
+    [Theory]
+    [InlineData("https://evently.id/i/abcdefghijklmnopqrstuv", "abcdefghijklmnopqrstuv")]
+    [InlineData("http://127.0.0.1:8080/i/abcdefghijklmnopqrstuv?utm=wa#top", "abcdefghijklmnopqrstuv")]
+    [InlineData("https://evently.id/i/abcdefghijklmnopqrstuv/", "abcdefghijklmnopqrstuv")]
+    [InlineData("  abcdefghijklmnopqrstuv \n", "abcdefghijklmnopqrstuv")]
+    [InlineData(null, "")]
+    public void The_code_is_taken_from_a_scanned_url_or_typed_in(string? scanned, string code) =>
+        InvitationCode.FromScan(scanned).ShouldBe(code);
 }

@@ -1,3 +1,4 @@
+using EventLy.Api.Common.Localization;
 using EventLy.Api.Dtos.Packages;
 using EventLy.Api.Dtos.Payments;
 using EventLy.Api.Entities;
@@ -20,9 +21,9 @@ public abstract class PackageInputValidator<T> : AbstractValidator<T>
     protected PackageInputValidator()
     {
         RuleFor(r => r.Name).NotEmpty().MaximumLength(80);
-        RuleFor(r => r.Currency).Equal(Currencies.Idr).WithMessage("Only IDR is supported.");
+        RuleFor(r => r.Currency).Equal(Currencies.Idr).WithMessage(_ => Texts.T("Hanya mendukung Rupiah (IDR).", "Only IDR is supported."));
         RuleFor(r => r.Price).GreaterThan(0).LessThanOrEqualTo(MoneyRules.MaxAmount)
-            .Must(MoneyRules.IsWholeRupiah).WithMessage("The price must be a whole rupiah amount.");
+            .Must(MoneyRules.IsWholeRupiah).WithMessage(_ => Texts.T("Harga harus dalam rupiah bulat.", "The price must be a whole rupiah amount."));
         RuleFor(r => r.Features).NotNull().SetValidator(new PackageFeaturesValidator());
     }
 }
@@ -39,7 +40,7 @@ public sealed class PackageFeaturesValidator : AbstractValidator<PackageFeatures
         RuleFor(f => f.MaxGuestPhotosPerInvitation).InclusiveBetween(0, 100);
         RuleFor(f => f.MaxGuestPhotosPerInvitation).GreaterThan(0)
             .When(f => f.GuestUploadEnabled)
-            .WithMessage("Set how many photos each guest may take, or turn guest photos off.");
+            .WithMessage(_ => Texts.T("Isi berapa foto yang boleh diambil tiap tamu, atau matikan foto tamu.", "Set how many photos each guest may take, or turn guest photos off."));
     }
 }
 
@@ -48,7 +49,7 @@ public sealed class CreatePackageRequestValidator : PackageInputValidator<Create
     public CreatePackageRequestValidator()
     {
         RuleFor(r => r.Code).NotEmpty().Matches("^[A-Za-z0-9_]{2,30}$")
-            .WithMessage("The code is 2 to 30 letters, digits or underscores.");
+            .WithMessage(_ => Texts.T("Kode berisi 2 sampai 30 huruf, angka atau garis bawah.", "The code is 2 to 30 letters, digits or underscores."));
     }
 }
 
@@ -76,8 +77,8 @@ public sealed class ManualActivationRequestValidator : AbstractValidator<ManualA
     {
         RuleFor(r => r.PackageId).NotEmpty();
         RuleFor(r => r.Amount).GreaterThanOrEqualTo(0).LessThanOrEqualTo(MoneyRules.MaxAmount)
-            .Must(MoneyRules.IsWholeRupiah).WithMessage("The amount must be a whole rupiah amount.");
-        RuleFor(r => r.Note).NotEmpty().WithMessage("Note how it was paid, for example the transfer reference.")
+            .Must(MoneyRules.IsWholeRupiah).WithMessage(_ => Texts.T("Jumlah harus dalam rupiah bulat.", "The amount must be a whole rupiah amount."));
+        RuleFor(r => r.Note).NotEmpty().WithMessage(_ => Texts.T("Catat cara pembayarannya, misalnya nomor referensi transfer.", "Note how it was paid, for example the transfer reference."))
             .MaximumLength(500);
     }
 }

@@ -57,6 +57,7 @@ public static class AuditActions
     public const string GuestUpdated = "guest.updated";
     public const string GuestDeleted = "guest.deleted";
     public const string GuestsImported = "guest.imported";
+    public const string CheckInCreated = "checkin.created";
     public const string InvitationCodeRegenerated = "invitation.code_regenerated";
     public const string InvitationRevoked = "invitation.revoked";
     public const string EventWhatsappTemplateUpdated = "event.whatsapp_template_updated";

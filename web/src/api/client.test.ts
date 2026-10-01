@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { useSession } from '@/features/auth/session-store'
+import { changeLocale } from '@/i18n'
 import { fakeAuthResponse, jsonResponse, signInAs } from '@/test/session'
 import { apiFetch } from './client'
 import { ApiError } from './problem'
@@ -16,6 +17,20 @@ describe('apiFetch', () => {
 
     await expect(apiFetch('/system/info')).resolves.toEqual({ name: 'EventLy' })
     expect(fetchMock).toHaveBeenCalledWith('/api/v1/system/info', expect.anything())
+  })
+
+  it('asks for messages in the app language', async () => {
+    const fetchMock = vi.fn(() => Promise.resolve(jsonResponse({})))
+    vi.stubGlobal('fetch', fetchMock)
+    const language = (call: unknown[]) =>
+      ((call[1] as RequestInit).headers as Record<string, string>)['Accept-Language']
+
+    changeLocale('en')
+    await apiFetch('/system/info')
+    changeLocale('id')
+    await apiFetch('/system/info')
+
+    expect(fetchMock.mock.calls.map(language)).toEqual(['en', 'id'])
   })
 
   it('turns ProblemDetails into an ApiError with the stable code', async () => {

@@ -1,3 +1,4 @@
+using EventLy.Api.Common.Localization;
 using EventLy.Api.Common.Errors;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
@@ -11,6 +12,7 @@ public static class PipelineSetup
     public static WebApplication UseApiPipeline(this WebApplication app)
     {
         app.UseForwardedHeaders();
+        app.UseRequestLanguage();
         // Request logging wraps the exception handler so it records the final status (409, 404, ...)
         // instead of a 500 for every business exception. Real 500s are logged by AppExceptionHandler.
         app.UseSerilogRequestLogging();
@@ -21,8 +23,9 @@ public static class PipelineSetup
         app.UseDefaultFiles();
         app.UseStaticFiles();
 
-        app.UseRateLimiter();
+        // Authentication first, so per-user rate limits (check-in) can read the signed-in user.
         app.UseAuthentication();
+        app.UseRateLimiter();
         app.UseAuthorization();
 
         if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("ApiDocs:Enabled"))

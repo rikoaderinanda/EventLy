@@ -45,6 +45,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options, ICurren
 
     public DbSet<Rsvp> Rsvps => Set<Rsvp>();
 
+    public DbSet<CheckIn> CheckIns => Set<CheckIn>();
+
     public DbSet<Wish> Wishes => Set<Wish>();
 
     public DbSet<GiftAccount> GiftAccounts => Set<GiftAccount>();

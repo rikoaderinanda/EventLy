@@ -54,6 +54,7 @@ const guest: Guest = {
     openedAt: null,
   },
   rsvp: 'Pending',
+  checkedInAt: null,
   createdAt: '',
 }
 
@@ -150,7 +151,7 @@ describe('guests and invitations', () => {
     expect(screen.queryByRole('link', { name: 'Tambah tamu' })).toBeInTheDocument()
   })
 
-  it('imports a CSV file and lists the lines to fix when it has mistakes', async () => {
+  it('imports an Excel file and lists the rows to fix when it has mistakes', async () => {
     const fetchMock = stubApi([
       { path: '/events/e1', response: () => jsonResponse(event) },
       { path: '/events/e1/guests', response: () => jsonResponse(list) },
@@ -173,9 +174,11 @@ describe('guests and invitations', () => {
     ])
     renderRoute('/app/events/e1/guests')
 
-    await userEvent.click(await screen.findByText('Import tamu dari CSV'))
-    const file = new File(['nama\nBudi'], 'tamu.csv', { type: 'text/csv' })
-    await userEvent.upload(screen.getByLabelText('File CSV'), file)
+    await userEvent.click(await screen.findByText('Import tamu dari Excel'))
+    const file = new File(['xlsx'], 'tamu.xlsx', {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    })
+    await userEvent.upload(screen.getByLabelText('File Excel (.xlsx)'), file)
     await userEvent.click(screen.getByRole('button', { name: 'Import' }))
 
     expect(await screen.findByText(/Baris 3 \(Budi\)/)).toBeInTheDocument()

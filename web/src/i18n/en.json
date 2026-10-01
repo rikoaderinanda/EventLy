@@ -203,8 +203,15 @@
     "gift_confirmation_limit": "This invitation has reached its gift confirmation limit.",
     "rate_limit_exceeded": "Too many requests. Please wait a moment and try again.",
     "invitation_event_not_paid": "Invitations can be sent once the event is paid.",
-    "guest_import_invalid_file": "The file can't be read. Use a CSV with a header line that has a \"nama\" (name) column.",
-    "user_admin_limit_exceeded": "Your package's Admin limit is reached. Disable another Admin or choose a bigger package."
+    "guest_import_invalid_file": "The file can't be read. Use an Excel workbook (.xlsx) whose first row holds the column headers, including \"nama\" (name).",
+    "user_admin_limit_exceeded": "Your package's Admin limit is reached. Disable another Admin or choose a bigger package.",
+    "checkin_invitation_not_found": "No invitation for this event. Guests without an invitation can't check in.",
+    "checkin_event_not_active": "Check-in is only for an active (paid) event.",
+    "checkin_not_event_day": "Check-in is open on the event day only.",
+    "guest_checked_in": "A guest who has checked in can't be deleted.",
+    "invitation_checked_in": "The guest has checked in; the invitation code can't change any more.",
+    "guest_name_taken": "A guest with this name is already on the list of this event.",
+    "guest_phone_taken": "This WhatsApp number already belongs to another guest of this event."
   },
   "events": {
     "title": "Events",
@@ -261,8 +268,7 @@
   },
   "staffArea": {
     "title": "My events",
-    "empty": "You aren't assigned to any event yet.",
-    "scannerSoon": "Guest QR scanning comes in the next step."
+    "empty": "You aren't assigned to any event yet."
   },
   "packages": {
     "sectionTitle": "Package & payment",
@@ -382,14 +388,14 @@
     "templateReset": "Back to the default message",
     "sendAfterPayment": "Can be sent once the event is paid",
     "sendAfterPaymentHint": "The invitation is ready. The link, QR code and Send via WhatsApp become available once the event is paid.",
-    "importTitle": "Import guests from CSV",
-    "importHint": "Columns: nama/name (required), telepon/phone, email, jumlah/people (more than 1 = group). Works from Excel or Google Sheets (save as CSV). Guests are invited to every session. If any line is wrong, nothing is imported.",
-    "importTemplate": "Download a sample file",
-    "importFile": "CSV file",
+    "importTitle": "Import guests from Excel",
+    "importHint": "Columns: nama/name (required), telepon/phone, email, jumlah/people (more than 1 = group). Names and WhatsApp numbers must not repeat another guest of this event. Guests are invited to every session. If any row is wrong, nothing is imported.",
+    "importTemplate": "Download a sample Excel file",
+    "importFile": "Excel file (.xlsx)",
     "importSubmit": "Import",
     "importDone": "{{n}} guests ({{people}} people) imported.",
-    "importFailed": "Nothing was imported. Fix these lines and try again:",
-    "importLine": "Line {{line}} ({{name}}):"
+    "importFailed": "Nothing was imported. Fix these rows and try again:",
+    "importLine": "Row {{line}} ({{name}}):"
   },
   "invitation": {
     "dear": "Dear",
@@ -438,7 +444,8 @@
     "giftThanks": "Thank you! Your confirmation has been passed on.",
     "privacy": "This page is for invited guests only. Please don't share your invitation link.",
     "notFoundTitle": "Invitation not found",
-    "notFoundBody": "This invitation link doesn't work or the event isn't open yet. Please contact your host."
+    "notFoundBody": "This invitation link doesn't work or the event isn't open yet. Please contact your host.",
+    "checkedIn": "You've checked in. Enjoy the event!"
   },
   "responses": {
     "rsvpTitle": "RSVP monitor",
@@ -481,5 +488,41 @@
     "confirmationsTitle": "Gift confirmations from guests",
     "noConfirmations": "No confirmations yet.",
     "noAmount": "no amount"
+  },
+  "checkin": {
+    "open": "Open the check-in scanner",
+    "notActive": "Check-in is available once the event is active.",
+    "camera": "Scanner camera",
+    "cameraDenied": "Camera access was denied. Allow the camera in the browser settings, or use the \"Find guest\" tab.",
+    "cameraUnavailable": "No camera on this device. Use the \"Find guest\" tab.",
+    "counter": "{{arrived}} of {{total}} people arrived · {{invitations}}/{{allInvitations}} invitations",
+    "tab": {
+      "scan": "Scan QR",
+      "manual": "Find guest",
+      "mine": "My check-ins"
+    },
+    "codeLabel": "Type the invitation code",
+    "find": "Find",
+    "searchLabel": "Search guest name",
+    "checkedIn": "Checked in",
+    "confirm": "Check in",
+    "cancel": "Cancel",
+    "next": "Next guest",
+    "success": "✓ Checked in",
+    "already": "Already checked in at {{time}} by {{by}}",
+    "invalidTitle": "Invalid invitation",
+    "errorTitle": "Can't check in",
+    "warning": {
+      "not_invited_to_check_in_session": "This guest is not invited to this session (only to another one).",
+      "rsvp_not_attending": "The guest had answered not attending; now recorded as attending."
+    },
+    "noActivity": "No check-ins by you yet.",
+    "logTitle": "Check-in",
+    "logEntry": "Guests who arrived, and who checked them in.",
+    "noCheckIns": "No one has checked in yet.",
+    "method": {
+      "Scan": "QR scan",
+      "Manual": "name search"
+    }
   }
 }

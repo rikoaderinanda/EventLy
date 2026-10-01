@@ -16,6 +16,7 @@
 | Idempotency | `Idempotency-Key` header is accepted on `POST /payments` and `POST /photos`. It is not required |
 | Concurrency | `ETag` / `If-Match` on `PUT` for Event and Guest (maps to `xmin`) |
 | Errors | RFC 7807 `application/problem+json` (below) |
+| Language | `Accept-Language: id` (default) or `en`. Validation messages (`errors`) and import row messages come back in that language (Q-57); FluentValidation's built-in Indonesian is used with Indonesian field names. Error `code`s never change, and the PWA translates them itself |
 | Docs | OpenAPI 3.1 at `/openapi/v1.json`, Scalar UI at `/docs` (disabled in production unless enabled by configuration) |
 
 ### Error shape
@@ -136,12 +137,13 @@ Details and rules: [docs/modules/payments.md](../modules/payments.md).
 |---|---|---|---|
 | GET | `/events/{eventId}/guests?search=&type=&status=&rsvp=&checkedIn=` | O A | `{guests, total, totalPeople, limit}`: guests with their invitation (RSVP and check-in status from Phases 7 and 8) and the package quota |
 | POST | `/events/{eventId}/guests` | O A | Create a guest **and its invitation** in one step `{name, phone, email, guestType, numberOfPeople, sessionIds}` (see 2.7). `sessionIds` null = all sessions (Q-38) |
-| POST | `/events/{eventId}/guests/import` | O A | CSV bulk import **[Q-12]**: all or nothing, `{imported, people, errors: [{line, name, messages}]}`, guest limit for the whole file (422) |
+| POST | `/events/{eventId}/guests/import` | O A | Excel (.xlsx) bulk import **[Q-12, Q-56]**: all or nothing, `{imported, people, errors: [{line, name, messages}]}`, unique names/numbers, guest limit for the whole file (422) |
+| GET | `/events/{eventId}/guests/import-template` | O A | Sample workbook |
 | GET | `/events/{eventId}/guests/{guestId}` | O A | Details |
 | PUT | `/events/{eventId}/guests/{guestId}` | O A | Update |
 | DELETE | `/events/{eventId}/guests/{guestId}` | O A | Soft delete (409 if checked in) |
 
-Creating guests, and growing a group, is checked against the package's `maxGuests` (422 `guest.quota_exceeded`). It counts **people**: a group of 4 takes 4 places (Q-46). Details: [docs/modules/guests.md](../modules/guests.md).
+Names and WhatsApp numbers are unique per event (409 `guest.name_taken` / `guest.phone_taken`, Q-55). Creating guests, and growing a group, is checked against the package's `maxGuests` (422 `guest.quota_exceeded`). It counts **people**: a group of 4 takes 4 places (Q-46). Details: [docs/modules/guests.md](../modules/guests.md).
 
 ### 2.7 Invitation — `/api/v1/invitations`
 
@@ -192,11 +194,15 @@ Anonymous, keyed by the 128-bit code. Rate-limited per IP (reads 60/min, writes 
 
 | Method | Path | Roles | Description |
 |---|---|---|---|
-| GET | `/staff/events` | S (O) | Events assigned to me (Active and upcoming) |
-| GET | `/events/{eventId}/check-ins/lookup?code=` | S O | Check the scanned code without committing → `{invitationId, guestName, numberOfPeople, type, rsvpStatus, alreadyCheckedIn, checkedInAt}` |
-| POST | `/events/{eventId}/check-ins` | S O | `{code}` → **201** new check-in, or **200** with `alreadyCheckedIn: true` (idempotent). 404 if the code isn't in *this* event. 409 if the event isn't Active |
-| GET | `/events/{eventId}/check-ins?staffId=&from=` | O A | Check-in log |
-| GET | `/staff/me/activity?eventId=` | S | My check-ins and uploads (staff activity) |
+| GET | `/events` | S (O) | Staff get the events assigned to them (Phase 4); no separate `/staff/events` |
+| GET | `/events/{eventId}/check-ins/lookup?code=` | S O | Check the scanned code (invitation URL or bare code) without committing → `{invitationId, guestName, type, numberOfPeople, rsvp, alreadyCheckedIn, checkedInAt, checkedInBy, warnings}` |
+| POST | `/events/{eventId}/check-ins` | S O | `{code}` or `{invitationId}` (manual entry) → **201** new check-in, or **200** with `alreadyCheckedIn: true` (idempotent). Sets the RSVP to Attending (Q-49). 404 `checkin.invitation_not_found` if the invitation isn't valid for *this* event. 409 `checkin.event_not_active` / `checkin.not_event_day` (Q-35) |
+| GET | `/events/{eventId}/check-ins/search?q=` | S O | Manual entry: active invitations by guest name (max 20) |
+| GET | `/events/{eventId}/check-ins/summary` | O A S | `{invitations, people, checkedInInvitations, checkedInPeople}` |
+| GET | `/events/{eventId}/check-ins?staffId=` | O A | Check-in log |
+| GET | `/staff/me/activity?eventId=` | S O | My check-ins (uploads come with Phase 9) |
+
+Details: [docs/modules/checkin.md](../modules/checkin.md).
 
 ### 2.11 Photo — Staff upload, Owner/Admin manage
 

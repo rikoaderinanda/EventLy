@@ -381,7 +381,9 @@ export function InvitationPage() {
 
       <Section title={t('invitation.qrTitle')}>
         <img src={publicQrUrl(code)} alt={t('invitation.qrAlt')} className="mx-auto size-56" />
-        <p className="text-center text-sm text-stone-600">{t('invitation.qrHint')}</p>
+        <p className="text-center text-sm text-stone-600">
+          {data.checkedIn ? t('invitation.checkedIn') : t('invitation.qrHint')}
+        </p>
       </Section>
 
       {data.features.wishes && (

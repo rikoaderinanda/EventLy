@@ -110,6 +110,12 @@ export const routes: RouteObject[] = [
                 }),
               },
               {
+                path: 'events/:id/check-ins',
+                lazy: async () => ({
+                  Component: (await import('@/features/checkin/CheckInLogPage')).CheckInLogPage,
+                }),
+              },
+              {
                 path: 'events/:id/qr-sheet',
                 lazy: async () => ({
                   Component: (await import('@/features/guests/QrSheetPage')).QrSheetPage,
@@ -164,6 +170,12 @@ export const routes: RouteObject[] = [
                 index: true,
                 lazy: async () => ({
                   Component: (await import('@/features/events/StaffEventsPage')).StaffEventsPage,
+                }),
+              },
+              {
+                path: 'events/:id',
+                lazy: async () => ({
+                  Component: (await import('@/features/checkin/ScannerPage')).ScannerPage,
                 }),
               },
             ],

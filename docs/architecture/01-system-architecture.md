@@ -335,6 +335,8 @@ sequenceDiagram
 
 A lookup-only `GET /events/{eventId}/check-ins/lookup?code=` lets staff confirm the guest before committing the check-in.
 
+*As built (Phase 8):* there is no Redis lock. The unique index on `check_ins(invitation_id)` alone makes concurrent scans safe: the loser of the insert reports the winner's check-in. That also fits production stage 1, which has no Redis. Details: [docs/modules/checkin.md](../modules/checkin.md).
+
 ### 6.4 Photo capture and gallery
 
 1. Staff taps **Take photo** on the check-in result screen, or taps **Skip** (decided 2026-09-29: the photo step is optional). A photo can still be added later for any checked-in invitation, from the staff activity list. The camera opens (`<input type="file" accept="image/*" capture="environment">`, which also works in a TWA).

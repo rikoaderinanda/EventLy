@@ -28,6 +28,12 @@ public sealed class Guest : ITenantOwned, ISoftDeletable, IHasTimestamps
     /// <summary>For "Kirim via WhatsApp". Stored as entered; normalised when the link is built.</summary>
     public string? Phone { get; set; }
 
+    /// <summary>
+    /// <see cref="Phone"/> as international digits (628…), so "0812-3456-7890" and "+62 812 3456 7890" are
+    /// one number. Unique per event (decision Q-55); null without a phone.
+    /// </summary>
+    public string? PhoneKey { get; set; }
+
     public string? Email { get; set; }
 
     public GuestType Type { get; set; }
@@ -94,12 +100,35 @@ public sealed class Invitation : ITenantOwned, IHasTimestamps
     public DateTimeOffset UpdatedAt { get; set; }
 }
 
+/// <summary>How guest names are compared and stored: trimmed, single spaces. Case is ignored by the column (citext).</summary>
+public static class GuestNames
+{
+    public static string Normalize(string name) =>
+        string.Join(' ', name.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
+}
+
 public static class InvitationCode
 {
     public const int Length = 22;
 
     /// <summary>128 bits from the CSPRNG as base64url: 22 characters that can't be guessed.</summary>
     public static string New() => Base64UrlEncode(RandomNumberGenerator.GetBytes(16));
+
+    /// <summary>
+    /// The code from what a scanner read: the invitation URL <c>https://host/i/{code}</c> (the QR payload,
+    /// Q-8) or the bare code typed in. Anything else is returned trimmed and then fails <see cref="IsWellFormed"/>.
+    /// </summary>
+    public static string FromScan(string? scanned)
+    {
+        var text = (scanned ?? "").Trim();
+        var marker = text.LastIndexOf("/i/", StringComparison.Ordinal);
+        if (marker >= 0)
+        {
+            text = text[(marker + 3)..];
+        }
+        var end = text.IndexOfAny(['?', '#', '/']);
+        return end >= 0 ? text[..end] : text;
+    }
 
     /// <summary>A cheap shape check before any database lookup.</summary>
     public static bool IsWellFormed(string? code) =>

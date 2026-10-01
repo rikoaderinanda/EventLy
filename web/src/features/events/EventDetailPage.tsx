@@ -200,6 +200,7 @@ export function EventDetailPage() {
           { to: 'rsvps', title: t('responses.rsvpTitle'), hint: t('responses.rsvpHint') },
           { to: 'wishes', title: t('responses.wishesTitle'), hint: t('responses.wishesEntry') },
           { to: 'gifts', title: t('responses.giftsTitle'), hint: t('responses.giftsEntry') },
+          { to: 'check-ins', title: t('checkin.logTitle'), hint: t('checkin.logEntry') },
         ].map((entry) => (
           <Link
             key={entry.to}

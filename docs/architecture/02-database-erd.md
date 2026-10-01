@@ -174,8 +174,9 @@ erDiagram
         uuid id PK
         uuid organization_id FK "+"
         uuid event_id FK
-        text name
+        citext name "UK per event (Q-55)"
         text phone
+        text phone_key "+ normalised 628..., UK per event (Q-55)"
         citext email
         text guest_type "Individual|Group (+ VIP/Family? Q-5)"
         int number_of_people
@@ -282,7 +283,8 @@ CREATE UNIQUE INDEX ux_payments_one_paid        ON payments (event_id) WHERE sta
 CREATE INDEX        ix_payments_pending         ON payments (status, expires_at) WHERE status = 'Pending';
 
 -- guests / invitations
-CREATE INDEX        ix_guests_event_name        ON guests (event_id, name) WHERE deleted_at IS NULL;
+CREATE UNIQUE INDEX ux_guests_event_name        ON guests (event_id, name) WHERE deleted_at IS NULL;          -- name is citext (Q-55)
+CREATE UNIQUE INDEX ux_guests_event_phone       ON guests (event_id, phone_key) WHERE deleted_at IS NULL AND phone_key IS NOT NULL;
 CREATE UNIQUE INDEX ux_invitations_code         ON invitations (code);
 CREATE UNIQUE INDEX ux_invitations_guest        ON invitations (guest_id);
 CREATE INDEX        ix_invitations_event_status ON invitations (event_id, status);

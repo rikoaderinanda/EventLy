@@ -74,6 +74,7 @@ All settings can be overridden with environment variables. Use `__` as the secti
 | Root account | `Auth__RootEmail` | – | The one Google email that signs in as Root. Development: `root@evently.test` |
 | Test sign-in | `Auth__DevSignInEnabled` | `false` | Sign in without Google. Only works in Development/Testing, even if switched on elsewhere |
 | Sign-in rate limit | `RateLimiting__AuthPermitPerMinute` | `10` | Per client IP, for sign-in/refresh/logout |
+| Check-in rate limit | `RateLimiting__CheckInPermitPerMinute` | `120` | Per signed-in user, for the check-in endpoints |
 | Guest page rate limits | `RateLimiting__PublicPermitPerMinute` · `RateLimiting__PublicWritePermitPerMinute` | `60` · `10` | Per client IP, for `/api/v1/public/*` reads and writes (RSVP, wish, gift confirmation) |
 | Terms version | `Legal__TermsVersion` | `2026-09-29` | Bump it when the Terms/Privacy text changes; Owners then accept the new version |
 | Payment gateway | `Payments__Provider` | `Fake` | `Fake` only starts in Development/Testing. The Xendit adapter comes later |
@@ -117,12 +118,14 @@ Without Docker, the database integration tests are reported as **skipped**, not 
 | `POST` · `GET /api/v1/events/{id}/payments`, `GET /api/v1/payments/{id}` · `/receipt` | Owner pays for an event (see §6.1) |
 | `POST /api/v1/payments/webhooks/{provider}` | Payment provider callback (signed) |
 | `GET` · `POST /api/v1/events/{id}/guests`, `GET` · `PUT` · `DELETE …/guests/{guestId}` | Guests, each with their invitation |
-| `POST /api/v1/events/{id}/guests/import` | CSV guest import (`multipart/form-data`, field `file`) |
+| `POST /api/v1/events/{id}/guests/import`, `GET …/guests/import-template` | Excel guest import (`multipart/form-data`, field `file`, .xlsx) and its sample file |
 | `GET /api/v1/invitations/{id}` · `/whatsapp-link` · `/qr`, `POST …/regenerate-code` · `/revoke` | Invitations |
 | `GET /api/v1/events/{id}/invitations/qr-sheet`, `GET` · `PUT …/whatsapp-template` | QR sheet, WhatsApp message |
 | `GET /api/v1/public/invitations/{code}`, `PUT …/rsvp` · `/wish`, `GET …/wishes` · `/gifts` · `/qr`, `POST …/gift-confirmations` | Guest invitation page (no sign-in; the code is the credential) |
 | `GET /api/v1/events/{id}/rsvps` · `/rsvps/summary` · `/wishes` · `/gifts` · `/gift-confirmations` | Organizer: RSVP monitor, wish moderation, digital gift |
 | `/i/{code}` | The guest invitation page in the PWA |
+| `GET …/check-ins/lookup` · `/search` · `/summary`, `POST /api/v1/events/{id}/check-ins`, `GET …/check-ins`, `GET /api/v1/staff/me/activity` | Check-in (Owner, Staff; log for Owner/Admin) |
+| `/staff/events/{id}` | The check-in scanner in the PWA (camera needs HTTPS or localhost) |
 | `POST /api/v1/maintenance/payments/reconcile` | Payment reconciliation (header `X-Maintenance-Key`) |
 | `/legal/terms`, `/legal/privacy` | Terms & Privacy Policy pages |
 | any other path | The PWA (`index.html`); unknown `/api/...` paths return a JSON 404 |

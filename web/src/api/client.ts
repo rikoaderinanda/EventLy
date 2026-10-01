@@ -1,3 +1,4 @@
+import i18n from 'i18next'
 import { env } from '@/config/env'
 import { refreshSession } from '@/features/auth/refresh'
 import { useSession } from '@/features/auth/session-store'
@@ -21,6 +22,8 @@ async function send(path: string, options: RequestOptions): Promise<Response> {
       credentials: 'same-origin',
       headers: {
         Accept: 'application/json',
+        // Validation and import messages come back in the app's language.
+        'Accept-Language': i18n.language === 'en' ? 'en' : 'id',
         ...(body !== undefined && !isForm ? { 'Content-Type': 'application/json' } : {}),
         ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
         ...headers,

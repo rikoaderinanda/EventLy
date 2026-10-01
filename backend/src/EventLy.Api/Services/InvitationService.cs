@@ -31,7 +31,11 @@ public sealed class InvitationService(AppDbContext db, ICurrentUser currentUser,
     {
         var (invitation, guest) = await LoadAsync(id, tracking: true, ct);
         await RequireEditableEventAsync(invitation.EventId, ct);
-        // Phase 8: blocked once the guest has checked in (the QR is then their check-in record).
+        if (await db.CheckIns.AnyAsync(c => c.InvitationId == invitation.Id, ct))
+        {
+            // The QR is now the guest's check-in record and their gallery access.
+            throw new ConflictException("invitation.checked_in", "The guest has checked in; the code can't change any more.");
+        }
 
         invitation.Code = InvitationCode.New();
         invitation.Status = InvitationStatus.Active;

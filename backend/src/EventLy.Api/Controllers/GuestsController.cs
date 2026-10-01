@@ -14,7 +14,8 @@ namespace EventLy.Api.Controllers;
 [Authorize(Policy = Permissions.GuestManage)]
 public sealed class GuestsController(GuestService guests) : ControllerBase
 {
-    private const int MaxImportBytes = 1024 * 1024;
+    private const int MaxImportBytes = 5 * 1024 * 1024;
+    private const string XlsxContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
     [HttpGet]
     public Task<GuestListDto> List(
@@ -23,8 +24,9 @@ public sealed class GuestsController(GuestService guests) : ControllerBase
         [FromQuery] GuestType? type,
         [FromQuery] InvitationStatus? status,
         [FromQuery] RsvpStatus? rsvp,
+        [FromQuery] bool? checkedIn,
         CancellationToken ct) =>
-        guests.ListAsync(eventId, new GuestListQuery(search, type, status, rsvp), ct);
+        guests.ListAsync(eventId, new GuestListQuery(search, type, status, rsvp, checkedIn), ct);
 
     /// <summary>422 <c>guest.quota_exceeded</c> when the package's guest limit is reached.</summary>
     [HttpPost]
@@ -36,23 +38,32 @@ public sealed class GuestsController(GuestService guests) : ControllerBase
     }
 
     /// <summary>
-    /// CSV import (<c>multipart/form-data</c>, field <c>file</c>, max 1 MB / 2,000 guests). All or nothing:
-    /// the result lists every problem by line, or the number imported. 422 when the guest limit is exceeded.
+    /// Excel import (<c>multipart/form-data</c>, field <c>file</c>, .xlsx up to 5 MB / 2,000 guests). All or
+    /// nothing: the result lists every problem by row, or the number imported. 422 past the guest limit.
     /// </summary>
     [HttpPost("import")]
     [Consumes("multipart/form-data")]
     [RequestSizeLimit(MaxImportBytes + 64 * 1024)]
     public async Task<GuestImportResultDto> Import(Guid eventId, IFormFile file, CancellationToken ct)
     {
-        if (file.Length is 0 or > MaxImportBytes)
+        if (file.Length is 0 or > MaxImportBytes || !file.FileName.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
         {
             throw new AppException(StatusCodes.Status400BadRequest, "guest.import_invalid_file",
-                "Upload a CSV file of at most 1 MB.");
+                "Upload an Excel workbook (.xlsx) of at most 5 MB.");
         }
 
-        using var reader = new StreamReader(file.OpenReadStream(), System.Text.Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
-        return await guests.ImportAsync(eventId, await reader.ReadToEndAsync(ct), ct);
+        // The workbook is a zip: read it from memory, where seeking is cheap.
+        using var buffer = new MemoryStream();
+        await file.CopyToAsync(buffer, ct);
+        buffer.Position = 0;
+        return await guests.ImportAsync(eventId, buffer, ct);
     }
+
+    /// <summary>A sample workbook with the expected columns.</summary>
+    [HttpGet("import-template")]
+    [Produces(XlsxContentType)]
+    public FileContentResult ImportTemplate(Guid eventId) =>
+        File(GuestSpreadsheet.Template(), XlsxContentType, "template-tamu.xlsx");
 
     [HttpGet("{guestId:guid}")]
     public Task<GuestDto> Get(Guid eventId, Guid guestId, CancellationToken ct) => guests.GetAsync(eventId, guestId, ct);

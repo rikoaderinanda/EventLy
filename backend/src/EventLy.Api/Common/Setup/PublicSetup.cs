@@ -11,14 +11,21 @@ public static class PublicSetup
     public const string ReadPolicy = "public-invitation";
     public const string WritePolicy = "public-invitation-write";
 
+    /// <summary>Check-in at the venue, per signed-in user (a fast scanner, not a script).</summary>
+    public const string CheckInPolicy = "checkin";
+
     public static IServiceCollection AddPublicRateLimits(this IServiceCollection services, IConfiguration configuration)
     {
         var reads = configuration.GetValue("RateLimiting:PublicPermitPerMinute", 60);
         var writes = configuration.GetValue("RateLimiting:PublicWritePermitPerMinute", 10);
+        var checkIns = configuration.GetValue("RateLimiting:CheckInPermitPerMinute", 120);
         services.AddRateLimiter(o =>
         {
             o.AddPolicy(ReadPolicy, http => PerIp(http, ReadPolicy, reads));
             o.AddPolicy(WritePolicy, http => PerIp(http, WritePolicy, writes));
+            o.AddPolicy(CheckInPolicy, http => RateLimitPartition.GetFixedWindowLimiter(
+                $"{CheckInPolicy}:{http.User.FindFirst(Auth.AuthClaims.UserId)?.Value ?? http.Connection.RemoteIpAddress?.ToString()}",
+                _ => new FixedWindowRateLimiterOptions { PermitLimit = checkIns, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
         });
         return services;
     }

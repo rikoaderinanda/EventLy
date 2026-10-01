@@ -91,6 +91,59 @@ namespace EventLy.Api.Data.Migrations
                     b.ToTable("audit_logs", (string)null);
                 });
 
+            modelBuilder.Entity("EventLy.Api.Entities.CheckIn", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CheckedInAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("checked_in_at");
+
+                    b.Property<Guid>("CheckedInBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("checked_in_by");
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("event_id");
+
+                    b.Property<Guid>("InvitationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("invitation_id");
+
+                    b.Property<string>("Method")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("method");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_check_ins");
+
+                    b.HasIndex("InvitationId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_check_ins_invitation");
+
+                    b.HasIndex("CheckedInBy", "CheckedInAt")
+                        .IsDescending(false, true)
+                        .HasDatabaseName("ix_check_ins_checked_in_by_checked_in_at");
+
+                    b.HasIndex("EventId", "CheckedInAt")
+                        .IsDescending(false, true)
+                        .HasDatabaseName("ix_check_ins_event_id_checked_in_at");
+
+                    b.ToTable("check_ins", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_check_ins_method", "method IN ('Scan','Manual')");
+                        });
+                });
+
             modelBuilder.Entity("EventLy.Api.Entities.Event", b =>
                 {
                     b.Property<Guid>("Id")
@@ -428,7 +481,7 @@ namespace EventLy.Api.Data.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(120)
-                        .HasColumnType("character varying(120)")
+                        .HasColumnType("citext")
                         .HasColumnName("name");
 
                     b.Property<int>("NumberOfPeople")
@@ -444,6 +497,11 @@ namespace EventLy.Api.Data.Migrations
                         .HasColumnType("character varying(30)")
                         .HasColumnName("phone");
 
+                    b.Property<string>("PhoneKey")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("phone_key");
+
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -458,8 +516,14 @@ namespace EventLy.Api.Data.Migrations
                         .HasName("pk_guests");
 
                     b.HasIndex("EventId", "Name")
-                        .HasDatabaseName("ix_guests_event_id_name")
+                        .IsUnique()
+                        .HasDatabaseName("ux_guests_event_name")
                         .HasFilter("deleted_at IS NULL");
+
+                    b.HasIndex("EventId", "PhoneKey")
+                        .IsUnique()
+                        .HasDatabaseName("ux_guests_event_phone")
+                        .HasFilter("deleted_at IS NULL AND phone_key IS NOT NULL");
 
                     b.ToTable("guests", null, t =>
                         {
@@ -1035,6 +1099,30 @@ namespace EventLy.Api.Data.Migrations
                         .HasDatabaseName("ix_wishes_event_id_created_at");
 
                     b.ToTable("wishes", (string)null);
+                });
+
+            modelBuilder.Entity("EventLy.Api.Entities.CheckIn", b =>
+                {
+                    b.HasOne("EventLy.Api.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("CheckedInBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_check_ins_users_checked_in_by");
+
+                    b.HasOne("EventLy.Api.Entities.Event", null)
+                        .WithMany()
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_check_ins_events_event_id");
+
+                    b.HasOne("EventLy.Api.Entities.Invitation", null)
+                        .WithOne()
+                        .HasForeignKey("EventLy.Api.Entities.CheckIn", "InvitationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_check_ins_invitations_invitation_id");
                 });
 
             modelBuilder.Entity("EventLy.Api.Entities.Event", b =>

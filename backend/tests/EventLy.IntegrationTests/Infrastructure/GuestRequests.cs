@@ -6,9 +6,14 @@ namespace EventLy.IntegrationTests.Infrastructure;
 /// <summary>Builders and calls for guest and invitation tests.</summary>
 public static class GuestRequests
 {
-    public static CreateGuestRequest Individual(string name = "Sari", string? phone = "0812 3456 7890",
+    /// <summary>Stands for "a fresh WhatsApp number": numbers are unique per event (Q-55).</summary>
+    public const string AnyPhone = "any";
+
+    public static CreateGuestRequest Individual(string name = "Sari", string? phone = AnyPhone,
         IReadOnlyList<Guid>? sessionIds = null) =>
-        new(name, phone, null, GuestType.Individual, 1, sessionIds);
+        new(name, phone == AnyPhone ? UniquePhone() : phone, null, GuestType.Individual, 1, sessionIds);
+
+    public static string UniquePhone() => "0812" + Random.Shared.Next(10_000_000, 99_999_999);
 
     public static CreateGuestRequest Family(string name = "Keluarga Wijaya", int people = 4) =>
         new(name, null, null, GuestType.Group, people, null);

@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRef, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { apiFetch } from '@/api/client'
+import { apiFetch, apiFetchBlob } from '@/api/client'
 import { errorMessage } from '@/shared/lib/errors'
 import { guestKeys } from './api'
 
@@ -10,10 +10,6 @@ type ImportResult = {
   people: number
   errors: { line: number; name: string; messages: string[] }[]
 }
-
-/** A starting file: Indonesian headers, one individual and one group, semicolons for Excel (Indonesian settings). */
-const template =
-  'nama;telepon;email;jumlah\nBudi Santoso;0812 3456 7890;budi@contoh.id;1\nKeluarga Wijaya;;;4\n'
 
 function useImportGuests(eventId: string) {
   const queryClient = useQueryClient()
@@ -28,13 +24,26 @@ function useImportGuests(eventId: string) {
   })
 }
 
-/** CSV guest import (Q-12). All or nothing: a file with mistakes imports nothing and lists every line to fix. */
+/** Saves the sample workbook; the download needs the access token, so it goes through fetch. */
+async function downloadTemplate(eventId: string) {
+  const url = URL.createObjectURL(await apiFetchBlob(`/events/${eventId}/guests/import-template`))
+  const link = document.createElement('a')
+  link.href = url
+  link.download = 'template-tamu.xlsx'
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
+/**
+ * Excel guest import (Q-12). All or nothing: a file with mistakes imports nothing and lists every row
+ * to fix. Names and WhatsApp numbers must be unique in the event (Q-55).
+ */
 export function GuestImport({ eventId }: { eventId: string }) {
   const { t } = useTranslation()
   const upload = useImportGuests(eventId)
   const input = useRef<HTMLInputElement>(null)
   const [chosen, setChosen] = useState(false)
-  const templateUrl = `data:text/csv;charset=utf-8,${encodeURIComponent(template)}`
+  const [templateError, setTemplateError] = useState<unknown>(null)
   const result = upload.data
 
   function submit(e: FormEvent) {
@@ -48,18 +57,23 @@ export function GuestImport({ eventId }: { eventId: string }) {
       <summary className="cursor-pointer font-medium text-brand-900">{t('guests.importTitle')}</summary>
       <form onSubmit={submit} className="mt-3 space-y-3">
         <p className="text-stone-600">{t('guests.importHint')}</p>
-        <a href={templateUrl} download="template-tamu.csv" className="text-brand-700 underline">
+        <button
+          type="button"
+          onClick={() => void downloadTemplate(eventId).catch(setTemplateError)}
+          className="text-brand-700 underline"
+        >
           {t('guests.importTemplate')}
-        </a>
+        </button>
+        {templateError !== null && <p className="text-red-700">{errorMessage(t, templateError)}</p>}
         <div>
-          <label htmlFor="guest-csv" className="block font-medium text-stone-700">
+          <label htmlFor="guest-file" className="block font-medium text-stone-700">
             {t('guests.importFile')}
           </label>
           <input
-            id="guest-csv"
+            id="guest-file"
             ref={input}
             type="file"
-            accept=".csv,text/csv"
+            accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             onChange={(e) => setChosen((e.target.files?.length ?? 0) > 0)}
             className="mt-1 block"
           />

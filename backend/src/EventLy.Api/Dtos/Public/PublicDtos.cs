@@ -13,7 +13,8 @@ public sealed record PublicInvitationDto(
     PublicEventDto Event,
     PublicRsvpDto Rsvp,
     PublicFeaturesDto Features,
-    string? MyWish);
+    string? MyWish,
+    bool CheckedIn);
 
 /// <summary><see cref="Sessions"/> holds only the sessions this guest is invited to (Q-38), in order.</summary>
 public sealed record PublicEventDto(

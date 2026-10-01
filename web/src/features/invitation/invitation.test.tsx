@@ -36,6 +36,7 @@ const invitation: PublicInvitation = {
   rsvp: { status: 'Pending', respondedAt: null, isOpen: true, closesAt: '2099-12-12T04:00:00Z' },
   features: { countdown: true, wishes: true, wishesOpen: true, digitalGift: true, backgroundMusic: false },
   myWish: null,
+  checkedIn: false,
 }
 
 describe('guest invitation page', () => {

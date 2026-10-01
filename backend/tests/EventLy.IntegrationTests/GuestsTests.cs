@@ -283,4 +283,65 @@ public sealed class GuestsTests(PostgresFixture postgres) : IClassFixture<Postgr
             await Send(HttpMethod.Get, $"/api/v1/events/{ev.Id}/guests/{guest.Id}", _tenant.Owner));
         reloaded.SessionIds.ShouldBe([ev.Sessions.Single(s => s.IsCheckInSession).Id]);
     }
+
+    [Fact]
+    public async Task A_name_appears_once_per_event_whatever_the_case_or_spacing()
+    {
+        var ev = await Events.CreateAsync(_client, _tenant.Owner);
+        var other = await Events.CreateAsync(_client, _tenant.Owner);
+        await CreateAsync(_client, _tenant.Owner, ev.Id, Individual("Budi Santoso", phone: null));
+
+        var same = await AddAsync(_client, _tenant.Owner, ev.Id, Individual("  budi   SANTOSO ", phone: null));
+        var otherEvent = await AddAsync(_client, _tenant.Owner, other.Id, Individual("Budi Santoso", phone: null));
+
+        same.StatusCode.ShouldBe(HttpStatusCode.Conflict);
+        (await ProblemCodeAsync(same)).ShouldBe("guest.name_taken");
+        otherEvent.StatusCode.ShouldBe(HttpStatusCode.Created);
+    }
+
+    [Fact]
+    public async Task A_whatsapp_number_appears_once_per_event_in_any_format()
+    {
+        var ev = await Events.CreateAsync(_client, _tenant.Owner);
+        var sari = await CreateAsync(_client, _tenant.Owner, ev.Id, Individual("Sari", phone: "0812-3456-7890"));
+        await CreateAsync(_client, _tenant.Owner, ev.Id, Individual("Tanpa nomor 1", phone: null));
+
+        var same = await AddAsync(_client, _tenant.Owner, ev.Id, Individual("Budi", phone: "+62 812 3456 7890"));
+        var noPhone = await AddAsync(_client, _tenant.Owner, ev.Id, Individual("Tanpa nomor 2", phone: null));
+        var keepOwn = await Send(HttpMethod.Put, $"/api/v1/events/{ev.Id}/guests/{sari.Id}", _tenant.Owner,
+            new UpdateGuestRequest("Sari Lestari", "6281234567890", null, GuestType.Individual, 1, null));
+
+        same.StatusCode.ShouldBe(HttpStatusCode.Conflict);
+        (await ProblemCodeAsync(same)).ShouldBe("guest.phone_taken");
+        noPhone.StatusCode.ShouldBe(HttpStatusCode.Created);
+        keepOwn.StatusCode.ShouldBe(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task Renaming_to_another_guests_name_is_refused_and_a_deleted_guest_frees_it()
+    {
+        var ev = await Events.CreateAsync(_client, _tenant.Owner);
+        var budi = await CreateAsync(_client, _tenant.Owner, ev.Id, Individual("Budi", phone: null));
+        var sari = await CreateAsync(_client, _tenant.Owner, ev.Id, Individual("Sari", phone: null));
+        var rename = new UpdateGuestRequest("BUDI", null, null, GuestType.Individual, 1, null);
+
+        var taken = await Send(HttpMethod.Put, $"/api/v1/events/{ev.Id}/guests/{sari.Id}", _tenant.Owner, rename);
+        (await Send(HttpMethod.Delete, $"/api/v1/events/{ev.Id}/guests/{budi.Id}", _tenant.Owner)).EnsureSuccessStatusCode();
+        var free = await Send(HttpMethod.Put, $"/api/v1/events/{ev.Id}/guests/{sari.Id}", _tenant.Owner, rename);
+
+        taken.StatusCode.ShouldBe(HttpStatusCode.Conflict);
+        free.StatusCode.ShouldBe(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task The_same_guest_added_twice_at_once_is_stored_once()
+    {
+        var ev = await Events.CreateAsync(_client, _tenant.Owner);
+
+        var responses = await Task.WhenAll(Enumerable.Range(0, 5)
+            .Select(_ => AddAsync(_client, _tenant.Owner, ev.Id, Individual("Budi", phone: null))));
+
+        responses.Count(r => r.StatusCode == HttpStatusCode.Created).ShouldBe(1);
+        responses.Count(r => r.StatusCode == HttpStatusCode.Conflict).ShouldBe(4);
+    }
 }

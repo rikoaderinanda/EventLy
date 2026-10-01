@@ -6,6 +6,9 @@ namespace EventLy.Api.Data.Configurations;
 
 public sealed class GuestConfiguration : IEntityTypeConfiguration<Guest>
 {
+    public const string GuestNameIndex = "ux_guests_event_name";
+    public const string GuestPhoneIndex = "ux_guests_event_phone";
+
     public void Configure(EntityTypeBuilder<Guest> builder)
     {
         builder.ToTable("guests", t =>
@@ -15,8 +18,10 @@ public sealed class GuestConfiguration : IEntityTypeConfiguration<Guest>
         });
 
         builder.Property(g => g.Id).ValueGeneratedNever();
-        builder.Property(g => g.Name).HasMaxLength(120);
+        // citext: "Budi Santoso" and "budi santoso" are the same guest (decision Q-55).
+        builder.Property(g => g.Name).HasColumnType("citext").HasMaxLength(120);
         builder.Property(g => g.Phone).HasMaxLength(30);
+        builder.Property(g => g.PhoneKey).HasMaxLength(20);
         builder.Property(g => g.Email).HasColumnType("citext").HasMaxLength(254);
         builder.Property(g => g.Type).HasColumnName("guest_type").HasConversion<string>().HasMaxLength(20);
 
@@ -24,7 +29,12 @@ public sealed class GuestConfiguration : IEntityTypeConfiguration<Guest>
         builder.HasMany(g => g.Sessions).WithOne().HasForeignKey(s => s.GuestId).OnDelete(DeleteBehavior.Cascade);
         builder.HasOne(g => g.Invitation).WithOne().HasForeignKey<Invitation>(i => i.GuestId).OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasIndex(g => new { g.EventId, g.Name }).HasFilter("deleted_at IS NULL");
+        // One name and one WhatsApp number per event among guests still on the list (Q-55).
+        builder.HasIndex(g => new { g.EventId, g.Name }).IsUnique().HasFilter("deleted_at IS NULL")
+            .HasDatabaseName(GuestNameIndex);
+        builder.HasIndex(g => new { g.EventId, g.PhoneKey }).IsUnique()
+            .HasFilter("deleted_at IS NULL AND phone_key IS NOT NULL")
+            .HasDatabaseName(GuestPhoneIndex);
     }
 }
 

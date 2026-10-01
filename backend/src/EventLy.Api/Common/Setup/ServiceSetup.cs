@@ -1,3 +1,4 @@
+using EventLy.Api.Common.Localization;
 using System.Text.Json.Serialization;
 using EventLy.Api.Common.Errors;
 using EventLy.Api.Common.Validation;
@@ -24,6 +25,7 @@ public static class ServiceSetup
         services.AddOpenApi("v1");
         services.AddSingleton(TimeProvider.System);
         services.AddValidatorsFromAssemblyContaining<Program>(ServiceLifetime.Singleton);
+        Texts.ConfigureValidation();
 
         // Cloud Run (and the local reverse proxy) terminate TLS and forward the original scheme/client IP.
         services.Configure<ForwardedHeadersOptions>(o =>
@@ -55,6 +57,7 @@ public static class ServiceSetup
         services.AddScoped<InvitationService>();
         services.AddScoped<PublicInvitationService>();
         services.AddScoped<GuestResponseService>();
+        services.AddScoped<CheckInService>();
         services.AddPublicRateLimits(configuration);
         return services;
     }

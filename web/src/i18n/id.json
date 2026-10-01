@@ -203,8 +203,15 @@
     "gift_confirmation_limit": "Batas konfirmasi hadiah untuk undangan ini sudah tercapai.",
     "rate_limit_exceeded": "Terlalu banyak permintaan. Tunggu sebentar lalu coba lagi.",
     "invitation_event_not_paid": "Undangan baru bisa dikirim setelah acara dibayar.",
-    "guest_import_invalid_file": "File tidak bisa dibaca. Pastikan CSV dengan baris judul berisi kolom \"nama\".",
-    "user_admin_limit_exceeded": "Batas Admin paket sudah tercapai. Nonaktifkan Admin lain atau gunakan paket yang lebih besar."
+    "guest_import_invalid_file": "File tidak bisa dibaca. Gunakan file Excel (.xlsx) dengan baris pertama berisi judul kolom, termasuk kolom \"nama\".",
+    "user_admin_limit_exceeded": "Batas Admin paket sudah tercapai. Nonaktifkan Admin lain atau gunakan paket yang lebih besar.",
+    "checkin_invitation_not_found": "Undangan tidak ditemukan untuk acara ini. Tamu tanpa undangan tidak bisa check-in.",
+    "checkin_event_not_active": "Check-in hanya untuk acara yang sudah aktif (dibayar).",
+    "checkin_not_event_day": "Check-in hanya dibuka pada hari acara.",
+    "guest_checked_in": "Tamu yang sudah check-in tidak bisa dihapus.",
+    "invitation_checked_in": "Tamu sudah check-in; kode undangannya tidak bisa diganti lagi.",
+    "guest_name_taken": "Sudah ada tamu dengan nama ini di acara ini.",
+    "guest_phone_taken": "Nomor WhatsApp ini sudah dipakai tamu lain di acara ini."
   },
   "events": {
     "title": "Acara",
@@ -261,8 +268,7 @@
   },
   "staffArea": {
     "title": "Acara saya",
-    "empty": "Anda belum ditugaskan ke acara mana pun.",
-    "scannerSoon": "Scan QR tamu tersedia di tahap berikutnya."
+    "empty": "Anda belum ditugaskan ke acara mana pun."
   },
   "packages": {
     "sectionTitle": "Paket & pembayaran",
@@ -382,10 +388,10 @@
     "templateReset": "Kembalikan ke pesan bawaan",
     "sendAfterPayment": "Bisa dikirim setelah acara dibayar",
     "sendAfterPaymentHint": "Undangan sudah disiapkan. Link, QR dan Kirim via WhatsApp tersedia setelah acara dibayar.",
-    "importTitle": "Import tamu dari CSV",
-    "importHint": "Kolom: nama (wajib), telepon, email, jumlah (orang; lebih dari 1 = rombongan). Bisa dari Excel atau Google Sheets (simpan sebagai CSV). Tamu diundang ke semua sesi. Jika ada baris yang salah, tidak ada yang diimpor.",
-    "importTemplate": "Unduh contoh file",
-    "importFile": "File CSV",
+    "importTitle": "Import tamu dari Excel",
+    "importHint": "Kolom: nama (wajib), telepon, email, jumlah (orang; lebih dari 1 = rombongan). Nama dan nomor WhatsApp tidak boleh sama dengan tamu lain di acara ini. Tamu diundang ke semua sesi. Jika ada baris yang salah, tidak ada yang diimpor.",
+    "importTemplate": "Unduh contoh file Excel",
+    "importFile": "File Excel (.xlsx)",
     "importSubmit": "Import",
     "importDone": "{{n}} tamu ({{people}} orang) berhasil diimpor.",
     "importFailed": "Tidak ada yang diimpor. Perbaiki baris berikut lalu coba lagi:",
@@ -438,7 +444,8 @@
     "giftThanks": "Terima kasih! Konfirmasi Anda sudah kami sampaikan.",
     "privacy": "Data di halaman ini hanya untuk tamu undangan. Jangan bagikan link undangan Anda.",
     "notFoundTitle": "Undangan tidak ditemukan",
-    "notFoundBody": "Link undangan tidak berlaku atau acara belum dibuka. Hubungi pengundang Anda."
+    "notFoundBody": "Link undangan tidak berlaku atau acara belum dibuka. Hubungi pengundang Anda.",
+    "checkedIn": "Anda sudah check-in. Selamat menikmati acara!"
   },
   "responses": {
     "rsvpTitle": "Monitor RSVP",
@@ -481,5 +488,41 @@
     "confirmationsTitle": "Konfirmasi hadiah dari tamu",
     "noConfirmations": "Belum ada konfirmasi.",
     "noAmount": "tanpa jumlah"
+  },
+  "checkin": {
+    "open": "Buka scanner check-in",
+    "notActive": "Check-in tersedia setelah acara aktif.",
+    "camera": "Kamera scanner",
+    "cameraDenied": "Izin kamera ditolak. Izinkan kamera di pengaturan browser, atau gunakan tab \"Cari tamu\".",
+    "cameraUnavailable": "Kamera tidak tersedia di perangkat ini. Gunakan tab \"Cari tamu\".",
+    "counter": "{{arrived}} dari {{total}} orang hadir · {{invitations}}/{{allInvitations}} undangan",
+    "tab": {
+      "scan": "Scan QR",
+      "manual": "Cari tamu",
+      "mine": "Riwayat saya"
+    },
+    "codeLabel": "Ketik kode undangan",
+    "find": "Cari",
+    "searchLabel": "Cari nama tamu",
+    "checkedIn": "Sudah check-in",
+    "confirm": "Check-in",
+    "cancel": "Batal",
+    "next": "Tamu berikutnya",
+    "success": "✓ Check-in berhasil",
+    "already": "Sudah check-in pukul {{time}} oleh {{by}}",
+    "invalidTitle": "Undangan tidak valid",
+    "errorTitle": "Check-in tidak bisa dilakukan",
+    "warning": {
+      "not_invited_to_check_in_session": "Tamu ini tidak diundang ke sesi ini (hanya sesi lain).",
+      "rsvp_not_attending": "Tamu sebelumnya menjawab tidak hadir; sekarang dicatat hadir."
+    },
+    "noActivity": "Belum ada check-in oleh Anda.",
+    "logTitle": "Check-in",
+    "logEntry": "Tamu yang sudah datang dan siapa petugasnya.",
+    "noCheckIns": "Belum ada tamu yang check-in.",
+    "method": {
+      "Scan": "scan QR",
+      "Manual": "cari nama"
+    }
   }
 }

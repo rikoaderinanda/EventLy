@@ -192,7 +192,13 @@ export function GuestListPage() {
                 {guest.phone && ` · ${guest.phone}`}
               </p>
             </div>
-            <RsvpBadge status={guest.rsvp} />
+            {guest.checkedInAt ? (
+              <span className="rounded-full bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-700">
+                {t('checkin.checkedIn')}
+              </span>
+            ) : (
+              <RsvpBadge status={guest.rsvp} />
+            )}
             <InvitationActions invitation={guest.invitation} />
           </li>
         ))}
