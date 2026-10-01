@@ -1,4 +1,5 @@
 using EventLy.Api.Auth;
+using EventLy.Api.Storage;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,6 +22,8 @@ public sealed class ApiFactory(string connectionString, IReadOnlyDictionary<stri
     public const string MaintenanceKey = "integration-test-maintenance-key-0123456789";
 
     public FakeTimeProvider Time { get; } = new(DateTimeOffset.UtcNow);
+
+    public FakeFileStorage Storage { get; } = new();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -48,6 +51,8 @@ public sealed class ApiFactory(string connectionString, IReadOnlyDictionary<stri
             services.AddSingleton<TimeProvider>(Time);
             services.RemoveAll<IGoogleTokenValidator>();
             services.AddSingleton<IGoogleTokenValidator, FakeGoogleTokenValidator>();
+            services.RemoveAll<IFileStorage>();
+            services.AddSingleton<IFileStorage>(Storage);
         });
     }
 }

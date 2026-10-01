@@ -213,11 +213,13 @@ erDiagram
         uuid event_id FK
         uuid invitation_id FK
         uuid uploaded_by FK "nullable - null when uploaded by the guest"
-        text uploaded_by_type "+ Staff|Owner|Guest"
-        text storage_url "object key, not public URL"
+        text source "+ Staff|Owner|Guest"
+        text object_key "object key, not public URL"
         text thumbnail_key "+"
         text content_type "+"
-        bigint size_bytes "+"
+        bigint size_bytes "+ photo + thumbnail"
+        int width "+"
+        int height "+"
         timestamptz created_at
     }
     AUDIT_LOGS {

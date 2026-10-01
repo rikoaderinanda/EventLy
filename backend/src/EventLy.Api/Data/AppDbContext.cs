@@ -47,6 +47,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options, ICurren
 
     public DbSet<CheckIn> CheckIns => Set<CheckIn>();
 
+    public DbSet<Photo> Photos => Set<Photo>();
+
     public DbSet<Wish> Wishes => Set<Wish>();
 
     public DbSet<GiftAccount> GiftAccounts => Set<GiftAccount>();

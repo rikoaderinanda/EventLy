@@ -52,7 +52,7 @@ The guest opens their invitation link `/i/{code}`. There is no account: **the 12
   - Over the limit, the API answers 429 with `Retry-After`.
 - **Referrer:** `Referrer-Policy: no-referrer` is set on `/i/*` and `/api/v1/public/*`, and the guest layout sets the same meta tag. The code then never reaches Google Maps or other sites through the `Referer` header. It isn't set app-wide, because Google Sign-In needs the referrer.
 
-**Moved to Phase 9 (needs object storage):** the background music upload and player (Q-43), the QRIS image (Q-41), and the cover photo. The page already returns `features.backgroundMusic = false`, `qrisUrl = null` and `coverUrl = null`, and the "Buka Undangan" cover is in place to start the music on that tap.
+**Built in Phase 9:** the background music upload and player (Q-43), the QRIS image (Q-41) and the cover photo. See [photos.md](photos.md).
 
 ## Endpoints
 

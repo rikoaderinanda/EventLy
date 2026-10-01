@@ -33,6 +33,24 @@ services:
       timeout: 3s
       retries: 20
 
+  # S3-compatible object storage for photos and invitation media (production: Cloudflare R2).
+  # SeaweedFS (Apache-2.0): MinIO no longer publishes free images. Local-only credentials below.
+  storage:
+    image: chrislusf/seaweedfs:4.48
+    command: ["server", "-dir=/data", "-s3", "-s3.port=8333", "-volume.max=0", "-master.volumeSizeLimitMB=1024"]
+    environment:
+      AWS_ACCESS_KEY_ID: ${STORAGE_ACCESS_KEY:-evently}
+      AWS_SECRET_ACCESS_KEY: ${STORAGE_SECRET_KEY:-evently-dev-only}
+    ports:
+      - "${STORAGE_PORT:-8333}:8333"
+    volumes:
+      - storagedata:/data
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:8333/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
   # Applies EF Core migrations once, then exits. The app starts only after it succeeds.
   migrate:
     build: .
@@ -41,8 +59,14 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__Database: Host=postgres;Port=5432;Database=${POSTGRES_DB:-evently};Username=${POSTGRES_USER:-evently};Password=${POSTGRES_PASSWORD:-evently_dev}
+      # The migrate command also creates the storage bucket.
+      Storage__ServiceUrl: http://storage:8333
+      Storage__AccessKey: ${STORAGE_ACCESS_KEY:-evently}
+      Storage__SecretKey: ${STORAGE_SECRET_KEY:-evently-dev-only}
     depends_on:
       postgres:
+        condition: service_healthy
+      storage:
         condition: service_healthy
 
   app:
@@ -60,12 +84,20 @@ services:
       Auth__RootEmail: ${AUTH_ROOT_EMAIL:-root@evently.test}
       # Origin in invitation links and QR codes. Empty = the browser's origin (fine on this PC only).
       App__PublicBaseUrl: ${APP_PUBLIC_BASE_URL:-}
+      Storage__ServiceUrl: http://storage:8333
+      Storage__AccessKey: ${STORAGE_ACCESS_KEY:-evently}
+      Storage__SecretKey: ${STORAGE_SECRET_KEY:-evently-dev-only}
+      # Signed photo URLs point here; the browser must be able to reach it (a tunnel URL for phones).
+      Storage__PublicUrl: ${STORAGE_PUBLIC_URL:-http://127.0.0.1:8333}
     depends_on:
       migrate:
         condition: service_completed_successfully
       redis:
         condition: service_healthy
+      storage:
+        condition: service_healthy
 
 volumes:
   pgdata:
   redisdata:
+  storagedata:

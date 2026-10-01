@@ -1,7 +1,8 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router'
 import { ApiError } from '@/api/problem'
+import { env } from '@/config/env'
 import { formatLocal, timeZoneLabel } from '@/features/events/format'
 import { errorMessage } from '@/shared/lib/errors'
 import {
@@ -14,6 +15,7 @@ import {
   useSetWish,
   type PublicInvitation,
 } from './api'
+import { GuestGallery } from './GuestGallery'
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -227,8 +229,8 @@ function Gifts({ code }: { code: string }) {
   const [note, setNote] = useState('')
 
   if (!gifts.data) return null
-  const { accounts, address } = gifts.data
-  if (accounts.length === 0 && !address)
+  const { accounts, address, qrisUrl } = gifts.data
+  if (accounts.length === 0 && !address && !qrisUrl)
     return <p className="text-center text-sm text-stone-600">{t('invitation.noGifts')}</p>
 
   function submit(e: FormEvent) {
@@ -249,6 +251,12 @@ function Gifts({ code }: { code: string }) {
           </li>
         ))}
       </ul>
+      {qrisUrl && (
+        <figure className="text-center">
+          <img src={qrisUrl} alt="QRIS" className="mx-auto max-h-80 rounded-lg border border-stone-200" />
+          <figcaption className="mt-1 text-xs text-stone-500">{t('invitation.qrisHint')}</figcaption>
+        </figure>
+      )}
       {address && (
         <div className="text-center">
           <p className="text-sm font-semibold text-brand-900">{t('invitation.giftAddress')}</p>
@@ -311,7 +319,16 @@ function Gifts({ code }: { code: string }) {
 function Cover({ invitation, onOpen }: { invitation: PublicInvitation; onOpen: () => void }) {
   const { t } = useTranslation()
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center gap-6 bg-brand-900 px-6 text-center text-brand-50">
+    <div
+      className="flex min-h-dvh flex-col items-center justify-center gap-6 bg-brand-900 bg-cover bg-center px-6 text-center text-brand-50"
+      style={
+        invitation.event.coverUrl
+          ? {
+              backgroundImage: `linear-gradient(rgb(0 0 0 / 0.55), rgb(0 0 0 / 0.55)), url(${JSON.stringify(invitation.event.coverUrl)})`,
+            }
+          : undefined
+      }
+    >
       <p className="text-sm tracking-widest uppercase opacity-80">
         {t(`events.category.${invitation.event.category}`)}
       </p>
@@ -340,6 +357,8 @@ export function InvitationPage() {
   const { code = '' } = useParams()
   const invitation = usePublicInvitation(code)
   const [opened, setOpened] = useState(false)
+  const music = useRef<HTMLAudioElement>(null)
+  const [muted, setMuted] = useState(false)
 
   if (invitation.isPending) return <p className="py-16 text-center text-stone-500">{t('common.loading')}</p>
   if (invitation.isError) {
@@ -357,48 +376,88 @@ export function InvitationPage() {
   }
 
   const data = invitation.data
-  if (!opened) return <Cover invitation={data} onOpen={() => setOpened(true)} />
+  const musicSrc = data.features.backgroundMusic
+    ? `${env.apiBaseUrl}/public/invitations/${encodeURIComponent(code)}/music`
+    : null
+  // Browsers block autoplay with sound: the tap on "Buka Undangan" starts the music (Q-43).
+  const open = () => {
+    setOpened(true)
+    void music.current?.play().catch(() => undefined)
+  }
+
+  // One audio element for the cover and the page, so the music keeps playing when the cover closes.
+  const audio = musicSrc && <audio ref={music} src={musicSrc} loop preload="auto" muted={muted} />
+  if (!opened) {
+    return (
+      <>
+        {audio}
+        <Cover invitation={data} onOpen={open} />
+      </>
+    )
+  }
 
   return (
-    <main className="mx-auto max-w-lg space-y-5 px-4 py-8">
-      <header className="space-y-2 text-center">
-        <p className="text-sm tracking-widest text-brand-700 uppercase">{t('invitation.weInvite')}</p>
-        <h1 className="text-3xl font-semibold text-brand-900">{data.event.name}</h1>
-        {data.event.description && (
-          <p className="whitespace-pre-line text-stone-700">{data.event.description}</p>
+    <>
+      {audio}
+      <main className="mx-auto max-w-lg space-y-5 px-4 py-8">
+        {musicSrc && (
+          <button
+            type="button"
+            onClick={() => setMuted(!muted)}
+            aria-label={muted ? t('invitation.unmute') : t('invitation.mute')}
+            className="fixed right-4 bottom-4 z-40 size-12 rounded-full bg-brand-700 text-xl text-white shadow-lg"
+          >
+            {muted ? '🔇' : '🎵'}
+          </button>
         )}
-      </header>
+        {data.event.coverUrl && (
+          <img src={data.event.coverUrl} alt="" className="aspect-video w-full rounded-2xl object-cover" />
+        )}
+        <header className="space-y-2 text-center">
+          <p className="text-sm tracking-widest text-brand-700 uppercase">{t('invitation.weInvite')}</p>
+          <h1 className="text-3xl font-semibold text-brand-900">{data.event.name}</h1>
+          {data.event.description && (
+            <p className="whitespace-pre-line text-stone-700">{data.event.description}</p>
+          )}
+        </header>
 
-      {data.features.countdown && <Countdown invitation={data} />}
+        {data.features.countdown && <Countdown invitation={data} />}
 
-      <Section title={t('invitation.when')}>
-        <Sessions invitation={data} />
-      </Section>
-
-      <Section title={t('invitation.rsvpTitle')}>
-        <Rsvp code={code} invitation={data} />
-      </Section>
-
-      <Section title={t('invitation.qrTitle')}>
-        <img src={publicQrUrl(code)} alt={t('invitation.qrAlt')} className="mx-auto size-56" />
-        <p className="text-center text-sm text-stone-600">
-          {data.checkedIn ? t('invitation.checkedIn') : t('invitation.qrHint')}
-        </p>
-      </Section>
-
-      {data.features.wishes && (
-        <Section title={t('invitation.wishesTitle')}>
-          <Wishes code={code} invitation={data} />
+        <Section title={t('invitation.when')}>
+          <Sessions invitation={data} />
         </Section>
-      )}
 
-      {data.features.digitalGift && (
-        <Section title={t('invitation.giftsTitle')}>
-          <Gifts code={code} />
+        <Section title={t('invitation.rsvpTitle')}>
+          <Rsvp code={code} invitation={data} />
         </Section>
-      )}
 
-      <p className="text-center text-xs text-stone-500">{t('invitation.privacy')}</p>
-    </main>
+        <Section title={t('invitation.qrTitle')}>
+          <img src={publicQrUrl(code)} alt={t('invitation.qrAlt')} className="mx-auto size-56" />
+          <p className="text-center text-sm text-stone-600">
+            {data.checkedIn ? t('invitation.checkedIn') : t('invitation.qrHint')}
+          </p>
+        </Section>
+
+        {data.checkedIn && (
+          <Section title={t('photos.guestGalleryTitle')}>
+            <GuestGallery code={code} />
+          </Section>
+        )}
+
+        {data.features.wishes && (
+          <Section title={t('invitation.wishesTitle')}>
+            <Wishes code={code} invitation={data} />
+          </Section>
+        )}
+
+        {data.features.digitalGift && (
+          <Section title={t('invitation.giftsTitle')}>
+            <Gifts code={code} />
+          </Section>
+        )}
+
+        <p className="text-center text-xs text-stone-500">{t('invitation.privacy')}</p>
+      </main>
+    </>
   )
 }

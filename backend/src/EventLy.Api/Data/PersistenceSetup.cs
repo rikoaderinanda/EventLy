@@ -75,6 +75,7 @@ public static class PersistenceSetup
         logger.LogInformation("Applying {Count} pending migration(s): {Migrations}", pending.Count, pending);
         await db.Database.MigrateAsync();
         var seeded = await PackageSeed.SeedAsync(db);
+        await scope.ServiceProvider.GetRequiredService<Storage.IFileStorage>().EnsureReadyAsync(CancellationToken.None);
         logger.LogInformation("Database is up to date ({Count} package(s) seeded)", seeded);
     }
 }

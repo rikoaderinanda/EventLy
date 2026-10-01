@@ -42,7 +42,7 @@ To change ports or the local database password, edit `.env`.
 Start only the dependencies with Docker:
 
 ```bash
-docker compose up -d postgres redis
+docker compose up -d postgres redis storage
 ```
 
 Then, in two terminals:
@@ -79,6 +79,9 @@ All settings can be overridden with environment variables. Use `__` as the secti
 | Terms version | `Legal__TermsVersion` | `2026-09-29` | Bump it when the Terms/Privacy text changes; Owners then accept the new version |
 | Payment gateway | `Payments__Provider` | `Fake` | `Fake` only starts in Development/Testing. The Xendit adapter comes later |
 | Checkout lifetime | `Payments__CheckoutMinutes` | `1440` | Minutes before an unpaid checkout expires |
+| Storage endpoint | `Storage__ServiceUrl` | – (required) | S3 API the server uses: `http://storage:8333` in compose, the R2 endpoint in production |
+| Storage URL for browsers | `Storage__PublicUrl` | `Storage__ServiceUrl` | Put into signed photo/media URLs: `http://127.0.0.1:8333` locally (`STORAGE_PUBLIC_URL` in `.env`) |
+| Storage bucket and keys | `Storage__Bucket` · `Storage__AccessKey` · `Storage__SecretKey` · `Storage__Region` | `evently` · – · – · `us-east-1` | **Secrets.** Local compose uses dev-only keys; R2 uses region `auto` |
 | Public app URL | `App__PublicBaseUrl` | – (request origin) | Origin used in invitation links and QR codes, for example `https://evently.id`. Set it in production |
 | Maintenance key | `Maintenance__Key` | – (off) | **Secret.** Scheduled jobs send it in `X-Maintenance-Key`. Development: `dev-only-maintenance-key-0123456789abcdef` |
 
@@ -126,6 +129,10 @@ Without Docker, the database integration tests are reported as **skipped**, not 
 | `/i/{code}` | The guest invitation page in the PWA |
 | `GET …/check-ins/lookup` · `/search` · `/summary`, `POST /api/v1/events/{id}/check-ins`, `GET …/check-ins`, `GET /api/v1/staff/me/activity` | Check-in (Owner, Staff; log for Owner/Admin) |
 | `/staff/events/{id}` | The check-in scanner in the PWA (camera needs HTTPS or localhost) |
+| `POST /api/v1/invitations/{id}/photos`, `GET /api/v1/events/{id}/gallery` · `/gallery/zip`, `DELETE /api/v1/photos/{id}` | Photos and the organizer gallery |
+| `GET`/`PUT`/`DELETE /api/v1/events/{id}/media/{cover\|qris\|music}` | Invitation media |
+| `GET` · `POST /api/v1/public/invitations/{code}/gallery` · `/photos`, `GET …/music` | Guest gallery, guest camera, music |
+| http://127.0.0.1:8333 | Local object storage (SeaweedFS, S3 API) |
 | `POST /api/v1/maintenance/payments/reconcile` | Payment reconciliation (header `X-Maintenance-Key`) |
 | `/legal/terms`, `/legal/privacy` | Terms & Privacy Policy pages |
 | any other path | The PWA (`index.html`); unknown `/api/...` paths return a JSON 404 |
@@ -176,5 +183,6 @@ To use real Google sign-in:
 | `docker` is not recognized (Windows) | Add `C:\Program Files\Docker\Docker\resources\bin` to your user `Path`, then restart the terminal (and VS Code) |
 | http://localhost:8080 doesn't answer but http://127.0.0.1:8080 does | Another program (often one inside WSL) listens on `::1:8080`. Use `127.0.0.1`, stop that program, or set `APP_PORT` |
 | The invitation link in WhatsApp can't be tapped | WhatsApp only links domain names, not `127.0.0.1` or `localhost`, and a phone can't reach your PC's localhost anyway. To test from a phone, expose the app with a tunnel (for example `cloudflared tunnel --url http://localhost:8080`), set `APP_PUBLIC_BASE_URL` (compose) or `App__PublicBaseUrl` to the tunnel's `https://` address, and restart. In production the real domain works as is |
+| Photos don't load (broken images) | The browser loads them from `STORAGE_PUBLIC_URL` (default `http://127.0.0.1:8333`, not `localhost`: WSL can hold `localhost` (`::1`) on that port and reset the connection, see above). From a phone expose port 8333 with a tunnel too and set `STORAGE_PUBLIC_URL` to it |
 | `Payments:Provider 'Fake' is only allowed in Development and Testing` | Expected outside Development: the simulated gateway must not run in production |
 | Google button: "origin is not allowed" | Add the exact origin (scheme + host + port) to *Authorized JavaScript origins* in Google Cloud Console |

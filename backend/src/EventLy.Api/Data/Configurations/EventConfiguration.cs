@@ -26,6 +26,10 @@ public sealed class EventConfiguration : IEntityTypeConfiguration<Event>
         builder.Property(e => e.CoverImageKey).HasMaxLength(512);
         builder.Property(e => e.WhatsappTemplate).HasMaxLength(1000);
         builder.Property(e => e.GiftAddress).HasMaxLength(500);
+        builder.Property(e => e.GiftQrisKey).HasMaxLength(512);
+        builder.Property(e => e.MusicKey).HasMaxLength(512);
+        builder.Property(e => e.MusicContentType).HasMaxLength(40);
+        builder.Property(e => e.GuestUploadEnabled).HasDefaultValue(true);
         builder.Property(e => e.Version).IsRowVersion();
         builder.Ignore(e => e.CheckInSession);
         builder.Ignore(e => e.EndsAt);

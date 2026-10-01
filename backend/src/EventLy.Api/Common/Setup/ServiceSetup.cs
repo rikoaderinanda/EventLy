@@ -58,6 +58,8 @@ public static class ServiceSetup
         services.AddScoped<PublicInvitationService>();
         services.AddScoped<GuestResponseService>();
         services.AddScoped<CheckInService>();
+        services.AddScoped<PhotoService>();
+        services.AddScoped<EventMediaService>();
         services.AddPublicRateLimits(configuration);
         return services;
     }

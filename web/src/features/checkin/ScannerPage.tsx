@@ -13,6 +13,7 @@ import {
   type CheckInResult,
   type CheckInTarget,
 } from './api'
+import { StaffPhotoButton } from '@/features/photos/StaffPhotoButton'
 import { QrScanner } from './QrScanner'
 
 type Sheet =
@@ -98,6 +99,7 @@ function ResultSheet({
           {t('checkin.confirm')}
         </button>
       )}
+      {(done || repeat) && <StaffPhotoButton key={result.invitationId} invitationId={result.invitationId} />}
       {(done || repeat) && <NextButton onNext={onNext} />}
       {sheet.kind === 'found' && !repeat && (
         <button type="button" onClick={onNext} className="text-sm text-stone-600 underline">

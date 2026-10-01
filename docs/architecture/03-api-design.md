@@ -86,7 +86,7 @@ The route is singular because a user belongs to exactly one organization.
 | GET | `/events/{id}/wishes` | O A | All wishes, including hidden ones |
 | POST | `/events/{id}/wishes/{wishId}/hide` · `/unhide` · DELETE `/events/{id}/wishes/{wishId}` | O A | Moderation |
 | GET / PUT | `/events/{id}/gifts` | O A | `{accounts, address}`: list / replace the bank and e-wallet accounts (max 5) and the gift address |
-| PUT | `/events/{id}/gift-qris` · `/events/{id}/music` | O A | Upload the QRIS image / music file (`multipart/form-data`; music MP3/M4A max 10 MB). **Phase 9** (needs storage) |
+| PUT · DELETE | `/events/{id}/media/qris` · `/events/{id}/media/music` · `/events/{id}/media/cover` | O A | Upload/remove the QRIS image, music file (MP3/M4A max 10 MB) or cover photo (`multipart/form-data`) |
 | GET | `/events/{id}/gift-confirmations` | O A | Gift confirmations from guests (Q-41) |
 | GET | `/events/{id}/staff` | O | Staff assigned to the event |
 | PUT | `/events/{id}/staff` | O | Replace assignments `{userIds: [...]}` (checked against the package's `maxStaff`) |
@@ -180,14 +180,14 @@ Anonymous, keyed by the 128-bit code. Rate-limited per IP (reads 60/min, writes 
 | GET | `/public/invitations/{code}` | `{guestName, numberOfPeople, type, event: {name, category, description, coverUrl, sessions: [{name, startsAt, endsAt, venue, mapsUrl}]}, rsvp: {status, respondedAt}, checkedIn: bool}`. Sets `opened_at` on first view |
 | PUT | `/public/invitations/{code}/rsvp` | `{status: "Attending" \| "NotAttending"}`. Allowed until the event is over (last session ends, Q-47), then 409 `rsvp.closed` |
 | GET | `/public/invitations/{code}/qr` | QR image, so the guest can show it at the entrance |
-| GET | `/public/invitations/{code}/gallery` | **403 `gallery.locked` until checked in**. Then `[{photoId, thumbnailUrl, createdAt}]` (pre-signed URLs, 10 min) |
+| GET | `/public/invitations/{code}/gallery` | **403 `gallery.locked` until checked in**. Then `{photos: [{id, thumbnailUrl, url, isMine, createdAt}], camera: {available, taken, limit, closesAt}}` (pre-signed URLs, 10 min) |
 | POST | `/public/invitations/{code}/photos` | **Guest camera capture (spec change 2026-09-29).** Receives the JPEG taken with the in-app camera (the UI has no file picker). Only after check-in and within the time window, only if the package and event allow it, up to `maxGuestPhotosPerInvitation`. Same file checks as staff uploads. Rate-limited |
 | DELETE | `/public/invitations/{code}/photos/{photoId}` | Guest deletes a photo **they took** (not staff photos) |
 | GET | `/public/invitations/{code}/wishes?page=` | Wishes of this event (visible ones only): `[{guestName, message, createdAt}]` |
 | PUT | `/public/invitations/{code}/wish` | Create or edit this invitation's wish `{message}` (max 500, rate-limited) |
-| GET | `/public/invitations/{code}/gifts` | Bank/e-wallet accounts, gift address, QRIS image URL (null until Phase 9) |
+| GET | `/public/invitations/{code}/gifts` | Bank/e-wallet accounts, gift address, QRIS image URL (signed) |
 | POST | `/public/invitations/{code}/gift-confirmations` | Optional "konfirmasi hadiah" `{senderName, amount?, note?}` (Q-41) |
-| GET | `/public/invitations/{code}/music` | 302 to a short-lived URL of the event's music file **(Phase 9)** |
+| GET | `/public/invitations/{code}/music` | 302 to a short-lived URL of the event's music file |
 | GET | `/public/invitations/{code}/gallery/{photoId}/download` | 302 to a pre-signed URL with `Content-Disposition: attachment` |
 
 ### 2.10 Check-in — Staff
@@ -208,16 +208,20 @@ Details: [docs/modules/checkin.md](../modules/checkin.md).
 
 | Method | Path | Roles | Description |
 |---|---|---|---|
-| POST | `/invitations/{invitationId}/photos` | S O | `multipart/form-data` field `file` (1–10 files per request). Requires a checked-in invitation. The photo step is optional and can be done later. Checked against `maxPhotos` |
+| POST | `/invitations/{invitationId}/photos` | S O | `multipart/form-data` field `files` (1–10 per request). Requires an Active event and a checked-in invitation (409). The photo step is optional and can be done later. Checked against `maxPhotos` (422) |
 | DELETE | `/photos/{photoId}` | O A | Hard delete (row and objects). Audited |
+| PUT | `/events/{eventId}/guest-camera` | O A | `{enabled}`: turn the guest camera off/on for the event (Q-25) |
+| GET · PUT · DELETE | `/events/{eventId}/media` · `/media/{cover\|qris\|music}` | O A | Invitation media (cover photo, QRIS image, music) |
 
 ### 2.12 Gallery — organizer
 
 | Method | Path | Roles | Description |
 |---|---|---|---|
-| GET | `/events/{eventId}/gallery?invitationId=&page=` | O A | All photos grouped by invitation, with pre-signed thumbnails |
+| GET | `/events/{eventId}/gallery?invitationId=` | O A | All photos with guest names and signed URLs (10 min), plus the count against `maxPhotos`, storage used, `zipAllowed` and the guest camera switches |
 | GET | `/photos/{photoId}/download` | O A | 302 to a pre-signed original |
-| GET | `/events/{eventId}/gallery/zip?invitationId=` | O A | Streams a ZIP of the gallery (or of one invitation) directly in the response |
+| GET | `/events/{eventId}/gallery/zip?invitationId=` | O A | Streams a ZIP of the gallery (or of one invitation) directly in the response. 403 `photo.zip_not_in_package` without `zipDownload` |
+
+Details: [docs/modules/photos.md](../modules/photos.md).
 
 ### 2.13 Dashboard and reporting
 

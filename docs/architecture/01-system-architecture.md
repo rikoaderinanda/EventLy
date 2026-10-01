@@ -22,7 +22,7 @@ This document describes how the system is built: its parts, how requests move th
 | Pay-per-event | Event lifecycle is gated by payment status. The payment provider is behind a port (interface) |
 | Busy check-in at the venue | The check-in endpoint is fast and idempotent. Staff UI is mobile-first and camera-driven |
 | Photos are private | Private bucket, short-lived pre-signed URLs issued only after authorization |
-| Runnable locally with Docker | Every dependency (PostgreSQL, Redis, MinIO) runs in `docker compose` |
+| Runnable locally with Docker | Every dependency (PostgreSQL, Redis, S3-compatible storage) runs in `docker compose` |
 | PWA now, TWA later | One React codebase, installable, HTTPS-ready, with no browser-only features that TWA would break |
 
 ## 3. High-level view (C4 — containers)
@@ -47,7 +47,7 @@ flowchart LR
     subgraph Data
         PG[(PostgreSQL 17<br/>Neon)]
         RD[(Redis 7 - optional<br/>local + stage 2 only)]
-        OS[(Object storage<br/>Cloudflare R2 / MinIO local)]
+        OS[(Object storage<br/>Cloudflare R2 / SeaweedFS local)]
     end
 
     PGW[[Payment gateway<br/>provider TBD]]
@@ -122,7 +122,7 @@ backend/
         Seed/                          package catalog
       Auth/                            JwtTokenService, CurrentUser, Permissions, policy registration
       Integrations/                    external systems only (reason: swappable providers + fakes for tests)
-        Storage/                       IFileStorage, S3FileStorage (S3 + MinIO), AzureBlobFileStorage
+        Storage/                       IFileStorage, S3FileStorage (R2, SeaweedFS), ImageProcessor, AudioCheck
         Payments/                      IPaymentGateway, <Provider>PaymentGateway, FakePaymentGateway
       Common/
         Errors/                        AppException types (NotFound, Conflict, Forbidden, QuotaExceeded)
@@ -132,7 +132,7 @@ backend/
       Maintenance/                     retention cleanup + payment reconciliation, run through a protected endpoint called by Cloud Scheduler
   tests/
     EventLy.UnitTests/                 pure logic: validators, token/code generation, entity state changes, permission map
-    EventLy.IntegrationTests/          services + controllers against real PostgreSQL/Redis/MinIO (WebApplicationFactory + Testcontainers)
+    EventLy.IntegrationTests/          services + controllers against real PostgreSQL (WebApplicationFactory + Testcontainers); storage in memory, plus the S3 adapter against SeaweedFS
 ```
 
 Why one project and not several: nothing in the specification needs to be deployed or versioned on its own. Folders give the same separation with far less ceremony. If a second deployable (for example a separate worker) is ever needed, `Data/` and `Entities/` can be moved into a class library at that point.
@@ -186,7 +186,7 @@ sequenceDiagram
 
 | Abstraction | Technical reason |
 |---|---|
-| `IFileStorage` | The specification requires S3, Azure Blob **or** MinIO. One interface with two implementations is chosen by configuration |
+| `IFileStorage` | The specification requires S3, Azure Blob **or** MinIO. One S3 implementation covers Cloudflare R2 (production) and SeaweedFS (local); tests use an in-memory store. An Azure adapter can be added behind the same interface if ever needed (decided in Phase 9) |
 | `IPaymentGateway` | The provider is still undecided (Q-1b). A `FakePaymentGateway` is needed for local development and tests, since real payments can't run in CI |
 | `ICurrentUser` | One place that reads `userId` / `org_id` / `role` from the JWT. The `DbContext` tenant filter depends on it, and tests can set it |
 | `TimeProvider` (built into .NET) | Tests need a controllable clock for token expiry, RSVP cut-off and retention. No custom interface is needed |
@@ -234,7 +234,9 @@ stateDiagram-v2
 | Auth | `Microsoft.AspNetCore.Authentication.JwtBearer` + policy-based authorization | |
 | External login | `Google.Apis.Auth` (Google ID token validation) | Every role signs in with Google, so no password hashing library is needed |
 | Cache / rate limit | StackExchange.Redis. ASP.NET Core `RateLimiter` | |
-| Object storage | AWSSDK.S3 (S3 + MinIO), Azure.Storage.Blobs | Behind `IFileStorage` |
+| Object storage | AWSSDK.S3 (Apache-2.0) for R2 and SeaweedFS | Behind `IFileStorage` |
+| Images | SkiaSharp (MIT): decode, orient, resize, re-encode (drops EXIF) | ImageSharp avoided: Six Labors Split License |
+| Spreadsheets | MiniExcel (Apache-2.0) | ClosedXML avoided: depends on SixLabors.Fonts |
 | QR | QRCoder (MIT) | |
 | Excel | ClosedXML (MIT) | |
 | Logging | Serilog → console (JSON) + Seq/OTLP | |
@@ -473,7 +475,7 @@ docker compose up --build            (compose.yaml)
 
 - **One image** (root `Dockerfile`) holds the API and the built PWA, so local and Cloud Run run the same thing.
 - **Migrations** use the `migrate` argument of the same image, not a separate EF migration bundle. This is one less build artefact, and the same command becomes the Cloud Run migration job. The API never migrates when it starts.
-- **Object storage for local development** is added in Phase 9. MinIO's community Docker images changed status in 2025, so the local S3-compatible emulator is chosen then. Production uses Cloudflare R2.
+- **Object storage for local development** is **SeaweedFS** (Apache-2.0, S3 API) since Phase 9: MinIO no longer publishes free Docker images. Production uses Cloudflare R2. Details: [docs/modules/photos.md](../modules/photos.md).
 
 ### Production — free-tier setup (stage 1, decided 2026-09-29)
 

@@ -3,6 +3,7 @@ using EventLy.Api.Data;
 using EventLy.Api.Dtos.Public;
 using EventLy.Api.Entities;
 using Microsoft.EntityFrameworkCore;
+using EventLy.Api.Storage;
 using Npgsql;
 
 namespace EventLy.Api.Services;
@@ -12,11 +13,12 @@ namespace EventLy.Api.Services;
 /// guest, and an event that isn't Active or Completed all answer the same 404, so nothing is revealed.
 /// Everything returned belongs to this invitation or is the event's public content.
 /// </summary>
-public sealed class PublicInvitationService(AppDbContext db, InvitationLinks links, TimeProvider timeProvider)
+public sealed class PublicInvitationService(AppDbContext db, InvitationLinks links, TimeProvider timeProvider, IFileStorage storage)
 {
     public const int WishPageSize = 20;
 
-    private sealed record Context(Invitation Invitation, Guest Guest, Event Event)
+    /// <summary>The invitation behind a code, with its guest and event, acting as their organization.</summary>
+    public sealed record Context(Invitation Invitation, Guest Guest, Event Event)
     {
         public PackageFeatures Features => Event.PackageSnapshot?.Features ?? new PackageFeatures();
     }
@@ -132,7 +134,7 @@ public sealed class PublicInvitationService(AppDbContext db, InvitationLinks lin
             .OrderBy(a => a.SortOrder)
             .Select(a => new GiftAccountDto(a.Kind, a.Provider, a.AccountNumber, a.AccountHolder))
             .ToListAsync(ct);
-        return new PublicGiftsDto(accounts, context.Event.GiftAddress, null);
+        return new PublicGiftsDto(accounts, context.Event.GiftAddress, Url(context.Event.GiftQrisKey));
     }
 
     /// <summary>"Konfirmasi hadiah" (Q-41): only Owner/Admin see it. At most a few per invitation.</summary>
@@ -162,6 +164,19 @@ public sealed class PublicInvitationService(AppDbContext db, InvitationLinks lin
     }
 
     /// <summary>Open while the event is Active and its last session hasn't ended (Q-47).</summary>
+    /// <summary>The event's background music, when the package allows it and the Owner uploaded one.</summary>
+    public async Task<string> MusicUrlAsync(string code, CancellationToken ct)
+    {
+        var context = await ResolveAsync(code, ct);
+        if (!context.Features.BackgroundMusicEnabled || context.Event.MusicKey is null)
+        {
+            throw FeatureOff();
+        }
+        return storage.GetReadUrl(context.Event.MusicKey, PhotoService.UrlLifetime);
+    }
+
+    private string? Url(string? key) => key is null ? null : storage.GetReadUrl(key, PhotoService.UrlLifetime);
+
     private bool RsvpOpen(Event ev) => ev.Status == EventStatus.Active && timeProvider.GetUtcNow() < ev.EndsAt;
 
     private bool WishesOpen(Event ev) =>
@@ -171,7 +186,7 @@ public sealed class PublicInvitationService(AppDbContext db, InvitationLinks lin
     /// Finds the invitation by its code. Allow-listed tenant filter bypass: a guest has no sign-in, so the
     /// invitation row names the organization, and the rest of the request acts as that organization.
     /// </summary>
-    private async Task<Context> ResolveAsync(string code, CancellationToken ct, bool tracking = false)
+    public async Task<Context> ResolveAsync(string code, CancellationToken ct, bool tracking = false)
     {
         if (!InvitationCode.IsWellFormed(code))
         {
@@ -242,14 +257,14 @@ public sealed class PublicInvitationService(AppDbContext db, InvitationLinks lin
 
         return new PublicInvitationDto(
             guest.Name, invitation.Type, guest.NumberOfPeople,
-            new PublicEventDto(ev.Name, ev.Category, ev.Description, ev.TimeZone, ev.Status, null, sessions),
+            new PublicEventDto(ev.Name, ev.Category, ev.Description, ev.TimeZone, ev.Status, Url(ev.CoverImageKey), sessions),
             new PublicRsvpDto(rsvp?.Status ?? RsvpStatus.Pending, rsvp?.RespondedAt, RsvpOpen(ev), ev.EndsAt),
             new PublicFeaturesDto(
                 features.CountdownEnabled,
                 features.WishesEnabled,
                 features.WishesEnabled && WishesOpen(ev),
                 features.DigitalGiftEnabled,
-                BackgroundMusic: false),
+                BackgroundMusic: features.BackgroundMusicEnabled && ev.MusicKey is not null),
             features.WishesEnabled ? myWish : null,
             checkedIn);
     }

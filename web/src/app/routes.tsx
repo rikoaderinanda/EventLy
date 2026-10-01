@@ -116,6 +116,18 @@ export const routes: RouteObject[] = [
                 }),
               },
               {
+                path: 'events/:id/gallery',
+                lazy: async () => ({
+                  Component: (await import('@/features/photos/GalleryPage')).GalleryPage,
+                }),
+              },
+              {
+                path: 'events/:id/media',
+                lazy: async () => ({
+                  Component: (await import('@/features/photos/MediaPage')).MediaPage,
+                }),
+              },
+              {
                 path: 'events/:id/qr-sheet',
                 lazy: async () => ({
                   Component: (await import('@/features/guests/QrSheetPage')).QrSheetPage,

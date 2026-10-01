@@ -211,7 +211,19 @@
     "guest_checked_in": "Tamu yang sudah check-in tidak bisa dihapus.",
     "invitation_checked_in": "Tamu sudah check-in; kode undangannya tidak bisa diganti lagi.",
     "guest_name_taken": "Sudah ada tamu dengan nama ini di acara ini.",
-    "guest_phone_taken": "Nomor WhatsApp ini sudah dipakai tamu lain di acara ini."
+    "guest_phone_taken": "Nomor WhatsApp ini sudah dipakai tamu lain di acara ini.",
+    "photo_not_checked_in": "Foto hanya untuk tamu yang sudah check-in.",
+    "photo_event_not_active": "Foto bisa ditambahkan saat acara aktif.",
+    "photo_invalid_image": "Hanya foto JPEG, PNG atau WebP sampai 15 MB.",
+    "photo_quota_exceeded": "Batas foto paket acara ini sudah tercapai.",
+    "photo_guest_limit_exceeded": "Jatah foto untuk undangan ini sudah habis.",
+    "photo_camera_closed": "Kamera tidak tersedia: dimatikan, waktunya sudah lewat, atau jatah foto habis.",
+    "photo_zip_not_in_package": "Unduh semua foto tidak termasuk paket acara ini.",
+    "photo_file_count": "Unggah 1 sampai 10 foto sekaligus.",
+    "photo_not_found": "Foto tidak ditemukan.",
+    "gallery_locked": "Galeri terbuka setelah Anda check-in di lokasi acara.",
+    "media_invalid_audio": "Unggah file MP3 atau M4A maksimal 10 MB.",
+    "upload_too_large": "Ukuran file terlalu besar."
   },
   "events": {
     "title": "Acara",
@@ -445,7 +457,10 @@
     "privacy": "Data di halaman ini hanya untuk tamu undangan. Jangan bagikan link undangan Anda.",
     "notFoundTitle": "Undangan tidak ditemukan",
     "notFoundBody": "Link undangan tidak berlaku atau acara belum dibuka. Hubungi pengundang Anda.",
-    "checkedIn": "Anda sudah check-in. Selamat menikmati acara!"
+    "checkedIn": "Anda sudah check-in. Selamat menikmati acara!",
+    "mute": "Matikan musik",
+    "unmute": "Nyalakan musik",
+    "qrisHint": "Pindai dengan aplikasi bank atau e-wallet."
   },
   "responses": {
     "rsvpTitle": "Monitor RSVP",
@@ -523,6 +538,56 @@
     "method": {
       "Scan": "scan QR",
       "Manual": "cari nama"
+    }
+  },
+  "photos": {
+    "galleryTitle": "Galeri foto",
+    "galleryEntry": "Foto tamu dari Staff dan kamera tamu, unduh semua.",
+    "downloadAll": "Unduh semua (ZIP)",
+    "count": "{{total}} foto · {{mb}} MB",
+    "countWithLimit": "{{total}} dari {{limit}} foto · {{mb}} MB",
+    "guestCameraSwitch": "Tamu boleh memotret dengan kamera di halaman undangannya",
+    "empty": "Belum ada foto.",
+    "photoOf": "Foto {{name}}",
+    "byGuest": "tamu",
+    "delete": "Hapus",
+    "confirmDelete": "Hapus foto ini?",
+    "take": "Ambil foto",
+    "takeAnother": "Ambil foto lagi",
+    "uploading": "Mengunggah…",
+    "uploaded": "{{n}} foto terunggah.",
+    "camera": "Kamera",
+    "preview": "Pratinjau foto",
+    "retake": "Ulangi",
+    "use": "Pakai foto",
+    "shutter": "Potret",
+    "switchCamera": "Ganti kamera",
+    "guestGalleryTitle": "Foto Anda",
+    "guestEmpty": "Belum ada foto. Foto dari petugas dan yang Anda ambil akan muncul di sini.",
+    "yourPhoto": "Foto Anda",
+    "download": "Unduh",
+    "cameraLeft": "Sisa {{n}} dari {{limit}} foto",
+    "cameraUntil": "kamera tersedia sampai {{time}}",
+    "pickFiles": "atau pilih file foto",
+    "guestCameraNotInPackage": "Paket acara ini tidak termasuk kamera tamu, jadi tamu tidak bisa memotret dari halaman undangannya. Foto dari Staff tetap bisa ditambahkan."
+  },
+  "media": {
+    "title": "Media undangan",
+    "entry": "Foto sampul, musik latar dan gambar QRIS.",
+    "upload": "Unggah",
+    "replace": "Ganti",
+    "remove": "Hapus",
+    "cover": {
+      "title": "Foto sampul",
+      "hint": "Tampil di layar pembuka dan di atas halaman undangan. JPEG, PNG atau WebP, maks. 15 MB."
+    },
+    "music": {
+      "title": "Musik latar",
+      "hint": "MP3 atau M4A, maks. 10 MB. Mulai saat tamu menekan \"Buka Undangan\". Hak cipta lagu tanggung jawab Anda."
+    },
+    "qris": {
+      "title": "Gambar QRIS",
+      "hint": "Untuk amplop digital: tamu memindai QRIS ini dan membayar langsung ke Anda."
     }
   }
 }

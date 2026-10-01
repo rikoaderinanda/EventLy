@@ -60,6 +60,18 @@ public sealed class Event : ITenantOwned, ISoftDeletable, IHasTimestamps
     /// <summary>Amplop digital: optional address for sending a gift (Q-41).</summary>
     public string? GiftAddress { get; set; }
 
+    /// <summary>Optional QRIS image for the digital gift (Q-41), object key in storage.</summary>
+    public string? GiftQrisKey { get; set; }
+
+    /// <summary>The Owner's background music file (Q-43), object key in storage.</summary>
+    public string? MusicKey { get; set; }
+
+    /// <summary>audio/mpeg or audio/mp4.</summary>
+    public string? MusicContentType { get; set; }
+
+    /// <summary>Owner/Admin can turn the guest camera off for this event, even when the package allows it (Q-25).</summary>
+    public bool GuestUploadEnabled { get; set; } = true;
+
     /// <summary>Object key of the cover photo in storage (upload arrives with storage in Phase 9).</summary>
     public string? CoverImageKey { get; set; }
 

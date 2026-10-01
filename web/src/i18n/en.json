@@ -211,7 +211,19 @@
     "guest_checked_in": "A guest who has checked in can't be deleted.",
     "invitation_checked_in": "The guest has checked in; the invitation code can't change any more.",
     "guest_name_taken": "A guest with this name is already on the list of this event.",
-    "guest_phone_taken": "This WhatsApp number already belongs to another guest of this event."
+    "guest_phone_taken": "This WhatsApp number already belongs to another guest of this event.",
+    "photo_not_checked_in": "Photos are for guests who have checked in.",
+    "photo_event_not_active": "Photos can be added while the event is active.",
+    "photo_invalid_image": "Only JPEG, PNG or WebP photos up to 15 MB.",
+    "photo_quota_exceeded": "This event's package photo limit is reached.",
+    "photo_guest_limit_exceeded": "This invitation's photos are used up.",
+    "photo_camera_closed": "The camera isn't available: switched off, the time is over, or your photos are used up.",
+    "photo_zip_not_in_package": "Downloading all photos isn't part of this event's package.",
+    "photo_file_count": "Upload 1 to 10 photos at a time.",
+    "photo_not_found": "Photo not found.",
+    "gallery_locked": "The gallery opens after you check in at the event.",
+    "media_invalid_audio": "Upload an MP3 or M4A file of at most 10 MB.",
+    "upload_too_large": "The file is too large."
   },
   "events": {
     "title": "Events",
@@ -445,7 +457,10 @@
     "privacy": "This page is for invited guests only. Please don't share your invitation link.",
     "notFoundTitle": "Invitation not found",
     "notFoundBody": "This invitation link doesn't work or the event isn't open yet. Please contact your host.",
-    "checkedIn": "You've checked in. Enjoy the event!"
+    "checkedIn": "You've checked in. Enjoy the event!",
+    "mute": "Mute music",
+    "unmute": "Play music",
+    "qrisHint": "Scan with a banking or e-wallet app."
   },
   "responses": {
     "rsvpTitle": "RSVP monitor",
@@ -523,6 +538,56 @@
     "method": {
       "Scan": "QR scan",
       "Manual": "name search"
+    }
+  },
+  "photos": {
+    "galleryTitle": "Photo gallery",
+    "galleryEntry": "Photos from Staff and the guest camera, download all.",
+    "downloadAll": "Download all (ZIP)",
+    "count": "{{total}} photos · {{mb}} MB",
+    "countWithLimit": "{{total}} of {{limit}} photos · {{mb}} MB",
+    "guestCameraSwitch": "Guests may take photos with the camera on their invitation page",
+    "empty": "No photos yet.",
+    "photoOf": "Photo of {{name}}",
+    "byGuest": "guest",
+    "delete": "Delete",
+    "confirmDelete": "Delete this photo?",
+    "take": "Take photo",
+    "takeAnother": "Take another photo",
+    "uploading": "Uploading…",
+    "uploaded": "{{n}} photo(s) uploaded.",
+    "camera": "Camera",
+    "preview": "Photo preview",
+    "retake": "Retake",
+    "use": "Use photo",
+    "shutter": "Take the photo",
+    "switchCamera": "Switch camera",
+    "guestGalleryTitle": "Your photos",
+    "guestEmpty": "No photos yet. Photos from the staff and the ones you take appear here.",
+    "yourPhoto": "Your photo",
+    "download": "Download",
+    "cameraLeft": "{{n}} of {{limit}} photos left",
+    "cameraUntil": "camera available until {{time}}",
+    "pickFiles": "or choose photo files",
+    "guestCameraNotInPackage": "This event's package doesn't include the guest camera, so guests can't take photos on their invitation page. Staff can still add photos."
+  },
+  "media": {
+    "title": "Invitation media",
+    "entry": "Cover photo, background music and QRIS image.",
+    "upload": "Upload",
+    "replace": "Replace",
+    "remove": "Remove",
+    "cover": {
+      "title": "Cover photo",
+      "hint": "Shown on the opening screen and at the top of the invitation. JPEG, PNG or WebP, max. 15 MB."
+    },
+    "music": {
+      "title": "Background music",
+      "hint": "MP3 or M4A, max. 10 MB. Starts when the guest taps \"Buka Undangan\". The song's copyright is your responsibility."
+    },
+    "qris": {
+      "title": "QRIS image",
+      "hint": "For the digital gift: guests scan this QRIS and pay you directly."
     }
   }
 }

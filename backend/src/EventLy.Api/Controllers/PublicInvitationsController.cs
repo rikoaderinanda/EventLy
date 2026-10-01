@@ -15,7 +15,7 @@ namespace EventLy.Api.Controllers;
 [AllowAnonymous]
 [Route("api/v1/public/invitations/{code}")]
 [EnableRateLimiting(PublicSetup.ReadPolicy)]
-public sealed class PublicInvitationsController(PublicInvitationService invitations) : ControllerBase
+public sealed class PublicInvitationsController(PublicInvitationService invitations, PhotoService photos) : ControllerBase
 {
     [HttpGet]
     public Task<PublicInvitationDto> Get(string code, CancellationToken ct) => invitations.GetAsync(code, ct);
@@ -47,6 +47,40 @@ public sealed class PublicInvitationsController(PublicInvitationService invitati
 
     [HttpGet("gifts")]
     public Task<PublicGiftsDto> Gifts(string code, CancellationToken ct) => invitations.GetGiftsAsync(code, ct);
+
+    /// <summary>The guest's photos: 403 <c>gallery.locked</c> until check-in. Includes the camera state.</summary>
+    [HttpGet("gallery")]
+    public Task<Dtos.Photos.PublicGalleryDto> Gallery(string code, CancellationToken ct) => photos.GuestGalleryAsync(code, ct);
+
+    /// <summary>302 to a signed URL that downloads the photo.</summary>
+    [HttpGet("gallery/{photoId:guid}/download")]
+    public async Task<IActionResult> DownloadPhoto(string code, Guid photoId, CancellationToken ct) =>
+        Redirect(await photos.GuestDownloadUrlAsync(code, photoId, ct));
+
+    /// <summary>The guest's in-app camera (Q-25): one JPEG per request, <c>multipart/form-data</c> field <c>file</c>.</summary>
+    [HttpPost("photos")]
+    [EnableRateLimiting(PublicSetup.WritePolicy)]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(Storage.ImageProcessor.MaxBytes + 1024 * 1024)]
+    [ProducesResponseType<Dtos.Photos.PublicPhotoDto>(StatusCodes.Status201Created)]
+    public async Task<ActionResult<Dtos.Photos.PublicPhotoDto>> Capture(string code, IFormFile file, CancellationToken ct) =>
+        StatusCode(StatusCodes.Status201Created,
+            await photos.CaptureAsync(code, await Uploads.ReadAsync(file, Storage.ImageProcessor.MaxBytes, ct), ct));
+
+    /// <summary>The guest deletes a photo they took.</summary>
+    [HttpDelete("photos/{photoId:guid}")]
+    [EnableRateLimiting(PublicSetup.WritePolicy)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> DeletePhoto(string code, Guid photoId, CancellationToken ct)
+    {
+        await photos.DeleteOwnAsync(code, photoId, ct);
+        return NoContent();
+    }
+
+    /// <summary>302 to a short-lived URL of the event's music (Q-43).</summary>
+    [HttpGet("music")]
+    public async Task<IActionResult> Music(string code, CancellationToken ct) =>
+        Redirect(await invitations.MusicUrlAsync(code, ct));
 
     [HttpPost("gift-confirmations")]
     [EnableRateLimiting(PublicSetup.WritePolicy)]
