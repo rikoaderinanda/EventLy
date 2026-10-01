@@ -126,6 +126,6 @@ describe('Root platform pages', () => {
 
     // The packages page is lazy-loaded; give it more than the default 1 s on a busy machine.
     expect(await screen.findByRole('heading', { name: 'Paket' }, { timeout: 5000 })).toBeInTheDocument()
-    expect(screen.getByText('Basic')).toBeInTheDocument()
+    expect(await screen.findByText('Basic')).toBeInTheDocument()
   })
 })

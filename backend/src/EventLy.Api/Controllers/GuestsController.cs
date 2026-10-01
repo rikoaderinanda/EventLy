@@ -1,4 +1,5 @@
 using EventLy.Api.Auth;
+using EventLy.Api.Common.Errors;
 using EventLy.Api.Dtos.Guests;
 using EventLy.Api.Entities;
 using EventLy.Api.Services;
@@ -13,6 +14,8 @@ namespace EventLy.Api.Controllers;
 [Authorize(Policy = Permissions.GuestManage)]
 public sealed class GuestsController(GuestService guests) : ControllerBase
 {
+    private const int MaxImportBytes = 1024 * 1024;
+
     [HttpGet]
     public Task<GuestListDto> List(
         Guid eventId,
@@ -30,6 +33,25 @@ public sealed class GuestsController(GuestService guests) : ControllerBase
     {
         var created = await guests.CreateAsync(eventId, request, ct);
         return CreatedAtAction(nameof(Get), new { eventId, guestId = created.Id }, created);
+    }
+
+    /// <summary>
+    /// CSV import (<c>multipart/form-data</c>, field <c>file</c>, max 1 MB / 2,000 guests). All or nothing:
+    /// the result lists every problem by line, or the number imported. 422 when the guest limit is exceeded.
+    /// </summary>
+    [HttpPost("import")]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(MaxImportBytes + 64 * 1024)]
+    public async Task<GuestImportResultDto> Import(Guid eventId, IFormFile file, CancellationToken ct)
+    {
+        if (file.Length is 0 or > MaxImportBytes)
+        {
+            throw new AppException(StatusCodes.Status400BadRequest, "guest.import_invalid_file",
+                "Upload a CSV file of at most 1 MB.");
+        }
+
+        using var reader = new StreamReader(file.OpenReadStream(), System.Text.Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
+        return await guests.ImportAsync(eventId, await reader.ReadToEndAsync(ct), ct);
     }
 
     [HttpGet("{guestId:guid}")]

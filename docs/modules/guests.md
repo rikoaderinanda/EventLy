@@ -50,7 +50,15 @@ The invitation URL is `{origin}/i/{code}` and is also the QR payload (Q-8). What
 - **Tenant isolation:** another organization's guests and invitations give 404. A deleted guest's invitation gives 404 too.
 - **Audit:** `guest.created`, `guest.updated`, `guest.deleted`, `invitation.code_regenerated`, `invitation.revoked`, `event.whatsapp_template_updated`.
 
-Not built: **CSV import** of guests. Q-12 is still open; it can be added later as `POST /events/{id}/guests/import`.
+- **CSV import (Q-12):**
+  - The file comes from Excel or Google Sheets saved as CSV, with a header line. Columns are found by name in Indonesian or English, in any order: `nama`/`name` (required), `telepon`/`no hp`/`whatsapp`/`phone`, `email`, `jumlah`/`pax`/`people` (empty = 1, more than 1 = group).
+  - Comma or semicolon separated (Excel with Indonesian settings uses `;`). Quoted fields and a UTF-8 BOM are fine.
+  - At most 1 MB and 2,000 guests per file.
+  - **All or nothing:** every line is checked like a single guest. If any line is wrong, nothing is imported, and the answer lists every problem with its line number.
+  - The guest limit (people) applies to the whole file under the same row lock: 422 `guest.quota_exceeded`.
+  - Imported guests are invited to every session and each gets an invitation.
+  - An unreadable file gives 400 `guest.import_invalid_file`. The audit log records `guest.imported` with the counts.
+  - The PWA offers a sample file, `template-tamu.csv`.
 
 ## Endpoints
 
@@ -58,6 +66,7 @@ Not built: **CSV import** of guests. Q-12 is still open; it can be added later a
 |---|---|---|
 | GET | `/events/{eventId}/guests?search=&type=&status=` | `{guests, total, totalPeople, limit}`. `total` (invitations) and `totalPeople` cover all guests, not only the filtered ones; `limit` is compared with `totalPeople`. RSVP and check-in filters come with Phases 7 and 8 |
 | POST | `/events/{eventId}/guests` | `{name, phone, email, guestType, numberOfPeople, sessionIds}` returns 201 with the guest and invitation summary |
+| POST | `/events/{eventId}/guests/import` | `multipart/form-data` with `file`. Returns `{imported, people, errors: [{line, name, messages}]}`; with errors, `imported` is 0 |
 | GET, PUT, DELETE | `/events/{eventId}/guests/{guestId}` | In PUT, `sessionIds: null` keeps the current sessions |
 | GET | `/invitations/{id}` | Code, URL, type, status, guest |
 | GET | `/invitations/{id}/whatsapp-link` | `{url, message, phone}` |
@@ -82,7 +91,9 @@ The WhatsApp tab is opened before the request, so pop-up blockers allow it. The 
   - `InvitationCodeTests`: length, alphabet, 100,000 codes without a repeat, spread over every character position.
   - `WhatsAppMessageTests`: number normalisation, template, link encoding.
   - `GuestValidatorsTests`: individual and group sizes, phone, sessions, template needs `{link}`, QR renders.
+  - `GuestCsvTests`: comma and semicolon files, BOM and quotes, English headers, blank lines and line numbers, unusable files, the row limit.
 - **Integration:**
   - `GuestsTests`: 1:1 invitation, sessions, group size, edit keeps the code, delete revokes, list and quota, 422, a group takes a place per person, growing a group past the limit, concurrent adds never exceed the limit, checkout guest limit counts people, read-only cancelled event, Staff 403, session removal.
-  - `InvitationsTests`: WhatsApp link and template, new code, revoke and restore, PNG and SVG, QR sheet, roles.
+  - `InvitationsTests`: WhatsApp link and template, new code, revoke and restore, PNG and SVG, QR sheet, roles, unpaid events can't send (Q-48).
+  - `GuestImportTests`: individuals and groups with invitations, all or nothing with line errors, the guest limit for the whole file, unusable files, Staff 403, another tenant 404.
   - `TenantIsolationTests`: guests and invitations.

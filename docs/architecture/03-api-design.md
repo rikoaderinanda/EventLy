@@ -136,7 +136,7 @@ Details and rules: [docs/modules/payments.md](../modules/payments.md).
 |---|---|---|---|
 | GET | `/events/{eventId}/guests?search=&type=&status=&rsvp=&checkedIn=` | O A | `{guests, total, totalPeople, limit}`: guests with their invitation (RSVP and check-in status from Phases 7 and 8) and the package quota |
 | POST | `/events/{eventId}/guests` | O A | Create a guest **and its invitation** in one step `{name, phone, email, guestType, numberOfPeople, sessionIds}` (see 2.7). `sessionIds` null = all sessions (Q-38) |
-| POST | `/events/{eventId}/guests/import` | O A | CSV bulk import **[Q-12, not built yet]** |
+| POST | `/events/{eventId}/guests/import` | O A | CSV bulk import **[Q-12]**: all or nothing, `{imported, people, errors: [{line, name, messages}]}`, guest limit for the whole file (422) |
 | GET | `/events/{eventId}/guests/{guestId}` | O A | Details |
 | PUT | `/events/{eventId}/guests/{guestId}` | O A | Update |
 | DELETE | `/events/{eventId}/guests/{guestId}` | O A | Soft delete (409 if checked in) |

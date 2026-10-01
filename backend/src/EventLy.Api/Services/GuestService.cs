@@ -3,6 +3,7 @@ using EventLy.Api.Common.Errors;
 using EventLy.Api.Data;
 using EventLy.Api.Dtos.Guests;
 using EventLy.Api.Entities;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventLy.Api.Services;
@@ -13,7 +14,12 @@ namespace EventLy.Api.Services;
 /// offered package (the checkout then checks the chosen package). A group counts all its people.
 /// </summary>
 public sealed class GuestService(
-    AppDbContext db, ICurrentUser currentUser, AuditService audit, InvitationLinks links, TimeProvider timeProvider)
+    AppDbContext db,
+    ICurrentUser currentUser,
+    AuditService audit,
+    InvitationLinks links,
+    TimeProvider timeProvider,
+    IValidator<CreateGuestRequest> guestValidator)
 {
     public async Task<GuestListDto> ListAsync(Guid eventId, GuestListQuery filter, CancellationToken ct)
     {
@@ -72,23 +78,66 @@ public sealed class GuestService(
         InLockedEventAsync(eventId, async ev =>
         {
             await RequirePlacesAsync(ev, request.NumberOfPeople, ct);
-
-            var guest = new Guest
-            {
-                EventId = ev.Id,
-                Name = request.Name.Trim(),
-                Phone = Normalize(request.Phone),
-                Email = Normalize(request.Email),
-                Type = request.GuestType,
-                NumberOfPeople = request.NumberOfPeople,
-            };
-            guest.Invitation = new Invitation { EventId = ev.Id, GuestId = guest.Id, Type = guest.Type };
-            SetSessions(guest, ev, request.SessionIds ?? [.. ev.Sessions.Select(s => s.Id)]);
-            db.Guests.Add(guest);
+            var guest = AddGuest(ev, request);
             audit.Add(AuditActions.GuestCreated, currentUser.UserId, ev.OrganizationId, nameof(Guest), guest.Id,
-                new { invitationId = guest.Invitation.Id });
+                new { invitationId = guest.Invitation!.Id });
             return guest;
         }, ct);
+
+    /// <summary>
+    /// CSV import (decision Q-12): all or nothing. Every line is checked like a single guest; if any line
+    /// is wrong, nothing is imported and every problem is reported by line number. The guest limit applies
+    /// to the whole file. A group is a line with more than one person. Guests get all sessions.
+    /// </summary>
+    public async Task<GuestImportResultDto> ImportAsync(Guid eventId, string csv, CancellationToken ct)
+    {
+        // The event first: another tenant's or a closed event answers 404/409 before the file is looked at.
+        await LoadEditableEventAsync(eventId, ct);
+        var (rows, fileError) = GuestCsv.Parse(csv);
+        if (fileError is not null)
+        {
+            throw new AppException(StatusCodes.Status400BadRequest, "guest.import_invalid_file", fileError);
+        }
+
+        var requests = new List<CreateGuestRequest>();
+        var errors = new List<GuestImportErrorDto>();
+        foreach (var row in rows)
+        {
+            if (row.People is not { } people)
+            {
+                errors.Add(new GuestImportErrorDto(row.Line, row.Name, [$"\"{row.PeopleText}\" is not a number of people."]));
+                continue;
+            }
+
+            var request = new CreateGuestRequest(row.Name, row.Phone, row.Email,
+                people > 1 ? GuestType.Group : GuestType.Individual, people, null);
+            var result = await guestValidator.ValidateAsync(request, ct);
+            if (result.IsValid)
+            {
+                requests.Add(request);
+            }
+            else
+            {
+                errors.Add(new GuestImportErrorDto(row.Line, row.Name, [.. result.Errors.Select(e => e.ErrorMessage)]));
+            }
+        }
+        if (errors.Count > 0)
+        {
+            return new GuestImportResultDto(0, 0, errors);
+        }
+
+        return await LockedAsync(eventId, async ev =>
+        {
+            await RequirePlacesAsync(ev, requests.Sum(r => r.NumberOfPeople), ct);
+            foreach (var request in requests)
+            {
+                AddGuest(ev, request);
+            }
+            audit.Add(AuditActions.GuestsImported, currentUser.UserId, ev.OrganizationId, nameof(Event), ev.Id,
+                new { guests = requests.Count, people = requests.Sum(r => r.NumberOfPeople) });
+            return new GuestImportResultDto(requests.Count, requests.Sum(r => r.NumberOfPeople), []);
+        }, ct);
+    }
 
     public Task<GuestDto> UpdateAsync(Guid eventId, Guid guestId, UpdateGuestRequest request, CancellationToken ct) =>
         InLockedEventAsync(eventId, async ev =>
@@ -132,7 +181,7 @@ public sealed class GuestService(
     /// take the last places. A row lock leaves the event's xmin (its version) unchanged, so editing the
     /// event meanwhile isn't affected. The retrying execution strategy starts the whole unit over.
     /// </summary>
-    private Task<GuestDto> InLockedEventAsync(Guid eventId, Func<Event, Task<Guest>> change, CancellationToken ct)
+    private Task<T> LockedAsync<T>(Guid eventId, Func<Event, Task<T>> change, CancellationToken ct)
     {
         var strategy = db.Database.CreateExecutionStrategy();
         return strategy.ExecuteAsync(async () =>
@@ -142,11 +191,36 @@ public sealed class GuestService(
             var ev = await LoadEditableEventAsync(eventId, ct);
             await db.Database.ExecuteSqlAsync($"SELECT 1 FROM events WHERE id = {ev.Id} FOR UPDATE", ct);
 
-            var guest = await change(ev);
+            var result = await change(ev);
             await db.SaveChangesAsync(ct);
             await transaction.CommitAsync(ct);
-            return ToDto(guest, await RsvpOfAsync(guest, ct), EventLifecycle.IsPublic(ev.Status));
+            return result;
         });
+    }
+
+    private async Task<GuestDto> InLockedEventAsync(Guid eventId, Func<Event, Task<Guest>> change, CancellationToken ct)
+    {
+        var (guest, sendable) = await LockedAsync(eventId,
+            async ev => (Guest: await change(ev), Sendable: EventLifecycle.IsPublic(ev.Status)), ct);
+        return ToDto(guest, await RsvpOfAsync(guest, ct), sendable);
+    }
+
+    /// <summary>A new guest with their invitation (1:1), invited to the chosen sessions or all of them.</summary>
+    private Guest AddGuest(Event ev, CreateGuestRequest request)
+    {
+        var guest = new Guest
+        {
+            EventId = ev.Id,
+            Name = request.Name.Trim(),
+            Phone = Normalize(request.Phone),
+            Email = Normalize(request.Email),
+            Type = request.GuestType,
+            NumberOfPeople = request.NumberOfPeople,
+        };
+        guest.Invitation = new Invitation { EventId = ev.Id, GuestId = guest.Id, Type = guest.Type };
+        SetSessions(guest, ev, request.SessionIds ?? [.. ev.Sessions.Select(s => s.Id)]);
+        db.Guests.Add(guest);
+        return guest;
     }
 
     /// <summary>

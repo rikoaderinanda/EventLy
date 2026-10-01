@@ -150,6 +150,40 @@ describe('guests and invitations', () => {
     expect(screen.queryByRole('link', { name: 'Tambah tamu' })).toBeInTheDocument()
   })
 
+  it('imports a CSV file and lists the lines to fix when it has mistakes', async () => {
+    const fetchMock = stubApi([
+      { path: '/events/e1', response: () => jsonResponse(event) },
+      { path: '/events/e1/guests', response: () => jsonResponse(list) },
+      {
+        path: '/events/e1/whatsapp-template',
+        response: () => jsonResponse({ template: 'Halo {nama} {link}', isDefault: true }),
+      },
+      {
+        method: 'POST',
+        path: '/events/e1/guests/import',
+        response: () =>
+          jsonResponse({
+            imported: 0,
+            people: 0,
+            errors: [
+              { line: 3, name: 'Budi', messages: ['Enter a phone number, for example 0812 3456 7890.'] },
+            ],
+          }),
+      },
+    ])
+    renderRoute('/app/events/e1/guests')
+
+    await userEvent.click(await screen.findByText('Import tamu dari CSV'))
+    const file = new File(['nama\nBudi'], 'tamu.csv', { type: 'text/csv' })
+    await userEvent.upload(screen.getByLabelText('File CSV'), file)
+    await userEvent.click(screen.getByRole('button', { name: 'Import' }))
+
+    expect(await screen.findByText(/Baris 3 \(Budi\)/)).toBeInTheDocument()
+    const post = fetchMock.mock.calls.find((c) => c[1]?.method === 'POST')!
+    expect(post[1]!.body).toBeInstanceOf(FormData)
+    expect((post[1]!.headers as Record<string, string>)['Content-Type']).toBeUndefined()
+  })
+
   it('revokes an invitation after confirmation', async () => {
     const fetchMock = stubApi([
       { path: '/events/e1', response: () => jsonResponse(event) },

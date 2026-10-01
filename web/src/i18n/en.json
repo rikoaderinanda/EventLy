@@ -202,7 +202,8 @@
     "feature_not_available": "This feature isn't available for this event.",
     "gift_confirmation_limit": "This invitation has reached its gift confirmation limit.",
     "rate_limit_exceeded": "Too many requests. Please wait a moment and try again.",
-    "invitation_event_not_paid": "Invitations can be sent once the event is paid."
+    "invitation_event_not_paid": "Invitations can be sent once the event is paid.",
+    "guest_import_invalid_file": "The file can't be read. Use a CSV with a header line that has a \"nama\" (name) column."
   },
   "events": {
     "title": "Events",
@@ -379,7 +380,15 @@
     "templateHint": "Use {nama} (name), {acara} (event) and {link}. {link} is required: it's where the guest's invitation link goes.",
     "templateReset": "Back to the default message",
     "sendAfterPayment": "Can be sent once the event is paid",
-    "sendAfterPaymentHint": "The invitation is ready. The link, QR code and Send via WhatsApp become available once the event is paid."
+    "sendAfterPaymentHint": "The invitation is ready. The link, QR code and Send via WhatsApp become available once the event is paid.",
+    "importTitle": "Import guests from CSV",
+    "importHint": "Columns: nama/name (required), telepon/phone, email, jumlah/people (more than 1 = group). Works from Excel or Google Sheets (save as CSV). Guests are invited to every session. If any line is wrong, nothing is imported.",
+    "importTemplate": "Download a sample file",
+    "importFile": "CSV file",
+    "importSubmit": "Import",
+    "importDone": "{{n}} guests ({{people}} people) imported.",
+    "importFailed": "Nothing was imported. Fix these lines and try again:",
+    "importLine": "Line {{line}} ({{name}}):"
   },
   "invitation": {
     "dear": "Dear",

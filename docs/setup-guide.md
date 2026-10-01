@@ -117,6 +117,7 @@ Without Docker, the database integration tests are reported as **skipped**, not 
 | `POST` · `GET /api/v1/events/{id}/payments`, `GET /api/v1/payments/{id}` · `/receipt` | Owner pays for an event (see §6.1) |
 | `POST /api/v1/payments/webhooks/{provider}` | Payment provider callback (signed) |
 | `GET` · `POST /api/v1/events/{id}/guests`, `GET` · `PUT` · `DELETE …/guests/{guestId}` | Guests, each with their invitation |
+| `POST /api/v1/events/{id}/guests/import` | CSV guest import (`multipart/form-data`, field `file`) |
 | `GET /api/v1/invitations/{id}` · `/whatsapp-link` · `/qr`, `POST …/regenerate-code` · `/revoke` | Invitations |
 | `GET /api/v1/events/{id}/invitations/qr-sheet`, `GET` · `PUT …/whatsapp-template` | QR sheet, WhatsApp message |
 | `GET /api/v1/public/invitations/{code}`, `PUT …/rsvp` · `/wish`, `GET …/wishes` · `/gifts` · `/qr`, `POST …/gift-confirmations` | Guest invitation page (no sign-in; the code is the credential) |

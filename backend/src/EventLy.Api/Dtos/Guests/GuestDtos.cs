@@ -82,5 +82,11 @@ public sealed record WhatsAppTemplateDto(string Template, bool IsDefault);
 /// <summary>Null resets the event to the default message.</summary>
 public sealed record UpdateWhatsAppTemplateRequest(string? Template);
 
+/// <summary>A line of an imported file that can't be used, with every reason.</summary>
+public sealed record GuestImportErrorDto(int Line, string Name, IReadOnlyList<string> Messages);
+
+/// <summary>All or nothing: with any <see cref="Errors"/>, nothing was imported.</summary>
+public sealed record GuestImportResultDto(int Imported, int People, IReadOnlyList<GuestImportErrorDto> Errors);
+
 /// <summary>One cell of the printable QR sheet (decision Q-27).</summary>
 public sealed record QrSheetItemDto(Guid InvitationId, string GuestName, GuestType Type, int NumberOfPeople, string Url, string Svg);

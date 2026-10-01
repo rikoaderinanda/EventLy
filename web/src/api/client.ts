@@ -12,6 +12,8 @@ type RequestOptions = Omit<RequestInit, 'body'> & {
 async function send(path: string, options: RequestOptions): Promise<Response> {
   const { body, headers, skipAuthRefresh, ...rest } = options
   const accessToken = useSession.getState().accessToken
+  // A file upload is sent as is; the browser sets the multipart Content-Type with its boundary.
+  const isForm = body instanceof FormData
 
   try {
     return await fetch(`${env.apiBaseUrl}${path}`, {
@@ -19,11 +21,11 @@ async function send(path: string, options: RequestOptions): Promise<Response> {
       credentials: 'same-origin',
       headers: {
         Accept: 'application/json',
-        ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
+        ...(body !== undefined && !isForm ? { 'Content-Type': 'application/json' } : {}),
         ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
         ...headers,
       },
-      body: body !== undefined ? JSON.stringify(body) : undefined,
+      body: isForm ? body : body !== undefined ? JSON.stringify(body) : undefined,
     })
   } catch {
     throw new ApiError(0)

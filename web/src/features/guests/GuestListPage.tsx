@@ -13,6 +13,7 @@ import {
 } from './api'
 import type { RsvpStatus } from '@/features/invitation/api'
 import { RsvpBadge } from '@/features/responses/RsvpBadge'
+import { GuestImport } from './GuestImport'
 import { InvitationActions } from './InvitationActions'
 
 /** The event's WhatsApp message, with {nama}, {acara} and {link}. */
@@ -122,6 +123,7 @@ export function GuestListPage() {
       </div>
 
       {editable && <TemplateEditor eventId={id} />}
+      {editable && !full && <GuestImport eventId={id} />}
 
       <div className="flex flex-wrap gap-2">
         <input

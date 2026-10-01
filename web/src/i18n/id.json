@@ -202,7 +202,8 @@
     "feature_not_available": "Fitur ini tidak tersedia untuk acara ini.",
     "gift_confirmation_limit": "Batas konfirmasi hadiah untuk undangan ini sudah tercapai.",
     "rate_limit_exceeded": "Terlalu banyak permintaan. Tunggu sebentar lalu coba lagi.",
-    "invitation_event_not_paid": "Undangan baru bisa dikirim setelah acara dibayar."
+    "invitation_event_not_paid": "Undangan baru bisa dikirim setelah acara dibayar.",
+    "guest_import_invalid_file": "File tidak bisa dibaca. Pastikan CSV dengan baris judul berisi kolom \"nama\"."
   },
   "events": {
     "title": "Acara",
@@ -379,7 +380,15 @@
     "templateHint": "Gunakan {nama}, {acara} dan {link}. {link} wajib ada: di situ link undangan tamu dimasukkan.",
     "templateReset": "Kembalikan ke pesan bawaan",
     "sendAfterPayment": "Bisa dikirim setelah acara dibayar",
-    "sendAfterPaymentHint": "Undangan sudah disiapkan. Link, QR dan Kirim via WhatsApp tersedia setelah acara dibayar."
+    "sendAfterPaymentHint": "Undangan sudah disiapkan. Link, QR dan Kirim via WhatsApp tersedia setelah acara dibayar.",
+    "importTitle": "Import tamu dari CSV",
+    "importHint": "Kolom: nama (wajib), telepon, email, jumlah (orang; lebih dari 1 = rombongan). Bisa dari Excel atau Google Sheets (simpan sebagai CSV). Tamu diundang ke semua sesi. Jika ada baris yang salah, tidak ada yang diimpor.",
+    "importTemplate": "Unduh contoh file",
+    "importFile": "File CSV",
+    "importSubmit": "Import",
+    "importDone": "{{n}} tamu ({{people}} orang) berhasil diimpor.",
+    "importFailed": "Tidak ada yang diimpor. Perbaiki baris berikut lalu coba lagi:",
+    "importLine": "Baris {{line}} ({{name}}):"
   },
   "invitation": {
     "dear": "Kepada Yth. Bapak/Ibu/Saudara/i",
