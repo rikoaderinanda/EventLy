@@ -113,6 +113,17 @@ Status is never shown by colour alone: badges always have a word and an icon.
 - **Root** (enterprise minimal): neutral stone borders, dense rows with column headers on the Owner list, plain package cards with the feature checklist, switches for the package flags, manual activation inline.
 - Legacy components (`StatusBadge`, `PaymentStatusBadge`, `RsvpBadge`, `Field`, `ComingSoon`) are gone: every page uses `components/`.
 
+## Marketing landing page (`/`)
+
+`features/landing/`, one component per section, in the order of the visitor's questions: **Hero** (promise, "Mulai Sekarang" → `/login`, "Lihat Demo Undangan" → `/i/demo`, a phone mockup) → **Problems** → **Features** (four pillars, each with a small picture drawn from the real components) → **How it works** (seven real steps) → **Dashboard preview** (the app's own `StatisticCard`s, labelled "data fiktif") → **Pricing** and the **comparison table** → **FAQ** (native `<details>`) → **Final call to action** → **Footer** (links, ID | EN).
+
+- **Honest marketing:** only facts about the product. No testimonials, customer logos, usage numbers or "most popular" badges; a test fails if words like *terpopuler* or *dipercaya* appear.
+- **Prices** live in `features/landing/packages.ts` (seed values, Q-37). Root can change the real prices, so the page says the price that applies is shown at checkout; update the file (and the JSON-LD in `index.html`) when the offer changes.
+- **Visuals** are components, CSS and SVG only (no external images). To use real screenshots later, replace the inside of `PhoneMockup` and `DashboardPreview`; the layout stays.
+- **Demo invitation** (`/i/demo`, `features/invitation/demo.ts`): the real invitation page with fictional data held in the browser. RSVP, wishes and gift confirmations change only that memory; no request reaches the server (real codes are 22 characters, so `demo` can't collide). A demo bar says the data is fictional, switches between the three themes and leads to sign-up. The QR is a sample image marked "CONTOH".
+- **SEO** in `index.html`: title, description, Open Graph and Twitter card, and Schema.org `SoftwareApplication` with the three offers. The Open Graph image is `public/og-image.png` (1200×630), rendered from `docs/design/og-image.html`. When the domain is known, make `og:image` absolute and add `og:url` and a canonical link.
+- **Motion:** gentle rise-in for the hero, slow float and auto-scroll in the phone, sections fade in on scroll (`components/ui/Reveal`); all still with "reduce motion".
+
 ## Motion
 
 - **Motion** (`motion/react`, MIT) for the modal, sheet and invitation opening; CSS transitions for hover and press.

@@ -232,8 +232,11 @@ Details: [docs/modules/photos.md](../modules/photos.md).
 | GET | `/events/{eventId}/reports/guests?format=csv\|xlsx` | O A | Guest, RSVP and check-in report |
 | GET | `/events/{eventId}/reports/check-ins?format=csv\|xlsx` | O A | Check-in timeline with staff |
 | GET | `/events/{eventId}/reports/photos?format=csv\|xlsx` | O A | Photo counts per invitation |
+| GET | `/events/{eventId}/reports/wishes?format=csv\|xlsx` | O A | Every wish, hidden ones included (Q-66) |
+| GET | `/events/{eventId}/reports/gifts?format=csv\|xlsx` | O A | Gift confirmations (Q-66) |
+| GET | `/events/{eventId}/reports` | O A | Every report in one `.xlsx`, one sheet each (Q-70) |
 
-`xlsx` is gated by the package's `excelExport` flag (Q-2).
+`xlsx` is gated by the package's `excelExport` flag (Q-2). CSV is UTF-8 with a BOM and semicolons (Q-67). Every download is audited (`report.exported`) and limited to 10 per minute per user. Details: [docs/modules/reports.md](../modules/reports.md).
 
 Statistics response (`/events/{eventId}/stats`; counts are active invitations of guests still on the list, "people" counts each invitation's number of people):
 

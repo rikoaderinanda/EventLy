@@ -43,8 +43,11 @@ import {
   type PublicSession,
 } from './api'
 import './fonts'
+import { DemoBar } from './DemoBar'
+import { isDemo } from './demo'
 import { GuestGallery } from './GuestGallery'
-import { InvitationSection, Ornament, Reveal, ThemeButton } from './InvitationParts'
+import { Reveal } from '@/components/ui/Reveal'
+import { InvitationSection, Ornament, ThemeButton } from './InvitationParts'
 import { themes, themeVariables, type ThemeDefinition } from './themes'
 
 /** The date of the first session, written as at the venue ("Sabtu, 12 Desember 2026"). */
@@ -560,6 +563,7 @@ export function InvitationPage() {
       className="min-h-dvh text-(--inv-ink)"
       style={{ ...themeVariables(theme), background: theme.backgroundStyle, backgroundAttachment: 'fixed' }}
     >
+      {isDemo(code) && <DemoBar theme={data.event.theme} />}
       {/* One audio element for the cover and the page, so the music keeps playing when the cover closes. */}
       {musicSrc && <audio ref={music} src={musicSrc} loop preload="auto" muted={muted} />}
       {!coverGone && (
@@ -573,7 +577,13 @@ export function InvitationPage() {
       )}
 
       {opened && (
-        <main className="mx-auto max-w-xl space-y-6 px-4 pt-6 pb-24 sm:space-y-8 sm:pt-10">
+        <main
+          className={cn(
+            'mx-auto max-w-xl space-y-6 px-4 pb-24 sm:space-y-8',
+            // Room for the demo bar above the page.
+            isDemo(code) ? 'pt-32 sm:pt-24' : 'pt-6 sm:pt-10',
+          )}
+        >
           <Reveal>
             <header className="text-center">
               {data.event.coverUrl && (

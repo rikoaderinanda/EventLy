@@ -51,6 +51,7 @@ public static class ServiceSetup
         services.AddScoped<PlatformOwnerService>();
         services.AddScoped<EventService>();
         services.AddScoped<EventStatsService>();
+        services.AddScoped<ReportService>();
         services.AddScoped<PackageService>();
         services.AddScoped<PaymentService>();
         services.AddScoped<InvitationLinks>();

@@ -3,6 +3,7 @@ import { apiFetch } from '@/api/client'
 import { env } from '@/config/env'
 import type { EventCategory, EventStatus, EventTimeZone, LocalDateTime } from '@/features/events/api'
 import type { GuestType } from '@/features/guests/api'
+import { demo, isDemo } from './demo'
 import type { InvitationTheme } from './themes'
 
 export type RsvpStatus = 'Pending' | 'Attending' | 'NotAttending'
@@ -67,12 +68,15 @@ export const publicKeys = {
 }
 
 /** The QR image is public (the code is the credential), so an <img> can load it directly. */
-export const publicQrUrl = (code: string) => `${env.apiBaseUrl}${base(code)}/qr?size=480`
+export const publicQrUrl = (code: string) =>
+  // The demo shows a sample image: it isn't a real invitation, so there is no QR to scan.
+  isDemo(code) ? '/demo-qr.svg' : `${env.apiBaseUrl}${base(code)}/qr?size=480`
 
 export function usePublicInvitation(code: string) {
   return useQuery({
     queryKey: publicKeys.invitation(code),
-    queryFn: () => apiFetch<PublicInvitation>(base(code), { skipAuthRefresh: true }),
+    queryFn: () =>
+      isDemo(code) ? demo.invitation() : apiFetch<PublicInvitation>(base(code), { skipAuthRefresh: true }),
     retry: false,
   })
 }
@@ -81,7 +85,13 @@ export function useSetRsvp(code: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (status: Exclude<RsvpStatus, 'Pending'>) =>
-      apiFetch<PublicRsvp>(`${base(code)}/rsvp`, { method: 'PUT', body: { status }, skipAuthRefresh: true }),
+      isDemo(code)
+        ? demo.rsvp(status)
+        : apiFetch<PublicRsvp>(`${base(code)}/rsvp`, {
+            method: 'PUT',
+            body: { status },
+            skipAuthRefresh: true,
+          }),
     onSuccess: (rsvp) =>
       queryClient.setQueryData<PublicInvitation>(
         publicKeys.invitation(code),
@@ -94,7 +104,9 @@ export function usePublicWishes(code: string, enabled: boolean) {
   return useInfiniteQuery({
     queryKey: publicKeys.wishes(code),
     queryFn: ({ pageParam }) =>
-      apiFetch<PublicWishPage>(`${base(code)}/wishes?page=${pageParam}`, { skipAuthRefresh: true }),
+      isDemo(code)
+        ? demo.wishes()
+        : apiFetch<PublicWishPage>(`${base(code)}/wishes?page=${pageParam}`, { skipAuthRefresh: true }),
     initialPageParam: 1,
     getNextPageParam: (last) => (last.hasMore ? last.page + 1 : undefined),
     enabled,
@@ -105,7 +117,13 @@ export function useSetWish(code: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (message: string) =>
-      apiFetch<PublicWish>(`${base(code)}/wish`, { method: 'PUT', body: { message }, skipAuthRefresh: true }),
+      isDemo(code)
+        ? demo.wish(message)
+        : apiFetch<PublicWish>(`${base(code)}/wish`, {
+            method: 'PUT',
+            body: { message },
+            skipAuthRefresh: true,
+          }),
     onSuccess: (wish) => {
       queryClient.setQueryData<PublicInvitation>(
         publicKeys.invitation(code),
@@ -119,7 +137,8 @@ export function useSetWish(code: string) {
 export function usePublicGifts(code: string, enabled: boolean) {
   return useQuery({
     queryKey: publicKeys.gifts(code),
-    queryFn: () => apiFetch<PublicGifts>(`${base(code)}/gifts`, { skipAuthRefresh: true }),
+    queryFn: () =>
+      isDemo(code) ? demo.gifts() : apiFetch<PublicGifts>(`${base(code)}/gifts`, { skipAuthRefresh: true }),
     enabled,
   })
 }
@@ -127,6 +146,8 @@ export function usePublicGifts(code: string, enabled: boolean) {
 export function useConfirmGift(code: string) {
   return useMutation({
     mutationFn: (body: { senderName: string; amount: number | null; note: string | null }) =>
-      apiFetch<void>(`${base(code)}/gift-confirmations`, { method: 'POST', body, skipAuthRefresh: true }),
+      isDemo(code)
+        ? demo.confirmGift()
+        : apiFetch<void>(`${base(code)}/gift-confirmations`, { method: 'POST', body, skipAuthRefresh: true }),
   })
 }

@@ -3,35 +3,10 @@
     "tagline": "Undangan, RSVP, check-in QR, dan galeri foto dalam satu aplikasi."
   },
   "home": {
-    "title": "Acara berkesan, dari undangan hingga kenangan.",
-    "subtitle": "Undangan digital, RSVP, check-in QR dan galeri foto dalam satu tempat. Untuk pernikahan, ulang tahun dan acara kantor.",
     "apiStatus": "Status server",
     "apiOnline": "Terhubung",
     "apiOffline": "Tidak terhubung",
-    "apiChecking": "Memeriksa…",
-    "eyebrow": "Platform acara premium",
-    "start": "Mulai sekarang",
-    "signIn": "Masuk",
-    "featuresTitle": "Semua yang dibutuhkan acara Anda",
-    "feature": {
-      "invite": {
-        "title": "Undangan digital",
-        "body": "Tiga tema elegan, sampul foto, musik, dan link pribadi untuk setiap tamu lewat WhatsApp."
-      },
-      "rsvp": {
-        "title": "RSVP & ucapan",
-        "body": "Tamu menjawab kehadiran dan menulis doa; Anda melihat angkanya secara langsung."
-      },
-      "checkin": {
-        "title": "Check-in QR",
-        "body": "Staff memindai QR di pintu masuk dalam hitungan detik, bahkan di gedung yang gelap."
-      },
-      "photos": {
-        "title": "Galeri foto",
-        "body": "Foto tamu dari Staff dan kamera tamu, aman tersimpan dan bisa diunduh semua."
-      }
-    },
-    "extras": "Plus amplop digital, hitung mundur dan statistik acara."
+    "apiChecking": "Memeriksa…"
   },
   "error": {
     "notFoundTitle": "Halaman tidak ditemukan",
@@ -63,7 +38,7 @@
       "network_unreachable": "Tidak dapat terhubung ke server."
     },
     "brandTitle": "Setiap acara layak terasa istimewa.",
-    "brandFoot": "Dipercaya untuk pernikahan, ulang tahun dan acara kantor di Indonesia.",
+    "brandFoot": "Untuk pernikahan, ulang tahun, acara kantor dan komunitas. Bayar sekali per acara.",
     "point": {
       "invite": "Undangan digital dengan tema premium",
       "checkin": "Check-in QR cepat di pintu masuk",
@@ -95,7 +70,8 @@
     "collapse": "Ciutkan menu",
     "expand": "Lebarkan menu",
     "accountMenu": "Menu akun",
-    "manageEvent": "Kelola acara"
+    "manageEvent": "Kelola acara",
+    "reports": "Laporan"
   },
   "roles": {
     "Root": "Root",
@@ -263,7 +239,8 @@
     "photo_not_found": "Foto tidak ditemukan.",
     "gallery_locked": "Galeri terbuka setelah Anda check-in di lokasi acara.",
     "media_invalid_audio": "Unggah file MP3 atau M4A maksimal 10 MB.",
-    "upload_too_large": "Ukuran file terlalu besar."
+    "upload_too_large": "Ukuran file terlalu besar.",
+    "report_excel_not_in_package": "Ekspor Excel tidak termasuk paket acara ini. Unduh CSV."
   },
   "events": {
     "title": "Acara",
@@ -336,7 +313,8 @@
       "photos_other": "{{count}} foto",
       "media": "Sampul, musik, QRIS",
       "unpaid": "Belum dibayar",
-      "stats": "Grafik dan angka"
+      "stats": "Grafik dan angka",
+      "reports": "CSV dan Excel"
     },
     "basics": "Informasi acara",
     "newSubtitle": "Isi nama dan jadwal; tamu bisa ditambahkan setelahnya.",
@@ -781,5 +759,289 @@
     "Elegant": "Elegan",
     "Birthday": "Ceria",
     "Corporate": "Modern gelap"
+  },
+  "reports": {
+    "title": "Laporan",
+    "subtitle": "Unduh data acara untuk dicetak, dibagikan ke keluarga atau diarsipkan.",
+    "open": "Unduh laporan",
+    "downloadAll": "Unduh semua (Excel)",
+    "downloadAs": "Unduh {{report}} sebagai {{format}}",
+    "csvOnlyTitle": "Paket ini hanya CSV",
+    "csvOnly": "File CSV tetap terbuka rapi di Excel. Untuk file Excel dan satu file berisi semua laporan, gunakan paket dengan ekspor Excel.",
+    "excelLocked": "Ekspor Excel tidak termasuk paket acara ini.",
+    "privacy": "Laporan berisi nomor WhatsApp dan email tamu. Simpan dengan aman. Link undangan tidak disertakan, karena link itu kunci check-in tamu.",
+    "kind": {
+      "guests": {
+        "title": "Tamu",
+        "body": "Nama, jenis, jumlah orang, kontak, sesi, status undangan, RSVP dan waktu check-in."
+      },
+      "check-ins": {
+        "title": "Check-in",
+        "body": "Urutan kedatangan: jam, tamu, jumlah orang, petugas dan metode."
+      },
+      "photos": {
+        "title": "Foto",
+        "body": "Jumlah foto per undangan, dari petugas dan dari tamu."
+      },
+      "wishes": {
+        "title": "Ucapan & doa",
+        "body": "Semua ucapan tamu, termasuk yang disembunyikan."
+      },
+      "gifts": {
+        "title": "Konfirmasi hadiah",
+        "body": "Pengirim, undangan, jumlah dan catatan dari tamu."
+      }
+    }
+  },
+  "landing": {
+    "nav": {
+      "features": "Fitur",
+      "how": "Cara kerja",
+      "pricing": "Harga",
+      "faq": "FAQ",
+      "signIn": "Masuk",
+      "menu": "Navigasi halaman"
+    },
+    "cta": {
+      "start": "Mulai Sekarang",
+      "demo": "Lihat Demo Undangan"
+    },
+    "hero": {
+      "badge": "Platform acara digital Indonesia",
+      "title1": "Buat acara lebih berkesan,",
+      "title2": "dari undangan hingga kenangan.",
+      "subtitle": "Buat undangan digital, kelola RSVP, check-in tamu dengan QR, dan kumpulkan foto acara dalam satu tempat.",
+      "points": [
+        "Undangan Digital",
+        "RSVP Online",
+        "QR Check-in",
+        "Galeri Foto"
+      ],
+      "note": "Bayar sekali per acara. Tanpa langganan."
+    },
+    "phone": {
+      "label": "Contoh tampilan undangan di HP",
+      "eyebrow": "Undangan Pernikahan",
+      "date": "Minggu, 20 Desember 2026",
+      "city": "Jakarta",
+      "dear": "Kepada Yth.",
+      "guest": "Bapak Andi Pratama",
+      "open": "Buka Undangan",
+      "countdown": "Menuju hari bahagia",
+      "days": "Hari",
+      "hours": "Jam",
+      "minutes": "Menit",
+      "seconds": "Detik",
+      "rsvp": "Konfirmasi kehadiran",
+      "attend": "Saya hadir",
+      "decline": "Tidak hadir",
+      "qr": "QR undangan",
+      "qrHint": "Tunjukkan saat tiba di lokasi",
+      "toastRsvp": "RSVP: Hadir",
+      "toastRsvpBody": "Bapak Andi · 2 orang",
+      "toastCheckin": "Check-in berhasil",
+      "toastCheckinBody": "Resepsi · 11.02 WIB"
+    },
+    "problems": {
+      "eyebrow": "Tantangan penyelenggara",
+      "title": "Mengelola acara besar tidak harus rumit.",
+      "items": [
+        {
+          "title": "Undangan tercecer",
+          "body": "Undangan dikirim lewat banyak grup dan pesan. Sulit tahu siapa yang sudah menerima dan membukanya."
+        },
+        {
+          "title": "Data tamu sulit dikelola",
+          "body": "Nama ganda, nomor tidak lengkap, dan jawaban RSVP tersebar di catatan, chat dan spreadsheet."
+        },
+        {
+          "title": "Check-in membuat antrean",
+          "body": "Buku tamu kertas memperlambat pintu masuk dan tidak memberi angka kehadiran saat acara berlangsung."
+        }
+      ],
+      "bridge": "EventLy menyatukan semuanya dalam satu alur digital."
+    },
+    "features": {
+      "eyebrow": "Fitur",
+      "title": "Satu platform untuk seluruh perjalanan acara",
+      "subtitle": "Dari tamu menerima undangan sampai foto terakhir diunduh.",
+      "items": [
+        {
+          "title": "Undangan Digital",
+          "body": "Buat undangan digital dengan tema elegan lengkap dengan jadwal, lokasi, musik, countdown dan RSVP.",
+          "points": [
+            "3 tema: Elegan, Ceria, Modern gelap",
+            "Sampul foto dan musik latar",
+            "Link pribadi untuk setiap tamu"
+          ]
+        },
+        {
+          "title": "RSVP & Ucapan",
+          "body": "Pantau konfirmasi tamu, ucapan dan hadiah secara langsung.",
+          "points": [
+            "RSVP dua pilihan",
+            "Ucapan & doa",
+            "Amplop digital (rekening, e-wallet, QRIS)"
+          ],
+          "note": "EventLy tidak memegang uang hadiah. Transfer langsung ke penyelenggara."
+        },
+        {
+          "title": "QR Check-in",
+          "body": "Sambut tamu lebih cepat dengan scanner QR di lokasi acara.",
+          "points": [
+            "Scanner layar penuh untuk Staff",
+            "Validasi QR: undangan tidak valid ditolak",
+            "Riwayat check-in",
+            "Statistik kehadiran langsung"
+          ]
+        },
+        {
+          "title": "Galeri Foto",
+          "body": "Kumpulkan momen acara dari tamu dalam satu galeri.",
+          "points": [
+            "Foto tamu oleh Staff",
+            "Kamera dalam aplikasi untuk tamu",
+            "Download semua foto (ZIP)"
+          ]
+        }
+      ]
+    },
+    "how": {
+      "eyebrow": "Cara kerja",
+      "title1": "Dari persiapan sampai hari acara,",
+      "title2": "semuanya lebih sederhana.",
+      "steps": [
+        {
+          "title": "Masuk dengan Google",
+          "body": "Tanpa membuat password baru."
+        },
+        {
+          "title": "Buat acara dan pilih tema",
+          "body": "Atur sesi seperti akad dan resepsi, lokasi, dan tema undangan."
+        },
+        {
+          "title": "Pilih paket",
+          "body": "Bayar sekali untuk acara ini, lalu acara langsung aktif."
+        },
+        {
+          "title": "Import tamu dari Excel",
+          "body": "Atau tambahkan satu per satu, perorangan maupun rombongan."
+        },
+        {
+          "title": "Kirim undangan lewat WhatsApp",
+          "body": "Pesan sudah terisi, tinggal tekan kirim."
+        },
+        {
+          "title": "Pantau RSVP",
+          "body": "Lihat jawaban, ucapan dan konfirmasi hadiah secara langsung."
+        },
+        {
+          "title": "Check-in dan kumpulkan foto",
+          "body": "Staff memindai QR di pintu masuk dan memotret tamu."
+        }
+      ]
+    },
+    "dashboard": {
+      "eyebrow": "Dashboard",
+      "title": "Semua informasi acara dalam satu dashboard.",
+      "subtitle": "Angka tamu, jawaban RSVP, kehadiran dan ucapan diperbarui saat tamu merespons.",
+      "sample": "Contoh tampilan dengan data fiktif",
+      "greeting": "Halo, Sarah",
+      "event": "Resepsi Rina & Budi",
+      "guests": "Total tamu",
+      "rsvp": "RSVP terjawab",
+      "checkin": "Sudah check-in",
+      "wishes": "Ucapan",
+      "ofQuota": "dari kuota 500",
+      "attending": "182 orang akan hadir",
+      "ofPeople": "dari 250 orang",
+      "points": [
+        "Grafik check-in per jam",
+        "Laporan CSV dan Excel",
+        "Kelola Admin dan Staff"
+      ]
+    },
+    "pricing": {
+      "eyebrow": "Harga",
+      "title": "Pilihan sesuai kebutuhan acara",
+      "subtitle": "Bayar sekali per acara, tanpa langganan. Semua paket sudah termasuk undangan digital, RSVP, ucapan, amplop digital, musik, hitung mundur dan QR check-in.",
+      "perEvent": "/acara",
+      "choose": "Pilih {{name}}",
+      "guests": "{{n}} tamu",
+      "photos": "{{n}} foto",
+      "staff": "{{n}} Staff check-in",
+      "admins": "{{n}} Admin",
+      "retention": "Galeri disimpan {{n}} hari",
+      "zip": "Download semua foto (ZIP)",
+      "guestCamera": "Kamera tamu ({{n}} foto/undangan)",
+      "excel": "Laporan CSV dan Excel",
+      "csv": "Laporan CSV",
+      "fine": "Harga dalam Rupiah dan dapat berubah; harga yang berlaku tampil saat pembayaran.",
+      "compareTitle": "Bandingkan paket",
+      "feature": "Fitur",
+      "rows": {
+        "guests": "Jumlah tamu",
+        "photos": "Foto",
+        "staff": "Staff",
+        "admins": "Admin",
+        "storage": "Penyimpanan galeri",
+        "zip": "Download ZIP",
+        "camera": "Kamera tamu",
+        "reports": "Laporan"
+      },
+      "days": "{{n}} hari",
+      "perInvitation": "{{n}}/undangan",
+      "yes": "Ya",
+      "no": "Tidak"
+    },
+    "faq": {
+      "eyebrow": "FAQ",
+      "title": "Pertanyaan yang sering diajukan",
+      "items": [
+        {
+          "q": "Apakah tamu perlu login?",
+          "a": "Tidak. Tamu cukup membuka link undangan pribadinya, tanpa akun dan tanpa aplikasi."
+        },
+        {
+          "q": "Apakah EventLy menerima uang hadiah?",
+          "a": "Tidak. EventLy hanya menampilkan informasi rekening, e-wallet atau QRIS milik penyelenggara. Tamu mentransfer langsung ke penyelenggara."
+        },
+        {
+          "q": "Apakah bisa import Excel?",
+          "a": "Ya. Unduh template Excel, isi nama, nomor WhatsApp dan jumlah orang, lalu unggah. Nama dan nomor ganda akan ditandai sebelum disimpan."
+        },
+        {
+          "q": "Apakah harus install aplikasi?",
+          "a": "Tidak. EventLy berjalan di browser HP maupun komputer, dan bisa dipasang di layar utama HP seperti aplikasi (PWA)."
+        },
+        {
+          "q": "Bagaimana undangan dikirim ke tamu?",
+          "a": "Setiap tamu mendapat link pribadi. Kirim lewat WhatsApp dengan pesan yang sudah terisi, atau salin link-nya."
+        },
+        {
+          "q": "Bagaimana data tamu dijaga?",
+          "a": "Data setiap organisasi terpisah, link undangan unik untuk tiap tamu, dan data lokasi (GPS) dihapus dari foto sebelum disimpan."
+        },
+        {
+          "q": "Apakah tema undangan bisa diganti?",
+          "a": "Bisa, kapan saja. Ada tiga tema: Elegan, Ceria dan Modern gelap."
+        }
+      ]
+    },
+    "final": {
+      "title": "Siapkan acara berikutnya dengan pengalaman digital yang lebih modern.",
+      "subtitle": "Mulai dengan akun Google Anda, lalu buat acara pertama dalam beberapa menit."
+    },
+    "footer": {
+      "tagline": "Platform acara digital: undangan, RSVP, check-in QR dan galeri foto.",
+      "language": "Bahasa"
+    }
+  },
+  "demo": {
+    "label": "Mode demo",
+    "title": "Contoh undangan",
+    "fictional": "semua data fiktif, tidak ada yang dikirim",
+    "themes": "Coba tema",
+    "back": "Kembali ke beranda"
   }
 }

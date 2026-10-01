@@ -1,7 +1,7 @@
 import type { RouteObject } from 'react-router'
 import { LoginPage } from '@/features/auth/LoginPage'
 import { ProtectedRoute } from '@/features/auth/ProtectedRoute'
-import { HomePage } from '@/features/home/HomePage'
+import { LandingPage } from '@/features/landing/LandingPage'
 import {
   AuthLayout,
   GuestLayout,
@@ -22,10 +22,11 @@ export const routes: RouteObject[] = [
   {
     errorElement: <RouteError />,
     children: [
+      // The marketing page has its own header and footer.
+      { index: true, element: <LandingPage /> },
       {
         element: <AuthLayout />,
         children: [
-          { index: true, element: <HomePage /> },
           { path: 'login', element: <LoginPage /> },
           {
             path: 'legal/terms',
@@ -144,6 +145,12 @@ export const routes: RouteObject[] = [
                 path: 'events/:id/payments',
                 lazy: async () => ({
                   Component: (await import('@/features/payments/EventPaymentsPage')).EventPaymentsPage,
+                }),
+              },
+              {
+                path: 'events/:id/reports',
+                lazy: async () => ({
+                  Component: (await import('@/features/reports/ReportsPage')).ReportsPage,
                 }),
               },
               {

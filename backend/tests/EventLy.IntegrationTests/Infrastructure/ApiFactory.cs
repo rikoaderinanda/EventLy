@@ -39,6 +39,7 @@ public sealed class ApiFactory(string connectionString, IReadOnlyDictionary<stri
         builder.UseSetting("RateLimiting:PublicPermitPerMinute", "1000");
         builder.UseSetting("RateLimiting:PublicWritePermitPerMinute", "1000");
         builder.UseSetting("RateLimiting:CheckInPermitPerMinute", "1000");
+        builder.UseSetting("RateLimiting:ExportPermitPerMinute", "1000");
         builder.UseSetting("Maintenance:Key", MaintenanceKey);
         foreach (var (key, value) in settings ?? new Dictionary<string, string?>())
         {

@@ -3,35 +3,10 @@
     "tagline": "Invitations, RSVP, QR check-in and photo gallery in one app."
   },
   "home": {
-    "title": "Memorable events, from invitation to keepsake.",
-    "subtitle": "Digital invitations, RSVP, QR check-in and photo galleries in one place. For weddings, birthdays and company events.",
     "apiStatus": "Server status",
     "apiOnline": "Connected",
     "apiOffline": "Not connected",
-    "apiChecking": "Checking…",
-    "eyebrow": "Premium event platform",
-    "start": "Get started",
-    "signIn": "Sign in",
-    "featuresTitle": "Everything your event needs",
-    "feature": {
-      "invite": {
-        "title": "Digital invitations",
-        "body": "Three elegant themes, a cover photo, music and a personal link for every guest via WhatsApp."
-      },
-      "rsvp": {
-        "title": "RSVP & wishes",
-        "body": "Guests answer and leave their wishes; you see the numbers live."
-      },
-      "checkin": {
-        "title": "QR check-in",
-        "body": "Staff scan the QR at the entrance in seconds, even in a dark venue."
-      },
-      "photos": {
-        "title": "Photo gallery",
-        "body": "Guest photos from staff and the guest camera, stored safely and downloadable in one go."
-      }
-    },
-    "extras": "Plus digital gifts, a countdown and event statistics."
+    "apiChecking": "Checking…"
   },
   "error": {
     "notFoundTitle": "Page not found",
@@ -63,7 +38,7 @@
       "network_unreachable": "Can't reach the server."
     },
     "brandTitle": "Every event deserves to feel special.",
-    "brandFoot": "Trusted for weddings, birthdays and company events in Indonesia.",
+    "brandFoot": "For weddings, birthdays, company and community events. Pay once per event.",
     "point": {
       "invite": "Digital invitations with premium themes",
       "checkin": "Fast QR check-in at the entrance",
@@ -95,7 +70,8 @@
     "collapse": "Collapse menu",
     "expand": "Expand menu",
     "accountMenu": "Account menu",
-    "manageEvent": "Manage event"
+    "manageEvent": "Manage event",
+    "reports": "Reports"
   },
   "roles": {
     "Root": "Root",
@@ -263,7 +239,8 @@
     "photo_not_found": "Photo not found.",
     "gallery_locked": "The gallery opens after you check in at the event.",
     "media_invalid_audio": "Upload an MP3 or M4A file of at most 10 MB.",
-    "upload_too_large": "The file is too large."
+    "upload_too_large": "The file is too large.",
+    "report_excel_not_in_package": "Excel export isn't part of this event's package. Download CSV instead."
   },
   "events": {
     "title": "Events",
@@ -342,7 +319,8 @@
       "photos_other": "{{count}} photos",
       "media": "Cover, music, QRIS",
       "unpaid": "Not paid yet",
-      "stats": "Charts and numbers"
+      "stats": "Charts and numbers",
+      "reports": "CSV and Excel"
     },
     "basics": "Event details",
     "newSubtitle": "Enter the name and schedule; add guests afterwards.",
@@ -796,5 +774,289 @@
     "Elegant": "Elegant",
     "Birthday": "Playful",
     "Corporate": "Modern dark"
+  },
+  "reports": {
+    "title": "Reports",
+    "subtitle": "Download the event data to print, share with the family or keep.",
+    "open": "Download reports",
+    "downloadAll": "Download all (Excel)",
+    "downloadAs": "Download {{report}} as {{format}}",
+    "csvOnlyTitle": "This package is CSV only",
+    "csvOnly": "CSV files still open neatly in Excel. For Excel files and one file with every report, use a package with Excel export.",
+    "excelLocked": "Excel export isn't part of this event's package.",
+    "privacy": "Reports contain guests' WhatsApp numbers and e-mails. Keep them safe. Invitation links are left out: a link is the guest's check-in key.",
+    "kind": {
+      "guests": {
+        "title": "Guests",
+        "body": "Name, type, people, contact, sessions, invitation status, RSVP and check-in time."
+      },
+      "check-ins": {
+        "title": "Check-ins",
+        "body": "Arrivals in order: time, guest, people, staff and method."
+      },
+      "photos": {
+        "title": "Photos",
+        "body": "Photos per invitation, by staff and by the guest."
+      },
+      "wishes": {
+        "title": "Wishes",
+        "body": "Every guest's wish, including hidden ones."
+      },
+      "gifts": {
+        "title": "Gift confirmations",
+        "body": "Sender, invitation, amount and note from guests."
+      }
+    }
+  },
+  "landing": {
+    "nav": {
+      "features": "Features",
+      "how": "How it works",
+      "pricing": "Pricing",
+      "faq": "FAQ",
+      "signIn": "Sign in",
+      "menu": "Page navigation"
+    },
+    "cta": {
+      "start": "Get Started",
+      "demo": "See a Demo Invitation"
+    },
+    "hero": {
+      "badge": "Digital event platform for Indonesia",
+      "title1": "Make every event memorable,",
+      "title2": "from invitation to keepsake.",
+      "subtitle": "Create digital invitations, manage RSVPs, check guests in with QR, and collect the event photos in one place.",
+      "points": [
+        "Digital Invitations",
+        "Online RSVP",
+        "QR Check-in",
+        "Photo Gallery"
+      ],
+      "note": "Pay once per event. No subscription."
+    },
+    "phone": {
+      "label": "Sample invitation on a phone",
+      "eyebrow": "Wedding Invitation",
+      "date": "Sunday, 20 December 2026",
+      "city": "Jakarta",
+      "dear": "Dear",
+      "guest": "Mr. Andi Pratama",
+      "open": "Open Invitation",
+      "countdown": "Counting down",
+      "days": "Days",
+      "hours": "Hours",
+      "minutes": "Min",
+      "seconds": "Sec",
+      "rsvp": "Will you attend?",
+      "attend": "I'll attend",
+      "decline": "Can't attend",
+      "qr": "Invitation QR",
+      "qrHint": "Show it when you arrive",
+      "toastRsvp": "RSVP: Attending",
+      "toastRsvpBody": "Mr. Andi · 2 people",
+      "toastCheckin": "Checked in",
+      "toastCheckinBody": "Reception · 11:02 WIB"
+    },
+    "problems": {
+      "eyebrow": "The organizer's challenge",
+      "title": "Running a big event doesn't have to be complicated.",
+      "items": [
+        {
+          "title": "Scattered invitations",
+          "body": "Invitations go out through many groups and chats. It's hard to know who received and opened them."
+        },
+        {
+          "title": "Guest data is hard to manage",
+          "body": "Duplicate names, missing numbers, and RSVP answers spread over notes, chats and spreadsheets."
+        },
+        {
+          "title": "Check-in causes queues",
+          "body": "A paper guest book slows the entrance and gives no attendance numbers while the event is running."
+        }
+      ],
+      "bridge": "EventLy brings it all together in one digital flow."
+    },
+    "features": {
+      "eyebrow": "Features",
+      "title": "One platform for the whole event journey",
+      "subtitle": "From the moment guests receive the invitation to the last photo downloaded.",
+      "items": [
+        {
+          "title": "Digital Invitations",
+          "body": "Create elegant digital invitations with the schedule, location, music, countdown and RSVP.",
+          "points": [
+            "3 themes: Elegant, Playful, Modern dark",
+            "Cover photo and background music",
+            "A personal link for every guest"
+          ]
+        },
+        {
+          "title": "RSVP & Wishes",
+          "body": "Follow guest confirmations, wishes and gifts as they come in.",
+          "points": [
+            "Two-choice RSVP",
+            "Wishes",
+            "Digital gift (bank, e-wallet, QRIS)"
+          ],
+          "note": "EventLy never holds gift money. Guests transfer directly to the organizer."
+        },
+        {
+          "title": "QR Check-in",
+          "body": "Welcome guests faster with a QR scanner at the venue.",
+          "points": [
+            "Full-screen scanner for staff",
+            "QR validation: invalid invitations are refused",
+            "Check-in history",
+            "Live attendance statistics"
+          ]
+        },
+        {
+          "title": "Photo Gallery",
+          "body": "Collect the event's moments from guests in one gallery.",
+          "points": [
+            "Guest photos by staff",
+            "In-app camera for guests",
+            "Download every photo (ZIP)"
+          ]
+        }
+      ]
+    },
+    "how": {
+      "eyebrow": "How it works",
+      "title1": "From preparation to the big day,",
+      "title2": "everything is simpler.",
+      "steps": [
+        {
+          "title": "Sign in with Google",
+          "body": "No new password to remember."
+        },
+        {
+          "title": "Create the event and pick a theme",
+          "body": "Set the sessions (ceremony and reception), the venue and the invitation theme."
+        },
+        {
+          "title": "Choose a package",
+          "body": "Pay once for this event and it goes live."
+        },
+        {
+          "title": "Import guests from Excel",
+          "body": "Or add them one by one, individuals and groups."
+        },
+        {
+          "title": "Send invitations via WhatsApp",
+          "body": "The message is ready; just press send."
+        },
+        {
+          "title": "Follow the RSVPs",
+          "body": "See answers, wishes and gift confirmations live."
+        },
+        {
+          "title": "Check in and collect photos",
+          "body": "Staff scan the QR at the entrance and take photos of guests."
+        }
+      ]
+    },
+    "dashboard": {
+      "eyebrow": "Dashboard",
+      "title": "Everything about your event in one dashboard.",
+      "subtitle": "Guest numbers, RSVP answers, attendance and wishes update as guests respond.",
+      "sample": "Sample view with fictional data",
+      "greeting": "Hi, Sarah",
+      "event": "Rina & Budi Reception",
+      "guests": "Total guests",
+      "rsvp": "RSVP answered",
+      "checkin": "Checked in",
+      "wishes": "Wishes",
+      "ofQuota": "of 500 allowed",
+      "attending": "182 people attending",
+      "ofPeople": "of 250 people",
+      "points": [
+        "Check-ins per hour chart",
+        "CSV and Excel reports",
+        "Manage admins and staff"
+      ]
+    },
+    "pricing": {
+      "eyebrow": "Pricing",
+      "title": "Choose what fits your event",
+      "subtitle": "Pay once per event, no subscription. Every package includes digital invitations, RSVP, wishes, digital gifts, music, a countdown and QR check-in.",
+      "perEvent": "/event",
+      "choose": "Choose {{name}}",
+      "guests": "{{n}} guests",
+      "photos": "{{n}} photos",
+      "staff": "{{n}} check-in staff",
+      "admins": "{{n}} admins",
+      "retention": "Gallery kept {{n}} days",
+      "zip": "Download every photo (ZIP)",
+      "guestCamera": "Guest camera ({{n}} photos/invitation)",
+      "excel": "CSV and Excel reports",
+      "csv": "CSV reports",
+      "fine": "Prices in Indonesian Rupiah and subject to change; the price that applies is shown at checkout.",
+      "compareTitle": "Compare packages",
+      "feature": "Feature",
+      "rows": {
+        "guests": "Guests",
+        "photos": "Photos",
+        "staff": "Staff",
+        "admins": "Admins",
+        "storage": "Gallery storage",
+        "zip": "ZIP download",
+        "camera": "Guest camera",
+        "reports": "Reports"
+      },
+      "days": "{{n}} days",
+      "perInvitation": "{{n}}/invitation",
+      "yes": "Yes",
+      "no": "No"
+    },
+    "faq": {
+      "eyebrow": "FAQ",
+      "title": "Frequently asked questions",
+      "items": [
+        {
+          "q": "Do guests need to sign in?",
+          "a": "No. Guests just open their personal invitation link, with no account and no app."
+        },
+        {
+          "q": "Does EventLy receive gift money?",
+          "a": "No. EventLy only shows the organizer's bank, e-wallet or QRIS details. Guests transfer directly to the organizer."
+        },
+        {
+          "q": "Can I import from Excel?",
+          "a": "Yes. Download the Excel template, fill in names, WhatsApp numbers and people, then upload. Duplicate names and numbers are flagged before anything is saved."
+        },
+        {
+          "q": "Do I have to install an app?",
+          "a": "No. EventLy works in the browser on phones and computers, and can be added to the phone's home screen like an app (PWA)."
+        },
+        {
+          "q": "How do guests receive their invitation?",
+          "a": "Every guest gets a personal link. Send it via WhatsApp with the message filled in, or copy the link."
+        },
+        {
+          "q": "How is guest data protected?",
+          "a": "Each organization's data is kept separate, every guest's link is unique, and location data (GPS) is removed from photos before they are stored."
+        },
+        {
+          "q": "Can I change the invitation theme?",
+          "a": "Yes, any time. There are three themes: Elegant, Playful and Modern dark."
+        }
+      ]
+    },
+    "final": {
+      "title": "Get your next event ready with a more modern digital experience.",
+      "subtitle": "Start with your Google account, then create your first event in minutes."
+    },
+    "footer": {
+      "tagline": "Digital event platform: invitations, RSVP, QR check-in and photo galleries.",
+      "language": "Language"
+    }
+  },
+  "demo": {
+    "label": "Demo mode",
+    "title": "Sample invitation",
+    "fictional": "all data is fictional, nothing is sent",
+    "themes": "Try a theme",
+    "back": "Back to home"
   }
 }

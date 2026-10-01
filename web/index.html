@@ -8,8 +8,49 @@
     <meta name="theme-color" content="#faf7f2" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="description" content="Undangan digital, RSVP, check-in QR, dan galeri foto acara." />
-    <title>EventLy</title>
+    <title>EventLy - Platform Undangan Digital, RSVP &amp; QR Check-in Acara</title>
+    <meta
+      name="description"
+      content="Buat undangan digital, kelola RSVP, check-in QR tamu, dan galeri foto acara dalam satu platform EventLy."
+    />
+    <!-- Open Graph / Twitter. Replace og-image.png (source: docs/design/og-image.html); when the domain is
+         known, make og:image an absolute URL and add og:url and a canonical link. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="EventLy" />
+    <meta property="og:locale" content="id_ID" />
+    <meta property="og:title" content="EventLy - Platform Undangan Digital, RSVP &amp; QR Check-in Acara" />
+    <meta
+      property="og:description"
+      content="Buat undangan digital, kelola RSVP, check-in QR tamu, dan galeri foto acara dalam satu platform EventLy."
+    />
+    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="EventLy: undangan digital, RSVP, check-in QR dan galeri foto" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="EventLy - Platform Undangan Digital, RSVP &amp; QR Check-in Acara" />
+    <meta
+      name="twitter:description"
+      content="Buat undangan digital, kelola RSVP, check-in QR tamu, dan galeri foto acara dalam satu platform EventLy."
+    />
+    <meta name="twitter:image" content="/og-image.png" />
+    <!-- Schema.org: the product and its packages (same values as features/landing/packages.ts). -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "EventLy",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web, Android, iOS (PWA)",
+        "inLanguage": ["id", "en"],
+        "description": "Platform acara digital untuk Indonesia: undangan digital, RSVP, check-in QR, dan galeri foto tamu.",
+        "offers": [
+          { "@type": "Offer", "name": "Basic", "price": "150000", "priceCurrency": "IDR" },
+          { "@type": "Offer", "name": "Premium", "price": "350000", "priceCurrency": "IDR" },
+          { "@type": "Offer", "name": "Enterprise", "price": "1000000", "priceCurrency": "IDR" }
+        ]
+      }
+    </script>
     <style>
       /* Splash: shown inside #root until React renders the first page (React replaces it). */
       html,

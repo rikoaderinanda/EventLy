@@ -1,5 +1,6 @@
 import {
   CircleCheck,
+  FileSpreadsheet,
   Gift,
   Images,
   MailOpen,
@@ -12,6 +13,7 @@ import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router'
 import { CheckInChart, RsvpBreakdown } from '@/components/event/Charts'
 import { StatisticCard } from '@/components/event/StatisticCard'
+import { ButtonLink } from '@/components/ui/Button'
 import { Card, PageHeader, SectionHeader } from '@/components/ui/Card'
 import { Notice, ProgressBar, ProgressRing } from '@/components/ui/Feedback'
 import { Loading } from '@/components/ui/Spinner'
@@ -33,7 +35,21 @@ export function StatsPage() {
 
   return (
     <section className="mx-auto max-w-6xl space-y-6 py-6 sm:space-y-8 sm:py-10">
-      <PageHeader eyebrow={event.data.name} title={t('stats.title')} subtitle={t('stats.subtitle')} />
+      <PageHeader
+        eyebrow={event.data.name}
+        title={t('stats.title')}
+        subtitle={t('stats.subtitle')}
+        actions={
+          <ButtonLink
+            to={`/app/events/${id}/reports`}
+            variant="secondary"
+            icon={FileSpreadsheet}
+            block="mobile"
+          >
+            {t('reports.open')}
+          </ButtonLink>
+        }
+      />
 
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <StatisticCard

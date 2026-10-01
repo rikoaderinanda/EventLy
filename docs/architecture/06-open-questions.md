@@ -63,6 +63,12 @@
 | Q-63 | Story, cover, location | "Story" uses the event description; the cover shows the event name (e.g. "Rina & Budi"); location uses each session's Google Maps link as an "Open map" button (no embedded map) | 2026-10-01 |
 | Q-64 | Guest avatars | Initials on a soft colour (guests have no photo) | 2026-10-01 |
 | Q-65 | Settings | A Profile/Settings page: name, email, language, sign out, link to Organization | 2026-10-01 |
+| Q-66 | Reports | Five reports: guests (with RSVP and check-in), check-ins, photos per invitation, wishes, gift confirmations | 2026-10-01 |
+| Q-67 | CSV format | UTF-8 with a BOM and **semicolon** separator, so Excel set to Indonesian opens it in columns | 2026-10-01 |
+| Q-68 | Contact details in reports | WhatsApp numbers and e-mails are **included** (Owner/Admin only); every download is audited | 2026-10-01 |
+| Q-69 | Invitation links in reports | **Not included**: the link is the guest's check-in key. Links are copied from the guest page | 2026-10-01 |
+| Q-70 | All-in-one download | "Unduh semua (Excel)": one workbook with one sheet per report, for packages with Excel export | 2026-10-01 |
+| Q-71 | Where reports live | A **Laporan** page per event (event tile and sidebar), and a button on the statistics page | 2026-10-01 |
 | Q-9 | Offline | **Online only** for the MVP. Upload retries automatically. Photo step can be skipped. Offline mode is a future phase | 2026-09-29 |
 
 ## Accepted recommendations ("sisanya sesuai saran", 2026-09-29)

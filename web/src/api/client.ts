@@ -67,3 +67,17 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
 export async function apiFetchBlob(path: string): Promise<Blob> {
   return (await request(path, { headers: { Accept: '*/*' } })).blob()
 }
+
+/** The file name the server suggests (RFC 6266: filename* first, then filename). */
+export function fileNameOf(disposition: string | null): string | null {
+  if (!disposition) return null
+  const star = /filename\*=UTF-8''([^;]+)/i.exec(disposition)
+  if (star?.[1]) return decodeURIComponent(star[1])
+  return /filename="?([^";]+)"?/i.exec(disposition)?.[1] ?? null
+}
+
+/** A download with the server's file name (reports). */
+export async function apiFetchFile(path: string): Promise<{ blob: Blob; fileName: string | null }> {
+  const response = await request(path, { headers: { Accept: '*/*' } })
+  return { blob: await response.blob(), fileName: fileNameOf(response.headers.get('content-disposition')) }
+}

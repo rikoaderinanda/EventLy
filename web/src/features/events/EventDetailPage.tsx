@@ -5,6 +5,7 @@ import {
   CircleCheck,
   Clock,
   CreditCard,
+  FileSpreadsheet,
   Gift,
   Images,
   type LucideIcon,
@@ -293,6 +294,13 @@ function SectionGrid({ event }: { event: EventDetail }) {
       detail: t('events.tile.stats'),
       icon: BarChart3,
       tone: 'bg-brand-100 text-brand-700',
+    },
+    {
+      to: 'reports',
+      title: t('nav.reports'),
+      detail: t('events.tile.reports'),
+      icon: FileSpreadsheet,
+      tone: 'bg-success-50 text-success-700',
     },
   ]
   return (

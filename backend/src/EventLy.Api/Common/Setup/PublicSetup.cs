@@ -14,11 +14,15 @@ public static class PublicSetup
     /// <summary>Check-in at the venue, per signed-in user (a fast scanner, not a script).</summary>
     public const string CheckInPolicy = "checkin";
 
+    /// <summary>Report and ZIP downloads, per signed-in user: each one reads the whole event.</summary>
+    public const string ExportPolicy = "export";
+
     public static IServiceCollection AddPublicRateLimits(this IServiceCollection services, IConfiguration configuration)
     {
         var reads = configuration.GetValue("RateLimiting:PublicPermitPerMinute", 60);
         var writes = configuration.GetValue("RateLimiting:PublicWritePermitPerMinute", 10);
         var checkIns = configuration.GetValue("RateLimiting:CheckInPermitPerMinute", 120);
+        var exports = configuration.GetValue("RateLimiting:ExportPermitPerMinute", 10);
         services.AddRateLimiter(o =>
         {
             o.AddPolicy(ReadPolicy, http => PerIp(http, ReadPolicy, reads));
@@ -26,6 +30,9 @@ public static class PublicSetup
             o.AddPolicy(CheckInPolicy, http => RateLimitPartition.GetFixedWindowLimiter(
                 $"{CheckInPolicy}:{http.User.FindFirst(Auth.AuthClaims.UserId)?.Value ?? http.Connection.RemoteIpAddress?.ToString()}",
                 _ => new FixedWindowRateLimiterOptions { PermitLimit = checkIns, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
+            o.AddPolicy(ExportPolicy, http => RateLimitPartition.GetFixedWindowLimiter(
+                $"{ExportPolicy}:{http.User.FindFirst(Auth.AuthClaims.UserId)?.Value ?? http.Connection.RemoteIpAddress?.ToString()}",
+                _ => new FixedWindowRateLimiterOptions { PermitLimit = exports, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
         });
         return services;
     }

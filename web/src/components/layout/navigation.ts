@@ -3,6 +3,7 @@ import {
   Building2,
   CalendarDays,
   CreditCard,
+  FileSpreadsheet,
   LayoutDashboard,
   type LucideIcon,
   Package,
@@ -34,7 +35,7 @@ const under = (path: string) => (pathname: string) => pathname === path || pathn
 const eventSub = (page: string) => (pathname: string) => !!matchPath(`/app/events/:id/${page}/*`, pathname)
 
 // "Acara" covers the list and an event's own pages, but not the pages that have their own menu.
-const eventPages = ['guests', 'check-ins', 'payments', 'stats']
+const eventPages = ['guests', 'check-ins', 'payments', 'stats', 'reports']
 const eventsActive = (pathname: string) =>
   under('/app/events')(pathname) && !eventPages.some((page) => eventSub(page)(pathname))
 
@@ -79,6 +80,7 @@ export function useOrganizerNav(selectedEventId: string | null): NavGroup[] {
         eventItem('checkins', t('nav.checkIn'), ScanLine, 'check-ins'),
         eventItem('payments', t('nav.payments'), CreditCard, 'payments'),
         eventItem('stats', t('nav.analytics'), BarChart3, 'stats'),
+        eventItem('reports', t('nav.reports'), FileSpreadsheet, 'reports'),
       ],
     },
     {

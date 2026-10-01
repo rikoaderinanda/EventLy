@@ -1,11 +1,13 @@
 using EventLy.Api.Auth;
 using EventLy.Api.Common.Errors;
+using EventLy.Api.Common.Setup;
 using EventLy.Api.Dtos.Photos;
 using EventLy.Api.Services;
 using EventLy.Api.Storage;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace EventLy.Api.Controllers;
 
@@ -52,6 +54,7 @@ public sealed class PhotosController(PhotoService photos) : ControllerBase
 
     /// <summary>The whole gallery (or one invitation) as a ZIP streamed into the response. Needs the package's zipDownload.</summary>
     [HttpGet("events/{eventId:guid}/gallery/zip")]
+    [EnableRateLimiting(PublicSetup.ExportPolicy)]
     [Authorize(Policy = Permissions.GalleryManage)]
     [Produces("application/zip")]
     public async Task Zip(Guid eventId, [FromQuery] Guid? invitationId, CancellationToken ct)
