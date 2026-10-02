@@ -13,7 +13,7 @@
 | Q-5 | Group invitation | Store **only the number of people** (`NumberOfPeople`). No member names | 2026-09-29 |
 | Q-5b | RSVP | **Attending / Not attending** only. No partial counts | 2026-09-29 |
 | Q-7 | Photo upload | Only **after check-in**. **Owner may upload** too. The photo step is **optional (can be skipped)** | 2026-09-29 |
-| Q-22 | Cost and region | **Completely free to start (Rp 0)** and easy to deploy. App region **Jakarta (`asia-southeast2`)**. See architecture §10 | 2026-09-29 |
+| Q-22 | Cost and region | **Completely free to start (Rp 0)** and easy to deploy. App region **Jakarta (`asia-southeast2`)**, changed to **Singapore** by Q-72. See architecture §10 | 2026-09-29 |
 | Q-18 | Frontend hosting | Served by the same Cloud Run service as the API (one service, one domain, one deploy). This follows from the "free and easy" decision | 2026-09-29 |
 | Q-23 | Free providers | **Neon** PostgreSQL (Singapore) for the database, **Cloudflare R2** for photos. **No Redis in production at stage 1** (in-memory cache). Redis stays in local docker compose, as the spec requires. A credit card is available for the Google Cloud billing account (budget alert + max 1 instance) | 2026-09-29 |
 | Q-17 | Source code and CI | Code hosted on **GitHub**, **public repository** (unlimited free GitHub Actions minutes). Secrets never go in the repo: `.env` is git-ignored, and secrets live in GitHub Actions secrets and Google Secret Manager. Secret scanning and push protection are on. Workflows from fork pull requests need maintainer approval and get no secrets. Build and tests run on **GitHub Actions** for every push and pull request. Deploy stays one command; an automatic deploy from GitHub can be added later | 2026-09-29 |
