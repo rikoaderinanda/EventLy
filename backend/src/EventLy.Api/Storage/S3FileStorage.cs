@@ -67,6 +67,10 @@ public sealed class S3FileStorage : IFileStorage, IDisposable
             Key = key,
             InputStream = stream,
             ContentType = contentType,
+            // Cloudflare R2 rejects the SDK's default streaming (aws-chunked) upload signature
+            // ("STREAMING-AWS4-HMAC-SHA256-PAYLOAD not implemented"). The content is already in memory,
+            // so sign it in one piece instead; SeaweedFS accepts both.
+            UseChunkEncoding = false,
         }, ct);
     }
 
