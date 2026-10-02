@@ -479,11 +479,11 @@ docker compose up --build            (compose.yaml)
 
 ### Production — free-tier setup (stage 1, decided 2026-09-29)
 
-Goal: **Rp 0 per month** while traffic is small, and **one-command deployment**. Region: **Jakarta (`asia-southeast2`)** for the app.
+Goal: **Rp 0 per month** while traffic is small, and **one-command deployment**. Region: **Singapore (`asia-southeast1`)** for the app (changed from Jakarta on 2026-10-03: Singapore has the free Cloud Run domain mapping, so no paid load balancer is needed, and it sits next to the Neon database).
 
 ```
                 ┌─────────────────────────────────────────────────┐
-Browser/PWA ───►│ Cloud Run "evently" (asia-southeast2, Jakarta)  │  free tier; min instances 0, max 1
+Browser/PWA ───►│ Cloud Run "evently" (asia-southeast1, Singapore)  │  free tier; min instances 0, max 1
                 │  .NET 10 API  +  built PWA served from wwwroot  │  one service, one domain, one deploy
                 └───────┬───────────────────────────┬─────────────┘
                         │ SQL (TLS)                 │ S3 API
@@ -498,7 +498,7 @@ Scheduled cleanup: Cloud Scheduler (free: 3 jobs) → internal endpoint
 
 | Piece | Choice | Why |
 |---|---|---|
-| App hosting | **Cloud Run**, Jakarta. The API also serves the built PWA files (frontend and API on one domain) | Free tier (2M requests, 180k vCPU-s, 360k GiB-s per month). Jakarta is a "Tier 2" region, so the free allowance stretches a little less far than in the US. It is still ample for testing and small events. One service is the easiest to deploy |
+| App hosting | **Cloud Run**, Singapore. The API also serves the built PWA files (frontend and API on one domain) | Free tier (2M requests, 180k vCPU-s, 360k GiB-s per month). Asian regions are priced higher than the US, so the free allowance stretches a little less far. It is still ample for testing and small events. One service is the easiest to deploy |
 | Database | **Neon** PostgreSQL free plan, Singapore region | Cloud SQL has **no free tier** (it is paid from day one). Neon is free, with 0.5 GB storage and 100 compute-hours per month, and scales to zero when idle |
 | Photo storage | **Cloudflare R2** | The Google Cloud Storage free tier only exists in US regions. R2 gives 10 GB free, **with no charge for downloads**, and is S3-compatible, so the existing `S3FileStorage` works unchanged. **No extra GCS adapter is needed** |
 | Cache / rate limit | **No Redis at this stage.** Uses the ASP.NET Core in-memory cache and in-memory rate limiter | Memorystore has no free tier. With a maximum of 1 Cloud Run instance, in-memory is correct and simpler. Switching to Redis later is a configuration change (`IDistributedCache`). Double check-ins are already prevented by the database unique index |
@@ -510,11 +510,11 @@ Scheduled cleanup: Cloud Scheduler (free: 3 jobs) → internal endpoint
 **Honest caveats of the free setup**
 - Google Cloud needs a **billing account (credit card)** even to use the free tier. New accounts also get a free trial credit. We set a **budget alert** and `max-instances=1` so usage can never grow unexpectedly.
 - **Cold start:** after a quiet period, the first request can take about 2–5 seconds while Cloud Run starts and Neon wakes up. On event day it is worth opening the app a few minutes before guests arrive. Keeping 1 instance always on removes this, but costs money.
-- Traffic from Jakarta to Neon (Singapore) counts as outbound traffic. For small usage it is normally covered or costs a few cents. Downloading large ZIP galleries also goes through Cloud Run. The budget alert catches any cost.
+- The app and Neon are both in Singapore, so database traffic stays in the region. Guests in Indonesia reach Singapore in a few tens of milliseconds. Downloading large ZIP galleries also goes through Cloud Run. The budget alert catches any cost.
 - Neon deletes free projects that are **inactive for 90 days**. The backup script below covers this.
 - **Backups:** a scheduled `pg_dump` stored in R2, plus Neon's built-in restore window. A monthly restore test is documented in the runbook.
 
-**Stage 2 (when there is a budget):** Cloud SQL Jakarta, Memorystore Redis, min instances 1, a separate frontend CDN. Only configuration changes, not code.
+**Stage 2 (when there is a budget):** Cloud SQL (Jakarta or Singapore, with a load balancer for the domain if the app moves to Jakarta), Memorystore Redis, min instances 1, a separate frontend CDN. Only configuration changes, not code.
 
 ## 11. Non-functional targets [Assumption — Q-14]
 

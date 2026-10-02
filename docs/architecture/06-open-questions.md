@@ -69,6 +69,7 @@
 | Q-69 | Invitation links in reports | **Not included**: the link is the guest's check-in key. Links are copied from the guest page | 2026-10-01 |
 | Q-70 | All-in-one download | "Unduh semua (Excel)": one workbook with one sheet per report, for packages with Excel export | 2026-10-01 |
 | Q-71 | Where reports live | A **Laporan** page per event (event tile and sidebar), and a button on the statistics page | 2026-10-01 |
+| Q-72 | Hosting region | **Singapore (`asia-southeast1`)** instead of Jakarta: free Cloud Run domain mapping (no paid load balancer) and the same city as Neon. Costs are listed in the deployment guide §1a | 2026-10-03 |
 | Q-9 | Offline | **Online only** for the MVP. Upload retries automatically. Photo step can be skipped. Offline mode is a future phase | 2026-09-29 |
 
 ## Accepted recommendations ("sisanya sesuai saran", 2026-09-29)

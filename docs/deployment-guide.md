@@ -1,6 +1,6 @@
 # Deployment Guide
 
-> How to put EventLy online. Target from the roadmap (Phase 12): **one Cloud Run service in Jakarta** (API + PWA in one image), **Neon PostgreSQL**, **Cloudflare R2** for photos, **Secret Manager** for secrets, the migration as a **Cloud Run Job**. Written 2026-10-01, after Phase 10; check the provider consoles, since their screens change.
+> How to put EventLy online. Target from the roadmap (Phase 12): **one Cloud Run service in Singapore** (API + PWA in one image; Singapore instead of Jakarta so the free domain mapping can be used, see §1a), **Neon PostgreSQL**, **Cloudflare R2** for photos, **Secret Manager** for secrets, the migration as a **Cloud Run Job**. Written 2026-10-01, after Phase 10; check the provider consoles, since their screens change.
 
 ## 0. Read first: what must be done before a public launch
 
@@ -13,6 +13,32 @@
 | B5 | Domain | Needed for Google sign-in, invitation links (`App__PublicBaseUrl`) and absolute Open Graph URLs | Choose one |
 
 Until B1 is solved you can still rehearse everything below on a **staging** copy, but only with `ASPNETCORE_ENVIRONMENT=Development`, which also enables the payment simulator and the test sign-in. **Never give a Development deployment a public domain or real guests.**
+
+## 1a. What it costs
+
+Prices and free allowances change; check each provider's pricing page before deciding. As of 2026-10, from memory of the published offers:
+
+| Part | Free? | Notes |
+|---|---|---|
+| Google Cloud account | Needs a **credit card** | Billing must be on even while usage stays inside the free allowances |
+| Cloud Run (the app) | Monthly free allowance | Enough for small traffic with `--min-instances 0`. `--min-instances 1` (no cold start) **costs money**: an instance is always on |
+| Cloud Build | Free build minutes | An occasional release fits |
+| Artifact Registry | About 0.5 GB free | One image is about 300 MB: delete old images (§13) or pay a few cents |
+| Secret Manager | Free for a handful of secrets | EventLy uses 5 |
+| Cloud Scheduler | 3 jobs free | EventLy uses 1–2 |
+| Domain mapping | Free, **only in some regions** | Available in Singapore, which is why this guide uses `asia-southeast1` (not Jakarta) |
+| Load Balancer | **Paid** (roughly USD 18+/month) | Only needed in a region without domain mapping |
+| Neon (database) | Free plan | Small storage (about 0.5 GB), limited compute hours, suspends when idle (a few seconds to wake), short restore history. Fine for trials; use a paid plan for real events |
+| Cloudflare R2 (photos) | About 10 GB free, **no egress fees** | 10 GB is roughly 10–20 thousand photos; one Enterprise event may hold 10,000 |
+| Google sign-in (OAuth) | Free | |
+| Domain | **Paid**, yearly | At the registrar |
+| Xendit (later) | No monthly fee | A fee per transaction |
+
+**Trial or demo:** close to Rp 0 per month with Singapore, `min-instances 0`, Neon free, R2 free and old images deleted. You still pay for the **domain** and need a **card** on Google Cloud.
+
+**Real events:** plan a small monthly budget for a paid Neon plan (longer backups, no sleeping), optionally `--min-instances 1` on event days, and R2 storage beyond 10 GB.
+
+Set a **budget alert** first: Google Cloud Console → *Billing → Budgets & alerts* → a small amount (for example USD 5) with e-mail alerts at 50%, 90% and 100%.
 
 ## 1. What you need
 
@@ -28,7 +54,7 @@ Values used below (replace them):
 
 ```bash
 PROJECT=evently-prod            # Google Cloud project id
-REGION=asia-southeast2          # Jakarta
+REGION=asia-southeast1          # Singapore: free domain mapping, next to Neon
 DOMAIN=evently.id
 REPO=evently                    # Artifact Registry repository
 IMAGE=$REGION-docker.pkg.dev/$PROJECT/$REPO/evently
@@ -36,7 +62,7 @@ IMAGE=$REGION-docker.pkg.dev/$PROJECT/$REPO/evently
 
 ## 2. Database: Neon
 
-1. Create a project in region **AWS Asia Pacific (Singapore)** (closest to Jakarta), PostgreSQL 17 or newer, database `evently`.
+1. Create a project in region **AWS Asia Pacific (Singapore)** (the same city as the app), PostgreSQL 17 or newer, database `evently`.
 2. Copy the **direct** connection (not the pooled one: the app keeps its own connection pool, and the migration needs a normal session).
 3. Write it in Npgsql form:
 
@@ -184,7 +210,13 @@ Check it: `curl https://<service-url>/health/ready` answers 200 when the databas
 
 ## 10. Domain
 
-1. Map the domain to the service. Cloud Run domain mapping is not available in every region; check the current list for `asia-southeast2`. If it isn't, use a Global External Application Load Balancer with a serverless network endpoint group (costs extra), or Firebase Hosting in front.
+1. Map the domain to the service (free; Singapore supports it, Jakarta doesn't at the time of writing):
+
+   ```bash
+   gcloud beta run domain-mappings create --service evently --domain $DOMAIN --region $REGION
+   ```
+
+   Domain mapping is a preview feature; if Google changes that, the paid alternative is a Global External Application Load Balancer with a serverless network endpoint group, or Firebase Hosting in front.
 2. Add the DNS records Google shows. With Cloudflare DNS, start with the records **DNS only** (grey cloud) so Google can issue the certificate.
 3. When HTTPS works on the domain, set `App__PublicBaseUrl` to it (it is already in §6 if you knew it) and add the domain to the OAuth origins (§4).
 4. In `web/index.html`, make `og:image` absolute (`https://evently.id/og-image.png`) and add `og:url` and `<link rel="canonical">`.
@@ -235,4 +267,10 @@ The database isn't rolled back by this. Releases whose migration isn't backward 
 
 - **Logs:** Cloud Run → *Logs* (Serilog writes to the console).
 - **Health:** `/health/live` (process) and `/health/ready` (database; Redis when configured). Point an uptime check at `/health/ready`.
-- **Costs:** set a budget alert on the Google Cloud project; watch the Neon compute hours and the R2 storage size.
+- **Costs:** the budget alert from §1a; watch the Neon compute hours and the R2 storage size.
+- **Old images:** keep the last few tags and delete the rest, so Artifact Registry stays inside its free space:
+
+  ```bash
+  gcloud artifacts docker images list $IMAGE --include-tags --sort-by=~UPDATE_TIME
+  gcloud artifacts docker images delete $IMAGE:<old-tag> --delete-tags --quiet
+  ```
