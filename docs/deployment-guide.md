@@ -81,13 +81,15 @@ IMAGE=$REGION-docker.pkg.dev/$PROJECT/$REPO/evently
 
 ## 4. Google sign-in
 
-In Google Cloud Console → *APIs & Services*:
+In Google Cloud Console → **Google Auth Platform** (*APIs & Services → OAuth consent screen*):
 
-1. **OAuth consent screen**: app name EventLy, support email, your domain, the links to `/legal/privacy` and `/legal/terms`. Publish it (otherwise only test users can sign in).
-2. **Credentials → Create OAuth client id → Web application**:
-   - Authorized JavaScript origins: `https://evently.id` (and the staging URL if you have one).
-   - No redirect URI is needed (the button uses Google Identity Services).
+1. **Get started:** app name EventLy, support email, audience **External**, contact email.
+2. **Clients → Create client → Web application**, name `EventLy Web`:
+   - Authorized JavaScript origins: `http://localhost:5173` and `http://127.0.0.1:5173` for testing from a laptop; add `https://evently.id` once the domain works (§10).
+   - No redirect URI (the button uses Google Identity Services). The client secret isn't used.
 3. Copy the **client id** (public, not a secret).
+4. **Before the domain exists** the app stays in **Testing**: *Publish app* is disabled until *Branding* is complete. Only the accounts under **Audience → Test users** (up to 100) can sign in; add your own, the Root email and the testers.
+5. **Once the domain works** (part of the launch): *Branding* → home page `https://evently.id`, privacy policy `/legal/privacy`, terms `/legal/terms`, the domain under *Authorized domains* (Google may ask you to verify it in Search Console); then **Audience → Publish app**. EventLy only asks for e-mail, name and picture, so no Google verification review is needed. Until this is done, guests aren't affected (they never sign in), but new Owners can't sign in.
 
 ## 5. Secrets
 
