@@ -86,7 +86,7 @@ All settings can be overridden with environment variables. Use `__` as the secti
 | Check-in rate limit | `RateLimiting__CheckInPermitPerMinute` | `120` | Per signed-in user, for the check-in endpoints |
 | Guest page rate limits | `RateLimiting__PublicPermitPerMinute` · `RateLimiting__PublicWritePermitPerMinute` | `60` · `10` | Per client IP, for `/api/v1/public/*` reads and writes (RSVP, wish, gift confirmation) |
 | Terms version | `Legal__TermsVersion` | `2026-09-29` | Bump it when the Terms/Privacy text changes; Owners then accept the new version |
-| Payment gateway | `Payments__Provider` | `Fake` | `Fake` only starts in Development/Testing. The Xendit adapter comes later |
+| Payment gateway | `Payments__Provider` | `Fake` | `Fake` only starts in Development/Testing. `Manual` = bank transfer confirmed by Root (production), which also needs `Payments__Manual__BankName`, `__AccountNumber`, `__AccountHolder` and `__ConfirmationContact`. The Xendit adapter comes later |
 | Checkout lifetime | `Payments__CheckoutMinutes` | `1440` | Minutes before an unpaid checkout expires |
 | Storage endpoint | `Storage__ServiceUrl` | – (required) | S3 API the server uses: `http://storage:8333` in compose, the R2 endpoint in production |
 | Storage URL for browsers | `Storage__PublicUrl` | `Storage__ServiceUrl` | Put into signed photo/media URLs: `http://127.0.0.1:8333` locally (`STORAGE_PUBLIC_URL` in `.env`) |
@@ -193,5 +193,6 @@ To use real Google sign-in:
 | http://localhost:8080 doesn't answer but http://127.0.0.1:8080 does | Another program (often one inside WSL) listens on `::1:8080`. Use `127.0.0.1`, stop that program, or set `APP_PORT` |
 | The invitation link in WhatsApp can't be tapped | WhatsApp only links domain names, not `127.0.0.1` or `localhost`, and a phone can't reach your PC's localhost anyway. To test from a phone, expose the app with a tunnel (for example `cloudflared tunnel --url http://localhost:8080`), set `APP_PUBLIC_BASE_URL` (compose) or `App__PublicBaseUrl` to the tunnel's `https://` address, and restart. In production the real domain works as is |
 | Photos don't load (broken images) | The browser loads them from `STORAGE_PUBLIC_URL` (default `http://127.0.0.1:8333`, not `localhost`: WSL can hold `localhost` (`::1`) on that port and reset the connection, see above). From a phone expose port 8333 with a tunnel too and set `STORAGE_PUBLIC_URL` to it |
-| `Payments:Provider 'Fake' is only allowed in Development and Testing` | Expected outside Development: the simulated gateway must not run in production |
+| `Payments:Provider 'Fake' is only allowed in Development and Testing` | Expected outside Development: the simulated gateway must not run in production. Use `Manual` |
+| `Payments:Provider 'Manual' needs Payments:Manual:BankName, ...` | One of the four bank-transfer values is empty |
 | Google button: "origin is not allowed" | Add the exact origin (scheme + host + port) to *Authorized JavaScript origins* in Google Cloud Console |

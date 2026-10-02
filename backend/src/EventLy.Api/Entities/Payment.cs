@@ -57,10 +57,10 @@ public sealed class Payment : ITenantOwned, IHasTimestamps
     public DateTimeOffset? PaidAt { get; set; }
 
     /// <summary>Root user who confirmed a <see cref="PaymentProvider.Manual"/> payment.</summary>
-    public Guid? ConfirmedBy { get; init; }
+    public Guid? ConfirmedBy { get; set; }
 
     /// <summary>For manual payments, for example the bank transfer reference.</summary>
-    public string? Note { get; init; }
+    public string? Note { get; set; }
 
     /// <summary>PostgreSQL xmin: two webhooks for the same payment can't both settle it.</summary>
     public uint Version { get; set; }

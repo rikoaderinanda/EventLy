@@ -71,6 +71,7 @@ export const paymentKeys = {
   forEvent: (eventId: string) => ['events', eventId, 'payments'] as const,
   detail: (id: string) => ['payments', id] as const,
   receipt: (id: string) => ['payments', id, 'receipt'] as const,
+  transfer: (id: string) => ['payments', id, 'transfer'] as const,
 }
 
 /** How often the payment page asks for news while the payment is pending. */
@@ -105,6 +106,25 @@ export function usePayment(id: string) {
     queryKey: paymentKeys.detail(id),
     queryFn: () => apiFetch<Payment>(`/payments/${id}`),
     refetchInterval: (query) => (query.state.data?.status === 'Pending' ? pollIntervalMs : false),
+  })
+}
+
+/** Bank details and reference of a pending manual-transfer checkout (Q-73). */
+export type ManualTransfer = {
+  bankName: string
+  accountNumber: string
+  accountHolder: string
+  confirmationContact: string
+  reference: string
+  amount: number
+  currency: string
+  expiresAt: string | null
+}
+
+export function useTransfer(id: string) {
+  return useQuery({
+    queryKey: paymentKeys.transfer(id),
+    queryFn: () => apiFetch<ManualTransfer>(`/payments/${id}/transfer`),
   })
 }
 

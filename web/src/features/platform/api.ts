@@ -38,6 +38,8 @@ export type PlatformPayment = {
   currency: string
   status: PaymentStatus
   provider: PaymentProvider
+  /** The transfer reference the Owner was asked to write (manual transfers, Q-73). */
+  reference: string | null
   paidAt: string | null
   note: string | null
   createdAt: string

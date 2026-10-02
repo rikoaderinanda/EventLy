@@ -139,6 +139,20 @@ public sealed class PaymentService(
         return ToDto(payment);
     }
 
+    /// <summary>The bank details for a pending manual-transfer checkout (Q-73); 404 for any other payment.</summary>
+    public async Task<ManualTransferDto> GetTransferAsync(Guid id, CancellationToken ct)
+    {
+        var payment = await FindAsync(id, ct);
+        if (payment.Provider != PaymentProvider.Manual || payment.Status != PaymentStatus.Pending
+            || payment.ProviderReference is null)
+        {
+            throw new NotFoundException("payment.no_transfer", "This payment isn't waiting for a bank transfer.");
+        }
+        var bank = options.Value.Manual;
+        return new ManualTransferDto(bank.BankName, bank.AccountNumber, bank.AccountHolder, bank.ConfirmationContact,
+            payment.ProviderReference, payment.Amount, payment.Currency, payment.ExpiresAt);
+    }
+
     public async Task<PaymentReceiptDto> GetReceiptAsync(Guid id, CancellationToken ct)
     {
         var payment = await FindAsync(id, ct);
@@ -259,8 +273,9 @@ public sealed class PaymentService(
     }
 
     /// <summary>
-    /// Root: the Owner paid outside the gateway (decision Q-24). Records a Manual payment that is
-    /// already paid and activates the event; an open checkout is cancelled.
+    /// Root: the Owner paid outside the gateway (decisions Q-24, Q-73). When the Owner has a pending
+    /// manual-transfer checkout for the same package, that checkout is confirmed (so its reference stays on the
+    /// receipt); otherwise a new Manual payment is recorded as paid. Any other open checkout is cancelled.
     /// </summary>
     public async Task<PaymentDto> ActivateManuallyAsync(Guid eventId, ManualActivationRequest request, CancellationToken ct)
     {
@@ -282,26 +297,40 @@ public sealed class PaymentService(
             ?? throw new NotFoundException("package.not_found", "Package not found.");
 
         var pending = await db.Payments.Where(p => p.EventId == ev.Id && p.Status == PaymentStatus.Pending).ToListAsync(ct);
-        foreach (var replaced in pending)
+        var transfer = pending.FirstOrDefault(p => p.Provider == PaymentProvider.Manual && p.PackageId == package.Id);
+        foreach (var replaced in pending.Where(p => p != transfer))
         {
             await CloseAsync(replaced, PaymentStatus.Cancelled, ct);
         }
 
         var now = timeProvider.GetUtcNow();
-        var payment = new Payment
+        Payment payment;
+        if (transfer is not null)
         {
-            EventId = ev.Id,
-            PackageId = package.Id,
-            PackageSnapshot = PackageSnapshot.Of(package),
-            Amount = request.Amount,
-            Currency = package.Currency,
-            Provider = PaymentProvider.Manual,
-            Status = PaymentStatus.Paid,
-            PaidAt = now,
-            ConfirmedBy = currentUser.RequireUserId(),
-            Note = request.Note.Trim(),
-        };
-        db.Payments.Add(payment);
+            payment = transfer;
+            // The checkout's price stays; what Root actually received is in the audit entry below and the note.
+            SetStatus(payment, PaymentStatus.Paid);
+            payment.PaidAt = now;
+            payment.ConfirmedBy = currentUser.RequireUserId();
+            payment.Note = request.Note.Trim();
+        }
+        else
+        {
+            payment = new Payment
+            {
+                EventId = ev.Id,
+                PackageId = package.Id,
+                PackageSnapshot = PackageSnapshot.Of(package),
+                Amount = request.Amount,
+                Currency = package.Currency,
+                Provider = PaymentProvider.Manual,
+                Status = PaymentStatus.Paid,
+                PaidAt = now,
+                ConfirmedBy = currentUser.RequireUserId(),
+                Note = request.Note.Trim(),
+            };
+            db.Payments.Add(payment);
+        }
         Activate(ev, payment);
         audit.Add(AuditActions.PaymentManualActivation, currentUser.UserId, ev.OrganizationId, nameof(Payment), payment.Id,
             new { eventId = ev.Id, package.Code, request.Amount, listPrice = package.Price });

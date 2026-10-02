@@ -35,6 +35,7 @@ public sealed record PlatformPaymentDto(
     string Currency,
     PaymentStatus Status,
     PaymentProvider Provider,
+    string? Reference,
     DateTimeOffset? PaidAt,
     string? Note,
     DateTimeOffset CreatedAt);

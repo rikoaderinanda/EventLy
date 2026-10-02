@@ -17,6 +17,7 @@ import { Notice } from '@/components/ui/Feedback'
 import { Loading, Spinner } from '@/components/ui/Spinner'
 import { errorMessage } from '@/shared/lib/errors'
 import { formatMoney, usePayment, useSimulatePayment, type Payment } from './api'
+import { TransferInstructions } from './TransferInstructions'
 
 /** Development only: the fake gateway's checkout. A real provider has its own page. */
 function SimulatedCheckout({ payment }: { payment: Payment }) {
@@ -121,7 +122,10 @@ export function PaymentPage() {
       </div>
 
       {payment.status === 'Pending' && payment.provider === 'Fake' && <SimulatedCheckout payment={payment} />}
-      {payment.status === 'Pending' && payment.provider !== 'Fake' && payment.checkoutUrl && (
+      {payment.status === 'Pending' && payment.provider === 'Manual' && (
+        <TransferInstructions paymentId={payment.id} />
+      )}
+      {payment.status === 'Pending' && payment.provider === 'Xendit' && payment.checkoutUrl && (
         <a href={payment.checkoutUrl} className={buttonClass({ size: 'lg', block: true })}>
           {t('payments.continue')}
           <ExternalLink aria-hidden />

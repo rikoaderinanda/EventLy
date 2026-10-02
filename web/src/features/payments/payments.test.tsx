@@ -79,6 +79,41 @@ describe('package and payment', () => {
     changeLocale('id')
   })
 
+  it('shows the bank transfer details and reference for a manual checkout', async () => {
+    signInAs('Owner')
+    const manual: Payment = { ...pending, provider: 'Manual', providerReference: 'EVL-1A2B3C4D' }
+    stubApi([
+      { path: '/payments/p1', response: () => jsonResponse(manual) },
+      {
+        path: '/payments/p1/transfer',
+        response: () =>
+          jsonResponse({
+            bankName: 'BSI',
+            accountNumber: '7123 456 789',
+            accountHolder: 'PT EventLy Indonesia',
+            confirmationContact: 'WhatsApp 0812 0000 0000',
+            reference: 'EVL-1A2B3C4D',
+            amount: 350000,
+            currency: 'IDR',
+            expiresAt: '2026-10-04T00:00:00Z',
+          }),
+      },
+    ])
+    const writeText = vi.fn(() => Promise.resolve())
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })
+    renderRoute('/app/payments/p1')
+
+    expect(await screen.findByRole('heading', { name: 'Transfer bank' })).toBeInTheDocument()
+    expect(screen.getByText('PT EventLy Indonesia')).toBeInTheDocument()
+    expect(screen.getAllByText('EVL-1A2B3C4D').length).toBeGreaterThan(0)
+    // No simulator and no external checkout link for a bank transfer.
+    expect(screen.queryByText('Simulasi pembayaran (khusus development)')).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /Lanjutkan pembayaran/ })).not.toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: 'Salin Nomor rekening' }))
+    expect(writeText).toHaveBeenCalledWith('7123456789')
+  })
+
   it('lets the owner choose a package, check out and pay through the simulated checkout', async () => {
     signInAs('Owner')
     const fetchMock = stubApi([

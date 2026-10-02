@@ -31,11 +31,14 @@ The `migrate` command seeds the initial catalog after the migrations: Basic Rp 1
 
 | Setting | Values |
 |---|---|
-| `Payments__Provider` | `Fake` (default). The app refuses to start with `Fake` outside Development and Testing, because anyone could "pay" through the simulated checkout. **Production needs the Xendit adapter first (Phase 12 at the latest)** |
+| `Payments__Provider` | `Fake` (default) or `Manual`. The app refuses to start with `Fake` outside Development and Testing, because anyone could "pay" through the simulated checkout. Production uses `Manual` until the Xendit adapter exists |
+| `Payments__Manual__BankName`, `__AccountNumber`, `__AccountHolder`, `__ConfirmationContact` | Required with `Manual` (the app refuses to start without them). Shown to the Owner on the checkout page |
 | `Payments__CheckoutMinutes` | How long a checkout can be paid. Default 1440 (24 hours) |
 | `Maintenance__Key` | Secret for the maintenance endpoints. Empty turns them off (404) |
 
 `FakePaymentGateway` keeps its state in memory and signs its webhooks with a key that is new for each process. Its checkout URL is `/app/payments/{id}`, a page of the PWA with "payment succeeds" and "payment fails" buttons (`POST /payments/{id}/simulate`, Development and Testing only). The result travels as a signed webhook through the same code path a real provider uses.
+
+`ManualTransferGateway` (Q-73) talks to no provider. A checkout gets the reference `EVL-` + the last 8 hex digits of the payment id, and its URL is the same PWA page, which shows the bank account, the exact amount and the reference (`GET /payments/{id}/transfer`, 404 `payment.no_transfer` unless the payment is a pending manual transfer). The Owner transfers and sends the proof to the confirmation contact; Root then confirms it with the manual activation. Its status check always answers "pending", so reconciliation only expires overdue transfers; it has no webhooks (anything posted to `/payments/webhooks/manual` is refused).
 
 ## Rules
 
@@ -63,7 +66,8 @@ The `migrate` command seeds the initial catalog after the migrations: Basic Rp 1
 - **Q-20:** Root's edits to a package apply to new checkouts only. A paid event keeps its snapshot (name, price, limits), and a payment keeps its amount.
 - **Manual activation** (`POST /platform/events/{id}/activate {packageId, amount, note}`, Root):
   - Allowed for a Draft or PendingPayment event.
-  - Records a `Manual` payment that is already Paid, with the amount received, the note and `confirmed_by`. An open checkout is cancelled.
+  - When the Owner has a pending **manual transfer** for the same package, that checkout is the one marked Paid (same id and reference, so the Owner's page turns into the receipt), with the note and `confirmed_by`; its amount stays the package price and the amount received goes into the audit entry. Otherwise a new `Manual` payment that is already Paid is recorded with the amount received. Any other open checkout is cancelled.
+  - The Root page preselects the package of a pending transfer and fills in the amount and `Ref EVL-...` in the note, and the Owner's payment list shows each reference.
   - The package may be one that is no longer offered.
   - Written to the audit log as `payment.manual_activation`.
 - **Receipt** (`GET /payments/{id}/receipt`): only for a paid payment, otherwise 409 `payment.not_paid`. It is printed from the browser (Q-36) and is not a tax invoice.
@@ -78,7 +82,7 @@ The `migrate` command seeds the initial catalog after the migrations: Basic Rp 1
 | GET, POST | `/platform/packages` · PUT `/platform/packages/{id}` | Root |
 | POST | `/events/{eventId}/payments` | Owner |
 | GET | `/events/{eventId}/payments` | Owner |
-| GET | `/payments/{id}`, `/payments/{id}/receipt` | Owner |
+| GET | `/payments/{id}`, `/payments/{id}/receipt`, `/payments/{id}/transfer` | Owner |
 | POST | `/payments/{id}/simulate` | Owner, Development and Testing only |
 | POST | `/payments/webhooks/{provider}` | Provider (signature) |
 | GET | `/platform/owners/{id}` | Root: Owner with events and payments |
@@ -106,5 +110,6 @@ The `migrate` command seeds the initial catalog after the migrations: Basic Rp 1
   - `PackagesTests`: catalog, Root management, cache eviction, 403 for the other roles.
   - `PaymentsTests`: amount from the server, reused and replaced checkouts, webhook replay and concurrent duplicates, tampered signature, wrong amount, failed payment back to Draft, lost webhook and expiry by reconciliation, maintenance key, receipt, staff limits, the Q-20 snapshot, Admin and Staff 403.
   - `PlatformPaymentsTests`: manual activation, Owner details.
+  - `ManualTransferTests`: bank details and reference on the checkout, Root confirms the Owner's own checkout, the reference in Owner details, expiry back to Draft, no webhook, startup refused without bank details.
   - `AdminLimitTests`: the limit before and after payment, disabled Admins, promotion, invitations at the same moment.
   - `TenantIsolationTests`: payments.

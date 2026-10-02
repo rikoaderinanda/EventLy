@@ -51,7 +51,9 @@ public sealed class PackagesTests(PostgresFixture postgres) : IClassFixture<Post
             var packages = await ReadAsync<List<PackageDto>>(
                 await SendAsync(_client, HttpMethod.Get, "/api/v1/packages", member.AccessToken));
 
-            packages.Select(p => p.Code).Take(3).ShouldBe(["BASIC", "PREMIUM", "ENTERPRISE"]);
+            // Other tests in this class add packages to the same database, so only the seeded ones are compared.
+            string[] seeded = ["BASIC", "PREMIUM", "ENTERPRISE"];
+            packages.Select(p => p.Code).Where(seeded.Contains).ShouldBe(seeded);
             var basic = packages[0];
             basic.Price.ShouldBe(150_000m);
             basic.Currency.ShouldBe("IDR");

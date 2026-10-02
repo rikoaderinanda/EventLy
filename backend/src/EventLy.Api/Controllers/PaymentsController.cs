@@ -30,6 +30,10 @@ public sealed class PaymentsController(PaymentService payments, IHostEnvironment
     [HttpGet("payments/{id:guid}")]
     public Task<PaymentDto> Get(Guid id, CancellationToken ct) => payments.GetAsync(id, ct);
 
+    /// <summary>Bank details and the transfer reference for a pending manual-transfer checkout.</summary>
+    [HttpGet("payments/{id:guid}/transfer")]
+    public Task<ManualTransferDto> GetTransfer(Guid id, CancellationToken ct) => payments.GetTransferAsync(id, ct);
+
     [HttpGet("payments/{id:guid}/receipt")]
     public Task<PaymentReceiptDto> GetReceipt(Guid id, CancellationToken ct) => payments.GetReceiptAsync(id, ct);
 

@@ -6,13 +6,13 @@
 
 | # | Item | Why it blocks | Status |
 |---|---|---|---|
-| **B1** | **Payment provider for production** | `Payments:Provider` is only `Fake`, and `Fake` refuses to start outside Development/Testing (anyone could "pay" through the simulator). **Neither the API nor the migration job starts in Production until this is solved.** | Open. Options: (a) build the **Xendit** adapter (planned, Q-52); (b) add a **manual-transfer** mode: no online checkout, the Owner transfers and Root activates the event with the existing manual activation |
+| B1 | Payment provider for production | `Fake` refuses to start outside Development/Testing (anyone could "pay" through the simulator) | **Solved with `Manual` (bank transfer, Q-73).** The Owner sees the bank account and a reference; Root confirms the transfer. Set the `Payments__*` values in §6. Xendit (online payment) comes later |
 | B2 | Phase 11: audit & security | Security headers (CSP, HSTS), the permission matrix test, a dependency scan and an OWASP ZAP baseline are planned but not done | Recommended before real guest data |
 | B3 | Retention jobs (Phase 12) | The Privacy Policy promises that photos are **deleted automatically** after the package's retention period, and guest data **12 months after the event**. Neither cleanup job exists yet, so data is kept longer than promised (and storage grows) | Needed within the first retention period (30 days for Basic) |
 | B4 | Backups | Neon keeps point-in-time history (length depends on the plan); R2 has no backup by default | Decide before real events |
 | B5 | Domain | Needed for Google sign-in, invitation links (`App__PublicBaseUrl`) and absolute Open Graph URLs | Choose one |
 
-Until B1 is solved you can still rehearse everything below on a **staging** copy, but only with `ASPNETCORE_ENVIRONMENT=Development`, which also enables the payment simulator and the test sign-in. **Never give a Development deployment a public domain or real guests.**
+A **staging** copy may run with `ASPNETCORE_ENVIRONMENT=Development`, but that also enables the payment simulator and the test sign-in. **Never give a Development deployment a public domain or real guests.**
 
 ## 1a. What it costs
 
@@ -140,7 +140,10 @@ Everything else is plain environment variables. Full list: [setup-guide.md §4](
 | `Storage__Bucket` · `Storage__Region` | `evently` · `auto` |
 | `Storage__AccessKey` · `Storage__SecretKey` | secrets `evently-r2-access` · `evently-r2-secret` |
 | `Maintenance__Key` | secret `evently-maintenance` |
-| `Payments__Provider` | see **B1**: no production value exists yet |
+| `Payments__Provider` | `Manual` (bank transfer confirmed by Root, Q-73). The app refuses to start when one of the four values below is empty |
+| `Payments__Manual__BankName` · `Payments__Manual__AccountNumber` · `Payments__Manual__AccountHolder` | The account Owners transfer to, e.g. `BSI` · `7123456789` · `PT EventLy Indonesia`. Shown on the checkout page |
+| `Payments__Manual__ConfirmationContact` | Where Owners send the proof, e.g. `WhatsApp 0812-xxxx-xxxx` or an e-mail address |
+| `Payments__CheckoutMinutes` | `4320` (3 days to transfer; the default 1440 is meant for online payment) |
 | `Cache__Provider` | `Memory` (the default; no Redis needed for one instance) |
 
 Not set in production: `Auth__DevSignInEnabled` (ignored outside Development anyway) and `ApiDocs__Enabled` (keep the API description private).
@@ -156,6 +159,12 @@ Storage__ServiceUrl: "https://<ACCOUNT_ID>.r2.cloudflarestorage.com"
 Storage__PublicUrl: "https://<ACCOUNT_ID>.r2.cloudflarestorage.com"
 Storage__Bucket: "evently"
 Storage__Region: "auto"
+Payments__Provider: "Manual"
+Payments__Manual__BankName: "BSI"
+Payments__Manual__AccountNumber: "7123456789"
+Payments__Manual__AccountHolder: "PT EventLy Indonesia"
+Payments__Manual__ConfirmationContact: "WhatsApp 0812-0000-0000"
+Payments__CheckoutMinutes: "4320"
 ```
 
 ```bash
@@ -225,7 +234,7 @@ Check it: `curl https://<service-url>/health/ready` answers 200 when the databas
 
 ## 11. Scheduled jobs
 
-Once a real payment gateway exists (B1), reconcile payments the webhook may have missed:
+Expire unpaid checkouts (and, once Xendit exists, settle payments whose webhook was lost). With `Manual` the job only closes transfers that were not paid in time and puts their event back to Draft; opening the payment page does the same for that one payment, so the job is tidy-up, not essential:
 
 ```bash
 gcloud scheduler jobs create http evently-reconcile --location $REGION --schedule "*/15 * * * *" \
@@ -239,7 +248,7 @@ The gallery retention cleanup (B3) is added here when Phase 12 builds it.
 
 1. Sign in with the **Root** email → *Paket*: check the prices and limits (seed values: Basic Rp 150.000, Premium Rp 350.000, Enterprise Rp 1.000.000). If you change them, also update `web/src/features/landing/packages.ts` and the JSON-LD in `web/index.html`.
 2. Sign in with another Google account as an Owner, accept the Terms, create an event.
-3. Activate it (payment or Root manual activation), add a guest, open the invitation link on a phone.
+3. As the Owner, choose a package: the page shows the bank account and a reference such as `EVL-1A2B3C4D`. As Root → *Owner* → that event → *Aktifkan manual*: the package, amount and `Ref` note are filled in from the checkout; confirm. The Owner's payment page turns into a receipt. Add a guest, open the invitation link on a phone.
 4. Upload a cover photo and a staff photo; the images must load (R2 signed links).
 5. Scan the guest's QR with the staff scanner (the camera needs HTTPS, which the domain gives).
 6. Download a CSV report.

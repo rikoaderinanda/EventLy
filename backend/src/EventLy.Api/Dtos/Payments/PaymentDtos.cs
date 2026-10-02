@@ -4,6 +4,18 @@ namespace EventLy.Api.Dtos.Payments;
 
 public sealed record CreatePaymentRequest(Guid PackageId);
 
+/// <summary>What the Owner needs to pay a manual-transfer checkout (Q-73).</summary>
+/// <param name="Reference">To write in the transfer note, so Root can match the money to the event.</param>
+public sealed record ManualTransferDto(
+    string BankName,
+    string AccountNumber,
+    string AccountHolder,
+    string ConfirmationContact,
+    string Reference,
+    decimal Amount,
+    string Currency,
+    DateTimeOffset? ExpiresAt);
+
 public sealed record PaymentDto(
     Guid Id,
     Guid EventId,

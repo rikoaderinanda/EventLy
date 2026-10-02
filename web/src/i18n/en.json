@@ -174,7 +174,8 @@
       "organization": "Organization",
       "status": "Status"
     },
-    "offeredShort": "Offered"
+    "offeredShort": "Offered",
+    "reference": "Ref"
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",
@@ -240,7 +241,8 @@
     "gallery_locked": "The gallery opens after you check in at the event.",
     "media_invalid_audio": "Upload an MP3 or M4A file of at most 10 MB.",
     "upload_too_large": "The file is too large.",
-    "report_excel_not_in_package": "Excel export isn't part of this event's package. Download CSV instead."
+    "report_excel_not_in_package": "Excel export isn't part of this event's package. Download CSV instead.",
+    "payment_no_transfer": "This payment isn't waiting for a bank transfer."
   },
   "events": {
     "title": "Events",
@@ -392,6 +394,23 @@
       "Fake": "Simulated",
       "Xendit": "Xendit",
       "Manual": "Transfer (confirmed by EventLy)"
+    },
+    "transfer": {
+      "title": "Bank transfer",
+      "subtitle": "Your event goes live once an EventLy admin confirms the transfer.",
+      "step1": "Transfer the exact amount below to this account.",
+      "step2": "Write the reference code in the transfer note.",
+      "step3": "Send the proof of transfer to {{contact}}.",
+      "bank": "Bank",
+      "accountNumber": "Account number",
+      "accountHolder": "Account holder",
+      "amount": "Amount",
+      "reference": "Reference code",
+      "copy": "Copy {{what}}",
+      "copyShort": "Copy",
+      "referenceHint": "Write {{reference}} in the transfer note, so your payment can be matched to this event.",
+      "confirm": "Transferred? Send the proof with the reference code to {{contact}}. This page updates by itself once the payment is confirmed.",
+      "deadline": "Complete it before {{date}}. After that, start a new payment from the event page."
     }
   },
   "guests": {

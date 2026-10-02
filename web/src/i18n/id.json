@@ -174,7 +174,8 @@
       "organization": "Organisasi",
       "status": "Status"
     },
-    "offeredShort": "Ditawarkan"
+    "offeredShort": "Ditawarkan",
+    "reference": "Ref"
   },
   "errors": {
     "generic": "Terjadi kesalahan. Silakan coba lagi.",
@@ -240,7 +241,8 @@
     "gallery_locked": "Galeri terbuka setelah Anda check-in di lokasi acara.",
     "media_invalid_audio": "Unggah file MP3 atau M4A maksimal 10 MB.",
     "upload_too_large": "Ukuran file terlalu besar.",
-    "report_excel_not_in_package": "Ekspor Excel tidak termasuk paket acara ini. Unduh CSV."
+    "report_excel_not_in_package": "Ekspor Excel tidak termasuk paket acara ini. Unduh CSV.",
+    "payment_no_transfer": "Pembayaran ini tidak sedang menunggu transfer."
   },
   "events": {
     "title": "Acara",
@@ -386,6 +388,23 @@
       "Fake": "Simulasi",
       "Xendit": "Xendit",
       "Manual": "Transfer (dikonfirmasi admin EventLy)"
+    },
+    "transfer": {
+      "title": "Transfer bank",
+      "subtitle": "Acara aktif setelah transfer Anda dikonfirmasi admin EventLy.",
+      "step1": "Transfer jumlah persis di bawah ke rekening ini.",
+      "step2": "Tulis kode referensi di berita/catatan transfer.",
+      "step3": "Kirim bukti transfer ke {{contact}}.",
+      "bank": "Bank",
+      "accountNumber": "Nomor rekening",
+      "accountHolder": "Atas nama",
+      "amount": "Jumlah",
+      "reference": "Kode referensi",
+      "copy": "Salin {{what}}",
+      "copyShort": "Salin",
+      "referenceHint": "Wajib tulis {{reference}} di berita transfer, supaya pembayaran Anda bisa dicocokkan dengan acara ini.",
+      "confirm": "Sudah transfer? Kirim bukti transfer beserta kode referensi ke {{contact}}. Halaman ini otomatis berubah begitu pembayaran dikonfirmasi.",
+      "deadline": "Selesaikan sebelum {{date}}. Setelah itu, buat pembayaran baru dari halaman acara."
     }
   },
   "guests": {

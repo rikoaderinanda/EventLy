@@ -79,7 +79,7 @@ public sealed class PlatformOwnerService(AppDbContext db, ICurrentUser currentUs
             events,
             [.. payments.Select(x => new PlatformPaymentDto(
                 x.Payment.Id, x.Payment.EventId, x.EventName, x.Payment.PackageSnapshot.Name, x.Payment.Amount,
-                x.Payment.Currency, x.Payment.Status, x.Payment.Provider, x.Payment.PaidAt, x.Payment.Note,
+                x.Payment.Currency, x.Payment.Status, x.Payment.Provider, x.Payment.ProviderReference, x.Payment.PaidAt, x.Payment.Note,
                 x.Payment.CreatedAt))]);
     }
 

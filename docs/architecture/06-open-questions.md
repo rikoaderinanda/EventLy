@@ -70,6 +70,7 @@
 | Q-70 | All-in-one download | "Unduh semua (Excel)": one workbook with one sheet per report, for packages with Excel export | 2026-10-01 |
 | Q-71 | Where reports live | A **Laporan** page per event (event tile and sidebar), and a button on the statistics page | 2026-10-01 |
 | Q-72 | Hosting region | **Singapore (`asia-southeast1`)** instead of Jakarta: free Cloud Run domain mapping (no paid load balancer) and the same city as Neon. Costs are listed in the deployment guide §1a | 2026-10-03 |
+| Q-73 | Payment in production | **Bank transfer confirmed by Root** (`Payments__Provider=Manual`) until Xendit is built. The checkout shows the bank account, the exact amount and a reference `EVL-XXXXXXXX`; the Owner sends the proof to a WhatsApp/e-mail contact; Root confirms that same checkout with the manual activation. Unpaid transfers expire after `Payments__CheckoutMinutes` (3 days in production) | 2026-10-03 |
 | Q-9 | Offline | **Online only** for the MVP. Upload retries automatically. Photo step can be skipped. Offline mode is a future phase | 2026-09-29 |
 
 ## Accepted recommendations ("sisanya sesuai saran", 2026-09-29)

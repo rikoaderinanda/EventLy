@@ -11,24 +11,38 @@ import { Select, TextField } from '@/components/ui/Input'
 import { Loading } from '@/components/ui/Spinner'
 import { formatMoney } from '@/features/payments/api'
 import { errorMessage } from '@/shared/lib/errors'
-import { useActivateManually, useAllPackages, useOwner, type PlatformEvent } from './api'
+import {
+  useActivateManually,
+  useAllPackages,
+  useOwner,
+  type PlatformEvent,
+  type PlatformPayment,
+} from './api'
 
 /** Root confirms a bank transfer (or other payment outside the gateway) and activates the event. */
 function ManualActivation({
   event,
+  transfer,
   onDone,
   onCancel,
 }: {
   event: PlatformEvent
+  /** The Owner's pending bank-transfer checkout, if any: confirming it keeps its reference (Q-73). */
+  transfer: PlatformPayment | undefined
   onDone: () => void
   onCancel: () => void
 }) {
   const { t, i18n } = useTranslation()
   const packages = useAllPackages()
   const activate = useActivateManually()
+  // Start from the package and amount the Owner checked out with.
+  const owned = packages.data?.find((p) => p.name === transfer?.packageName)
   const [packageId, setPackageId] = useState('')
-  const [amount, setAmount] = useState('')
-  const [note, setNote] = useState('')
+  const [amount, setAmount] = useState(transfer ? String(transfer.amount) : '')
+  const [note, setNote] = useState(
+    transfer?.reference ? `${t('platform.reference')} ${transfer.reference}` : '',
+  )
+  const chosenPackage = packageId || owned?.id || ''
 
   function choose(id: string) {
     setPackageId(id)
@@ -38,7 +52,10 @@ function ManualActivation({
 
   function submit(e: FormEvent) {
     e.preventDefault()
-    activate.mutate({ eventId: event.id, packageId, amount: Number(amount), note }, { onSuccess: onDone })
+    activate.mutate(
+      { eventId: event.id, packageId: chosenPackage, amount: Number(amount), note },
+      { onSuccess: onDone },
+    )
   }
 
   return (
@@ -49,7 +66,7 @@ function ManualActivation({
           id={`pkg-${event.id}`}
           label={t('payments.package')}
           required
-          value={packageId}
+          value={chosenPackage}
           onChange={(e) => choose(e.target.value)}
         >
           <option value="" disabled>
@@ -162,6 +179,9 @@ export function OwnerDetailPage() {
                 {activating === ev.id && (
                   <ManualActivation
                     event={ev}
+                    transfer={payments.find(
+                      (p) => p.eventId === ev.id && p.status === 'Pending' && p.provider === 'Manual',
+                    )}
                     onDone={() => setActivating(null)}
                     onCancel={() => setActivating(null)}
                   />
@@ -190,6 +210,11 @@ export function OwnerDetailPage() {
                   {new Date(p.paidAt ?? p.createdAt).toLocaleString(i18n.language)}
                   {p.note && ` · ${p.note}`}
                 </p>
+                {p.reference && p.provider === 'Manual' && (
+                  <p className="mt-1 font-mono text-xs font-semibold text-stone-700">
+                    {t('platform.reference')} {p.reference}
+                  </p>
+                )}
               </div>
               <PaymentBadge status={p.status} />
             </li>
